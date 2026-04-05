@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">PetCompanyApp</string>
+    <string name="login_title">Bem-vindo</string>
+    <string name="login_subtitle">Acesse sua conta e escolha o perfil de entrada</string>
+    <string name="button_login">Entrar</string>
+    <string name="text_register_user">Cadastrar Usuario</string>
+    <string name="text_register_company">Cadastrar Empresa</string>
+    <string name="user_register_title">Cadastro de Usuario</string>
+    <string name="user_register_subtitle">Preencha os dados para criar sua conta</string>
+    <string name="user_register_subtitle_person">Cadastre uma conta para pessoa fisica</string>
+    <string name="user_register_subtitle_company">Cadastre o acesso principal para empresa</string>
+    <string name="company_register_title">Cadastro de Empresa</string>
+    <string name="company_register_subtitle">Informe os dados da empresa</string>
+    <string name="company_register_subtitle_person">Associe uma empresa ao seu perfil pessoa fisica</string>
+    <string name="company_register_subtitle_company">Complete o cadastro institucional da empresa</string>
+    <string name="animal_register_title">Cadastro de Animal</string>
+    <string name="animal_register_subtitle">Registre os dados do animal</string>
+    <string name="animal_register_subtitle_person">Cadastro disponivel para usuarios pessoa fisica</string>
+    <string name="animal_register_subtitle_company">Cadastro disponivel para contas empresariais</string>
+    <string name="feed_title">Ola, %1$s</string>
+    <string name="feed_title_placeholder">Ola, usuario</string>
+    <string name="feed_subtitle_person">Seu feed reune novidades, animais e acoes para pessoa fisica.</string>
+    <string name="feed_subtitle_company">Seu feed centraliza a gestao da empresa, animais e comunicados.</string>
+    <string name="feed_audience_person">Perfil ativo: Pessoa fisica. Voce pode cadastrar animais e acompanhar novidades.</string>
+    <string name="feed_audience_company">Perfil ativo: Empresa. Voce pode manter dados da empresa e cadastrar animais.</string>
+    <string name="feed_card_one_title">Novidades</string>
+    <string name="feed_card_two_title">Acoes rapidas</string>
+    <string name="feed_card_three_title">Lembretes</string>
+    <string name="feed_person_card_one">Veja publicacoes recentes da plataforma e acompanhe campanhas voltadas a tutores.</string>
+    <string name="feed_person_card_two">Atualize seu cadastro, registre um animal e acompanhe as informacoes do seu perfil.</string>
+    <string name="feed_company_card_one">Acompanhe avisos operacionais, campanhas e oportunidades para empresas cadastradas.</string>
+    <string name="feed_company_card_two">Revise os dados da empresa, publique animais e mantenha a equipe alinhada.</string>
+    <string name="feed_common_card_three">Mantenha seus dados atualizados para melhorar a qualidade do atendimento e do cadastro.</string>
+    <string name="default_user_name">usuario</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Senha</string>
+    <string name="hint_confirm_password">Confirmar senha</string>
+    <string name="hint_name">Nome</string>
+    <string name="hint_company_responsible_name">Nome do Responsavel</string>
+    <string name="hint_cpf">CPF</string>
+    <string name="hint_company_name">Nome da Empresa</string>
+    <string name="hint_cnpj">CNPJ</string>
+    <string name="hint_address">Endereco</string>
+    <string name="hint_phone">Telefone</string>
+    <string name="hint_animal_name">Nome do Animal</string>
+    <string name="hint_breed">Raca</string>
+    <string name="hint_age">Idade</string>
+    <string name="hint_weight">Peso (kg)</string>
+    <string name="label_species">Especie</string>
+    <string name="label_access_type">Tipo de acesso</string>
+    <string name="label_user_type">Tipo de usuario</string>
+    <string name="user_type_person">Pessoa fisica</string>
+    <string name="user_type_company">Empresa</string>
+    <string name="button_register">Cadastrar</string>
+    <string name="button_save">Salvar</string>
+    <string name="button_register_animal">Cadastrar Animal</string>
+    <string name="button_register_company">Cadastro de Empresa</string>
+    <string name="button_edit_company">Editar Empresa</string>
+    <string name="error_required_field">Campo obrigatorio</string>
+    <string name="error_invalid_email">Informe um email valido</string>
+    <string name="error_invalid_cpf">Informe um CPF com 11 digitos</string>
+    <string name="error_password_length">A senha deve ter pelo menos 6 caracteres</string>
+    <string name="error_password_match">As senhas precisam ser iguais</string>
+    <string name="error_invalid_cnpj">Informe um CNPJ com 14 digitos</string>
+    <string name="error_invalid_phone">Informe um telefone valido</string>
+    <string name="error_species_required">Selecione uma especie</string>
+    <string name="login_success">Login realizado com sucesso</string>
+    <string name="user_register_success">Usuario cadastrado com sucesso</string>
+    <string name="company_register_success">Empresa salva com sucesso</string>
+    <string name="animal_register_success">Animal cadastrado com sucesso</string>
+    <string name="species_hint">Selecione uma especie</string>
+
+    <string-array name="species_options">
+        <item>@string/species_hint</item>
+        <item>Cachorro</item>
+        <item>Gato</item>
+        <item>Passaro</item>
+        <item>Coelho</item>
+        <item>Outro</item>
+    </string-array>
+</resources>

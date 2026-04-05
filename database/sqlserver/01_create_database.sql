@@ -1,0 +1,14 @@
+IF DB_ID('PetCompanyDB') IS NULL
+BEGIN
+    CREATE DATABASE PetCompanyDB;
+END;
+GO
+
+USE PetCompanyDB;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'app')
+BEGIN
+    EXEC('CREATE SCHEMA app');
+END;
+GO
