@@ -1,12 +1,12 @@
 # PetCompanyApp
 
-Aplicativo Android em Java com 5 telas principais:
+Aplicativo Android em Java com 5 telas:
 
 - Login
 - Cadastro de Usuario
 - Cadastro de Empresa
 - Cadastro de Animal
-- Feed
+- Feed (em construção)
 
 ## Estrutura
 
