@@ -151,6 +151,16 @@
             android:textStyle="bold"
             android:gravity="center" />
 
+        <TextView
+            android:id="@+id/textGoToRegisterCompany"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/text_register_company"
+            android:textColor="@color/primary_color"
+            android:textStyle="bold"
+            android:gravity="center" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

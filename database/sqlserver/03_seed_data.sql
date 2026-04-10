@@ -108,6 +108,7 @@ BEGIN
         AgeDescription,
         DescriptionText,
         ContactPhone,
+        ImageUrl,
         LocationReference,
         Latitude,
         Longitude
@@ -122,6 +123,7 @@ BEGIN
         '4 anos',
         'Animal perdido na regiao central, usa coleira azul e atende pelo nome Thor.',
         '(11) 98888-0001',
+        'content://seed/thor',
         'Ultima vez visto proximo a praca central.',
         -23.550520,
         -46.633308
@@ -140,6 +142,7 @@ BEGIN
         AgeDescription,
         DescriptionText,
         ContactPhone,
+        ImageUrl,
         LocationReference,
         Latitude,
         Longitude
@@ -154,6 +157,7 @@ BEGIN
         '2 anos',
         'Gata docil, castrada e pronta para um novo lar responsavel.',
         '(11) 99999-1234',
+        'content://seed/luna',
         NULL,
         NULL,
         NULL

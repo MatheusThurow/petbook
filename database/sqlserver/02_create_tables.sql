@@ -92,6 +92,7 @@ CREATE TABLE app.AnimalPosts (
     AgeDescription VARCHAR(40) NOT NULL,
     DescriptionText VARCHAR(800) NOT NULL,
     ContactPhone VARCHAR(20) NOT NULL,
+    ImageUrl VARCHAR(500) NOT NULL,
     LocationReference VARCHAR(250) NULL,
     Latitude DECIMAL(9,6) NULL,
     Longitude DECIMAL(9,6) NULL,
@@ -101,4 +102,40 @@ CREATE TABLE app.AnimalPosts (
     CONSTRAINT FK_AnimalPosts_Users FOREIGN KEY (AuthorUserId) REFERENCES app.Users(UserId),
     CONSTRAINT FK_AnimalPosts_Animals FOREIGN KEY (AnimalId) REFERENCES app.Animals(AnimalId)
 );
+GO
+
+CREATE OR ALTER TRIGGER app.TR_AnimalPosts_ValidateIntegrity
+ON app.AnimalPosts
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        LEFT JOIN app.Users u ON u.UserId = i.AuthorUserId
+        WHERE u.UserId IS NULL OR u.IsActive = 0
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 51000, 'Nao e permitido salvar post sem usuario valido e ativo.', 1;
+    END;
+
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        INNER JOIN app.PostTypes pt ON pt.PostTypeId = i.PostTypeId
+        WHERE pt.RequiresLocation = 1
+          AND (
+              i.Latitude IS NULL
+              OR i.Longitude IS NULL
+              OR NULLIF(LTRIM(RTRIM(i.LocationReference)), '') IS NULL
+          )
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 51001, 'Posts de animal perdido exigem latitude, longitude e referencia do local.', 1;
+    END;
+END;
 GO

@@ -11,9 +11,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petcompanyapp.R;
+import com.example.petcompanyapp.models.User;
+import com.example.petcompanyapp.repositories.UserRepository;
 import com.google.android.material.textfield.TextInputLayout;
 import com.example.petcompanyapp.utils.IntentKeys;
 import com.example.petcompanyapp.utils.MaskUtils;
+import com.example.petcompanyapp.utils.UserProfileStorage;
 import com.example.petcompanyapp.utils.UserType;
 import com.example.petcompanyapp.utils.ValidationUtils;
 
@@ -108,6 +111,13 @@ public class UserRegisterActivity extends AppCompatActivity {
             return;
         }
 
+        User registeredUser = UserRepository.register(selectedUserType, name, email, password, document);
+        if (registeredUser == null) {
+            editEmail.setError(getString(R.string.error_email_already_registered));
+            editEmail.requestFocus();
+            return;
+        }
+
         Toast.makeText(this, R.string.user_register_success, Toast.LENGTH_SHORT).show();
         Intent intent;
         if (UserType.isCompany(selectedUserType)) {
@@ -115,8 +125,17 @@ public class UserRegisterActivity extends AppCompatActivity {
         } else {
             intent = new Intent(this, FeedActivity.class);
         }
-        intent.putExtra(IntentKeys.EXTRA_USER_TYPE, selectedUserType);
-        intent.putExtra(IntentKeys.EXTRA_USER_NAME, name);
+        UserProfileStorage.saveProfile(
+                this,
+                registeredUser.getId(),
+                registeredUser.getName(),
+                registeredUser.getEmail(),
+                registeredUser.getUserType()
+        );
+        intent.putExtra(IntentKeys.EXTRA_USER_ID, registeredUser.getId().longValue());
+        intent.putExtra(IntentKeys.EXTRA_USER_TYPE, registeredUser.getUserType());
+        intent.putExtra(IntentKeys.EXTRA_USER_NAME, registeredUser.getName());
+        intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, registeredUser.getEmail());
         startActivity(intent);
         finish();
     }

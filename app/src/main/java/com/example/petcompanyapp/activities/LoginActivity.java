@@ -11,7 +11,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petcompanyapp.R;
+import com.example.petcompanyapp.models.User;
+import com.example.petcompanyapp.repositories.UserRepository;
 import com.example.petcompanyapp.utils.IntentKeys;
+import com.example.petcompanyapp.utils.UserProfileStorage;
 import com.example.petcompanyapp.utils.UserType;
 import com.example.petcompanyapp.utils.ValidationUtils;
 
@@ -56,10 +59,25 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        User authenticatedUser = UserRepository.authenticate(email, password, getSelectedUserType());
+        if (authenticatedUser == null) {
+            Toast.makeText(this, R.string.error_invalid_login, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Toast.makeText(this, R.string.login_success, Toast.LENGTH_SHORT).show();
+        UserProfileStorage.saveProfile(
+                this,
+                authenticatedUser.getId(),
+                authenticatedUser.getName(),
+                authenticatedUser.getEmail(),
+                authenticatedUser.getUserType()
+        );
         Intent intent = new Intent(this, FeedActivity.class);
-        intent.putExtra(IntentKeys.EXTRA_USER_TYPE, getSelectedUserType());
-        intent.putExtra(IntentKeys.EXTRA_USER_NAME, email);
+        intent.putExtra(IntentKeys.EXTRA_USER_ID, authenticatedUser.getId().longValue());
+        intent.putExtra(IntentKeys.EXTRA_USER_TYPE, authenticatedUser.getUserType());
+        intent.putExtra(IntentKeys.EXTRA_USER_NAME, authenticatedUser.getName());
+        intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, authenticatedUser.getEmail());
         startActivity(intent);
     }
 

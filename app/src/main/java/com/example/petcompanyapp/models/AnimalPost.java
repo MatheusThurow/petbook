@@ -1,6 +1,8 @@
 package com.example.petcompanyapp.models;
 
 public class AnimalPost {
+    private final Long id;
+    private final Long authorUserId;
     private final String postType;
     private final String animalName;
     private final String species;
@@ -11,6 +13,11 @@ public class AnimalPost {
     private final Double latitude;
     private final Double longitude;
     private final String locationReference;
+    private final String imageUri;
+    private final String authorName;
+    private final long createdAtMillis;
+    private final boolean liked;
+    private final int likeCount;
 
     public AnimalPost(
             String postType,
@@ -22,8 +29,51 @@ public class AnimalPost {
             String contactPhone,
             Double latitude,
             Double longitude,
-            String locationReference
+            String locationReference,
+            String imageUri
     ) {
+        this(
+                null,
+                null,
+                postType,
+                animalName,
+                species,
+                breed,
+                age,
+                description,
+                contactPhone,
+                latitude,
+                longitude,
+                locationReference,
+                imageUri,
+                "usuario",
+                System.currentTimeMillis(),
+                false,
+                0
+        );
+    }
+
+    public AnimalPost(
+            Long id,
+            Long authorUserId,
+            String postType,
+            String animalName,
+            String species,
+            String breed,
+            String age,
+            String description,
+            String contactPhone,
+            Double latitude,
+            Double longitude,
+            String locationReference,
+            String imageUri,
+            String authorName,
+            long createdAtMillis,
+            boolean liked,
+            int likeCount
+    ) {
+        this.id = id;
+        this.authorUserId = authorUserId;
         this.postType = postType;
         this.animalName = animalName;
         this.species = species;
@@ -34,6 +84,19 @@ public class AnimalPost {
         this.latitude = latitude;
         this.longitude = longitude;
         this.locationReference = locationReference;
+        this.imageUri = imageUri;
+        this.authorName = authorName;
+        this.createdAtMillis = createdAtMillis;
+        this.liked = liked;
+        this.likeCount = likeCount;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getAuthorUserId() {
+        return authorUserId;
     }
 
     public String getPostType() {
@@ -74,5 +137,25 @@ public class AnimalPost {
 
     public String getLocationReference() {
         return locationReference;
+    }
+
+    public String getImageUri() {
+        return imageUri;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public long getCreatedAtMillis() {
+        return createdAtMillis;
+    }
+
+    public boolean isLiked() {
+        return liked;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
     }
 }

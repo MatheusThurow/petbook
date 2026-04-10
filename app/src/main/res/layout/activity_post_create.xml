@@ -167,6 +167,33 @@
                         android:layout_height="wrap_content"
                         android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/label_pet_image"
+                    android:textColor="@color/primary_text"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/imagePostPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="190dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_spinner"
+                    android:scaleType="centerCrop"
+                    android:src="@android:drawable/ic_menu_gallery" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSelectImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="12dp"
+                    android:backgroundTint="@color/primary_dark"
+                    android:text="@string/button_select_image"
+                    android:textAllCaps="false"
+                    app:cornerRadius="14dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -213,6 +240,16 @@
                         android:textAllCaps="false"
                         app:cornerRadius="14dp"
                         android:backgroundTint="@color/primary_color" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonSelectLocationOnMap"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="10dp"
+                        android:backgroundTint="@color/primary_dark"
+                        android:text="@string/button_select_location_map"
+                        android:textAllCaps="false"
+                        app:cornerRadius="14dp" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"

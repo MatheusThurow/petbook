@@ -1,12 +1,15 @@
 package com.example.petcompanyapp.activities;
 
 import android.Manifest;
+import android.content.Intent;
+import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -20,8 +23,14 @@ import androidx.core.content.ContextCompat;
 
 import com.example.petcompanyapp.R;
 import com.example.petcompanyapp.models.AnimalPost;
+import com.example.petcompanyapp.models.User;
+import com.example.petcompanyapp.repositories.AnimalPostRepository;
+import com.example.petcompanyapp.repositories.UserRepository;
+import com.example.petcompanyapp.utils.IntentKeys;
+import com.example.petcompanyapp.utils.LocationUtils;
 import com.example.petcompanyapp.utils.MaskUtils;
 import com.example.petcompanyapp.utils.PostType;
+import com.example.petcompanyapp.utils.UserProfileStorage;
 import com.example.petcompanyapp.utils.ValidationUtils;
 
 import java.util.Locale;
@@ -38,9 +47,13 @@ public class PostCreateActivity extends AppCompatActivity {
     private EditText editLocationReference;
     private LinearLayout layoutLostLocation;
     private TextView textLocationStatus;
+    private ImageView imagePostPreview;
+    private Long authorUserId;
     private String selectedPostType = PostType.ADOPTION;
+    private String authorName;
     private Double selectedLatitude;
     private Double selectedLongitude;
+    private Uri selectedImageUri;
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -52,6 +65,39 @@ public class PostCreateActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(this, R.string.error_location_permission, Toast.LENGTH_SHORT).show();
                 }
+            });
+
+    private final ActivityResultLauncher<String[]> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+
+                getContentResolver().takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+                selectedImageUri = uri;
+                imagePostPreview.setImageURI(uri);
+            });
+
+    private final ActivityResultLauncher<Intent> mapPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() != RESULT_OK || result.getData() == null) {
+                    return;
+                }
+
+                Intent data = result.getData();
+                selectedLatitude = data.getDoubleExtra(IntentKeys.EXTRA_LATITUDE, 0d);
+                selectedLongitude = data.getDoubleExtra(IntentKeys.EXTRA_LONGITUDE, 0d);
+                String locationReference = data.getStringExtra(IntentKeys.EXTRA_LOCATION_REFERENCE);
+
+                editLocationReference.setText(locationReference);
+                textLocationStatus.setText(getString(
+                        R.string.location_captured,
+                        String.format(Locale.US, "%.5f", selectedLatitude),
+                        String.format(Locale.US, "%.5f", selectedLongitude)
+                ));
             });
 
     @Override
@@ -69,11 +115,26 @@ public class PostCreateActivity extends AppCompatActivity {
         editLocationReference = findViewById(R.id.editLostLocationReference);
         layoutLostLocation = findViewById(R.id.layoutLostLocation);
         textLocationStatus = findViewById(R.id.textLocationStatus);
+        imagePostPreview = findViewById(R.id.imagePostPreview);
+        Button buttonSelectImage = findViewById(R.id.buttonSelectImage);
         Button buttonCaptureLocation = findViewById(R.id.buttonCaptureLocation);
+        Button buttonSelectLocationOnMap = findViewById(R.id.buttonSelectLocationOnMap);
         Button buttonCreatePost = findViewById(R.id.buttonCreatePost);
 
         MaskUtils.applyPhoneMask(editContactPhone);
         MaskUtils.configureSpeciesSpinner(this, spinnerSpecies);
+        long extraUserId = getIntent().getLongExtra(IntentKeys.EXTRA_USER_ID, -1L);
+        authorUserId = extraUserId >= 0 ? extraUserId : UserProfileStorage.getUserId(this);
+        authorName = getIntent().getStringExtra(IntentKeys.EXTRA_USER_NAME);
+        if (authorName == null || authorName.trim().isEmpty()) {
+            authorName = getString(R.string.default_user_name);
+        }
+        User authorUser = UserRepository.findById(authorUserId);
+        if (authorUser != null) {
+            authorName = authorUser.getName();
+        } else {
+            authorName = UserProfileStorage.getName(this, authorName);
+        }
         updatePostTypeUi(selectedPostType);
 
         radioGroupPostType.setOnCheckedChangeListener((group, checkedId) -> {
@@ -82,20 +143,16 @@ public class PostCreateActivity extends AppCompatActivity {
         });
 
         buttonCaptureLocation.setOnClickListener(v -> requestLocation());
+        buttonSelectLocationOnMap.setOnClickListener(v -> openMapPicker());
+        buttonSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
         buttonCreatePost.setOnClickListener(v -> createPost());
     }
 
     private void updatePostTypeUi(String postType) {
-        boolean isLost = PostType.isLost(postType);
-        layoutLostLocation.setVisibility(isLost ? android.view.View.VISIBLE : android.view.View.GONE);
-
-        if (!isLost) {
-            selectedLatitude = null;
-            selectedLongitude = null;
-            textLocationStatus.setText(R.string.location_not_required);
-            editLocationReference.setText("");
-        } else {
+        if (PostType.isLost(postType)) {
             textLocationStatus.setText(R.string.location_not_captured);
+        } else {
+            textLocationStatus.setText(R.string.location_optional);
         }
     }
 
@@ -146,6 +203,11 @@ public class PostCreateActivity extends AppCompatActivity {
 
             selectedLatitude = bestLocation.getLatitude();
             selectedLongitude = bestLocation.getLongitude();
+            editLocationReference.setText(LocationUtils.resolveLocationLabel(
+                    this,
+                    selectedLatitude,
+                    selectedLongitude
+            ));
             textLocationStatus.setText(getString(
                     R.string.location_captured,
                     String.format(Locale.US, "%.5f", selectedLatitude),
@@ -156,6 +218,17 @@ public class PostCreateActivity extends AppCompatActivity {
         }
     }
 
+    private void openMapPicker() {
+        Intent intent = new Intent(this, MapPickerActivity.class);
+        if (selectedLatitude != null) {
+            intent.putExtra(IntentKeys.EXTRA_LATITUDE, selectedLatitude);
+        }
+        if (selectedLongitude != null) {
+            intent.putExtra(IntentKeys.EXTRA_LONGITUDE, selectedLongitude);
+        }
+        mapPickerLauncher.launch(intent);
+    }
+
     private void createPost() {
         String animalName = editAnimalName.getText().toString().trim();
         String species = spinnerSpecies.getSelectedItem().toString();
@@ -164,6 +237,16 @@ public class PostCreateActivity extends AppCompatActivity {
         String description = editDescription.getText().toString().trim();
         String contactPhone = editContactPhone.getText().toString().replaceAll("\\D", "");
         String locationReference = editLocationReference.getText().toString().trim();
+
+        if (!UserRepository.isValidActiveUser(authorUserId)) {
+            Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (selectedImageUri == null) {
+            Toast.makeText(this, R.string.error_image_required, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (ValidationUtils.isEmpty(animalName)) {
             editAnimalName.setError(getString(R.string.error_required_field));
@@ -223,8 +306,28 @@ public class PostCreateActivity extends AppCompatActivity {
                 contactPhone,
                 selectedLatitude,
                 selectedLongitude,
-                locationReference
+                locationReference,
+                selectedImageUri.toString()
         );
+        AnimalPostRepository.addPost(new AnimalPost(
+                null,
+                authorUserId,
+                animalPost.getPostType(),
+                animalPost.getAnimalName(),
+                animalPost.getSpecies(),
+                animalPost.getBreed(),
+                animalPost.getAge(),
+                animalPost.getDescription(),
+                animalPost.getContactPhone(),
+                animalPost.getLatitude(),
+                animalPost.getLongitude(),
+                animalPost.getLocationReference(),
+                animalPost.getImageUri(),
+                UserRepository.findById(authorUserId).getName(),
+                System.currentTimeMillis(),
+                false,
+                0
+        ));
 
         int successMessage = PostType.isLost(animalPost.getPostType())
                 ? R.string.post_lost_success

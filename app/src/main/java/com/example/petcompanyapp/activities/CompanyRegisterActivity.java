@@ -22,6 +22,9 @@ public class CompanyRegisterActivity extends AppCompatActivity {
     private EditText editAddress;
     private EditText editPhone;
     private String userType;
+    private Long userId;
+    private String userName;
+    private String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,10 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         if (userType == null) {
             userType = UserType.COMPANY;
         }
+        long extraUserId = getIntent().getLongExtra(IntentKeys.EXTRA_USER_ID, -1L);
+        userId = extraUserId >= 0 ? extraUserId : null;
+        userName = getIntent().getStringExtra(IntentKeys.EXTRA_USER_NAME);
+        userEmail = getIntent().getStringExtra(IntentKeys.EXTRA_USER_EMAIL);
 
         MaskUtils.applyCnpjMask(editCnpj);
         MaskUtils.applyPhoneMask(editPhone);
@@ -84,8 +91,14 @@ public class CompanyRegisterActivity extends AppCompatActivity {
 
         Toast.makeText(this, R.string.company_register_success, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, FeedActivity.class);
+        if (userId != null) {
+            intent.putExtra(IntentKeys.EXTRA_USER_ID, userId.longValue());
+        }
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, UserType.COMPANY);
-        intent.putExtra(IntentKeys.EXTRA_USER_NAME, companyName);
+        intent.putExtra(IntentKeys.EXTRA_USER_NAME, userName != null ? userName : companyName);
+        if (userEmail != null) {
+            intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, userEmail);
+        }
         startActivity(intent);
         finish();
     }

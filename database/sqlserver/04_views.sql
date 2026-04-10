@@ -58,9 +58,11 @@ SELECT
     ap.AgeDescription,
     ap.DescriptionText,
     ap.ContactPhone,
+    ap.ImageUrl,
     ap.LocationReference,
     ap.Latitude,
     ap.Longitude,
+    ap.AuthorUserId,
     u.FullName AS AuthorName,
     ap.CreatedAt
 FROM app.AnimalPosts ap
