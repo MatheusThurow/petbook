@@ -65,10 +65,21 @@
             android:background="@drawable/bg_spinner" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonGoAnimalRegister"
+            android:id="@+id/buttonCreatePost"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginTop="18dp"
+            android:text="@string/button_create_post"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:cornerRadius="14dp"
+            android:backgroundTint="@color/primary_dark" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGoAnimalRegister"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
             android:text="@string/button_register_animal"
             android:textAllCaps="false"
             android:textStyle="bold"

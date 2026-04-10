@@ -37,6 +37,7 @@ public class FeedActivity extends AppCompatActivity {
         TextView textCardOneBody = findViewById(R.id.textCardOneBody);
         TextView textCardTwoBody = findViewById(R.id.textCardTwoBody);
         TextView textCardThreeBody = findViewById(R.id.textCardThreeBody);
+        Button buttonCreatePost = findViewById(R.id.buttonCreatePost);
         Button buttonGoAnimal = findViewById(R.id.buttonGoAnimalRegister);
         Button buttonGoCompany = findViewById(R.id.buttonGoCompanyRegister);
 
@@ -59,6 +60,10 @@ public class FeedActivity extends AppCompatActivity {
             textCardThreeBody.setText(R.string.feed_common_card_three);
             buttonGoCompany.setText(R.string.button_register_company);
         }
+
+        buttonCreatePost.setOnClickListener(v ->
+                startActivity(new Intent(this, PostCreateActivity.class))
+        );
 
         buttonGoAnimal.setOnClickListener(v -> {
             Intent intent = new Intent(this, AnimalRegisterActivity.class);

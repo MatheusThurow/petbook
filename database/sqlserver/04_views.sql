@@ -45,3 +45,26 @@ FROM app.FeedPosts fp
 LEFT JOIN app.UserTypes ut ON ut.UserTypeId = fp.TargetUserTypeId
 WHERE fp.IsActive = 1;
 GO
+
+CREATE OR ALTER VIEW app.vwAnimalPosts
+AS
+SELECT
+    ap.AnimalPostId,
+    pt.Code AS PostTypeCode,
+    pt.Name AS PostTypeName,
+    ap.AnimalName,
+    ap.Species,
+    ap.Breed,
+    ap.AgeDescription,
+    ap.DescriptionText,
+    ap.ContactPhone,
+    ap.LocationReference,
+    ap.Latitude,
+    ap.Longitude,
+    u.FullName AS AuthorName,
+    ap.CreatedAt
+FROM app.AnimalPosts ap
+INNER JOIN app.PostTypes pt ON pt.PostTypeId = ap.PostTypeId
+INNER JOIN app.Users u ON u.UserId = ap.AuthorUserId
+WHERE ap.IsActive = 1;
+GO

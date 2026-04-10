@@ -10,6 +10,15 @@ SELECT 'COMPANY', 'Empresa'
 WHERE NOT EXISTS (SELECT 1 FROM app.UserTypes WHERE Code = 'COMPANY');
 GO
 
+INSERT INTO app.PostTypes (Code, Name, RequiresLocation)
+SELECT 'LOST', 'Animal perdido', 1
+WHERE NOT EXISTS (SELECT 1 FROM app.PostTypes WHERE Code = 'LOST');
+
+INSERT INTO app.PostTypes (Code, Name, RequiresLocation)
+SELECT 'ADOPTION', 'Animal para adocao', 0
+WHERE NOT EXISTS (SELECT 1 FROM app.PostTypes WHERE Code = 'ADOPTION');
+GO
+
 DECLARE @PersonTypeId INT = (SELECT UserTypeId FROM app.UserTypes WHERE Code = 'PERSON');
 DECLARE @CompanyTypeId INT = (SELECT UserTypeId FROM app.UserTypes WHERE Code = 'COMPANY');
 
@@ -64,6 +73,10 @@ GO
 
 DECLARE @PersonFeedTypeId INT = (SELECT UserTypeId FROM app.UserTypes WHERE Code = 'PERSON');
 DECLARE @CompanyFeedTypeId INT = (SELECT UserTypeId FROM app.UserTypes WHERE Code = 'COMPANY');
+DECLARE @LostPostTypeId INT = (SELECT PostTypeId FROM app.PostTypes WHERE Code = 'LOST');
+DECLARE @AdoptionPostTypeId INT = (SELECT PostTypeId FROM app.PostTypes WHERE Code = 'ADOPTION');
+DECLARE @ThorAnimalId INT = (SELECT TOP 1 AnimalId FROM app.Animals WHERE AnimalName = 'Thor');
+DECLARE @LunaAnimalId INT = (SELECT TOP 1 AnimalId FROM app.Animals WHERE AnimalName = 'Luna');
 
 IF NOT EXISTS (SELECT 1 FROM app.FeedPosts WHERE Title = 'Campanha de vacinacao')
 BEGIN
@@ -81,5 +94,69 @@ IF NOT EXISTS (SELECT 1 FROM app.FeedPosts WHERE Title = 'Cadastro de animais')
 BEGIN
     INSERT INTO app.FeedPosts (TargetUserTypeId, Title, Body, DisplayOrder)
     VALUES (NULL, 'Cadastro de animais', 'O cadastro de animais fica disponivel para pessoa fisica e empresa.', 2);
+END;
+
+IF NOT EXISTS (SELECT 1 FROM app.AnimalPosts WHERE AnimalName = 'Thor' AND PostTypeId = @LostPostTypeId)
+BEGIN
+    INSERT INTO app.AnimalPosts (
+        PostTypeId,
+        AuthorUserId,
+        AnimalId,
+        AnimalName,
+        Species,
+        Breed,
+        AgeDescription,
+        DescriptionText,
+        ContactPhone,
+        LocationReference,
+        Latitude,
+        Longitude
+    )
+    VALUES (
+        @LostPostTypeId,
+        @PersonUserId,
+        @ThorAnimalId,
+        'Thor',
+        'Cachorro',
+        'Labrador',
+        '4 anos',
+        'Animal perdido na regiao central, usa coleira azul e atende pelo nome Thor.',
+        '(11) 98888-0001',
+        'Ultima vez visto proximo a praca central.',
+        -23.550520,
+        -46.633308
+    );
+END;
+
+IF NOT EXISTS (SELECT 1 FROM app.AnimalPosts WHERE AnimalName = 'Luna' AND PostTypeId = @AdoptionPostTypeId)
+BEGIN
+    INSERT INTO app.AnimalPosts (
+        PostTypeId,
+        AuthorUserId,
+        AnimalId,
+        AnimalName,
+        Species,
+        Breed,
+        AgeDescription,
+        DescriptionText,
+        ContactPhone,
+        LocationReference,
+        Latitude,
+        Longitude
+    )
+    VALUES (
+        @AdoptionPostTypeId,
+        @CompanyOwnerId,
+        @LunaAnimalId,
+        'Luna',
+        'Gato',
+        'Siames',
+        '2 anos',
+        'Gata docil, castrada e pronta para um novo lar responsavel.',
+        '(11) 99999-1234',
+        NULL,
+        NULL,
+        NULL
+    );
 END;
 GO

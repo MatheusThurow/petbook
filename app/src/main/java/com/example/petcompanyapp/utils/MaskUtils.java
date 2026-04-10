@@ -3,6 +3,12 @@ package com.example.petcompanyapp.utils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import android.content.Context;
+
+import com.example.petcompanyapp.R;
 
 public final class MaskUtils {
 
@@ -136,6 +142,16 @@ public final class MaskUtils {
                 isUpdating = false;
             }
         });
+    }
+
+    public static void configureSpeciesSpinner(Context context, Spinner spinner) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                context,
+                R.array.species_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     private static void attachMask(EditText editText, TextWatcher newWatcher) {

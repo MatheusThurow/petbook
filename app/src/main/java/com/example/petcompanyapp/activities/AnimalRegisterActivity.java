@@ -1,7 +1,6 @@
 package com.example.petcompanyapp.activities;
 
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -12,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petcompanyapp.R;
 import com.example.petcompanyapp.utils.IntentKeys;
+import com.example.petcompanyapp.utils.MaskUtils;
 import com.example.petcompanyapp.utils.UserType;
 import com.example.petcompanyapp.utils.ValidationUtils;
 
@@ -46,13 +46,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
                 ? R.string.animal_register_subtitle_company
                 : R.string.animal_register_subtitle_person);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.species_options,
-                android.R.layout.simple_spinner_item
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerSpecies.setAdapter(adapter);
+        MaskUtils.configureSpeciesSpinner(this, spinnerSpecies);
 
         buttonRegister.setOnClickListener(v -> registerAnimal());
     }
