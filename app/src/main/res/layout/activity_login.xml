@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/screen_background">
 
-
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -96,6 +95,16 @@
                         android:layout_height="wrap_content"
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/textForgotPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Esqueci minha senha"
+                    android:textColor="@color/primary_color"
+                    android:textStyle="bold"
+                    android:layout_gravity="end" />
 
                 <TextView
                     android:layout_width="match_parent"

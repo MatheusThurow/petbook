@@ -12,36 +12,54 @@
         android:paddingStart="20dp"
         android:paddingTop="24dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="32dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/post_create_title"
-            android:textColor="@color/primary_text"
-            android:textSize="28sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/post_create_subtitle"
-            android:textColor="@color/secondary_text"
-            android:textSize="14sp" />
+        android:paddingBottom="28dp">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/primary_color"
             app:cardCornerRadius="18dp"
-            app:cardElevation="6dp">
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/post_create_title"
+                    android:textColor="@android:color/white"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/post_create_subtitle"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:alpha="0.9" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/divider">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="22dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -71,25 +89,12 @@
                         android:layout_marginTop="6dp"
                         android:text="@string/post_type_lost" />
                 </RadioGroup>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="6dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="18dp">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
                     android:hint="@string/hint_animal_name">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -102,7 +107,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="18dp"
                     android:layout_marginBottom="6dp"
                     android:text="@string/label_species"
                     android:textColor="@color/primary_text"
@@ -111,13 +116,16 @@
                 <Spinner
                     android:id="@+id/spinnerPostSpecies"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_spinner" />
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_spinner"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="18dp"
                     android:hint="@string/hint_breed">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -128,9 +136,10 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="18dp"
                     android:hint="@string/hint_age">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -141,24 +150,25 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="18dp"
                     android:hint="@string/hint_post_description">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editPostDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top|start"
                         android:inputType="textMultiLine"
                         android:minLines="4" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="18dp"
                     android:hint="@string/hint_contact_phone">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -171,7 +181,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="18dp"
                     android:text="@string/label_pet_image"
                     android:textColor="@color/primary_text"
                     android:textStyle="bold" />
@@ -189,94 +199,94 @@
                     android:id="@+id/buttonSelectImage"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="14dp"
                     android:backgroundTint="@color/primary_dark"
                     android:text="@string/button_select_image"
                     android:textAllCaps="false"
                     app:cornerRadius="14dp" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/layoutLostLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="vertical">
+            android:layout_marginTop="18dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/divider">
 
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="6dp">
+                android:orientation="vertical"
+                android:padding="22dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="18dp">
+                    android:text="@string/lost_location_title"
+                    android:textColor="@color/primary_text"
+                    android:textStyle="bold" />
 
-                    <TextView
+                <TextView
+                    android:id="@+id/textLocationStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/location_not_captured"
+                    android:textColor="@color/secondary_text" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonCaptureLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/button_capture_location"
+                    android:textAllCaps="false"
+                    app:cornerRadius="14dp"
+                    android:backgroundTint="@color/primary_color" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSelectLocationOnMap"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="10dp"
+                    android:backgroundTint="@color/primary_dark"
+                    android:text="@string/button_select_location_map"
+                    android:textAllCaps="false"
+                    app:cornerRadius="14dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:hint="@string/hint_lost_location_reference">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editLostLocationReference"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/lost_location_title"
-                        android:textColor="@color/primary_text"
-                        android:textStyle="bold" />
+                        android:inputType="textMultiLine"
+                        android:minLines="3" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    <TextView
-                        android:id="@+id/textLocationStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/location_not_captured"
-                        android:textColor="@color/secondary_text" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonCaptureLocation"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="14dp"
-                        android:text="@string/button_capture_location"
-                        android:textAllCaps="false"
-                        app:cornerRadius="14dp"
-                        android:backgroundTint="@color/primary_color" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonSelectLocationOnMap"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="10dp"
-                        android:backgroundTint="@color/primary_dark"
-                        android:text="@string/button_select_location_map"
-                        android:textAllCaps="false"
-                        app:cornerRadius="14dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:hint="@string/hint_lost_location_reference">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editLostLocationReference"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:minLines="3" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonCreatePost"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
             android:text="@string/button_publish_post"
             android:textAllCaps="false"
             android:textStyle="bold"
             app:cornerRadius="14dp"
             android:backgroundTint="@color/accent_color" />
+
     </LinearLayout>
 </ScrollView>

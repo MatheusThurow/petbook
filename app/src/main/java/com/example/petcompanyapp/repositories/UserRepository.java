@@ -34,7 +34,6 @@ public final class UserRepository {
     }
 
     private UserRepository() {
-        // Repositorio local em memoria alinhado aos seeds do banco.
     }
 
     public static User authenticate(String email, String password, String userType) {
@@ -98,6 +97,29 @@ public final class UserRepository {
     public static boolean isValidActiveUser(Long userId) {
         User user = findById(userId);
         return user != null && user.isActive();
+    }
+
+    public static boolean resetPassword(String email, String newPassword) {
+        for (int i = 0; i < USERS.size(); i++) {
+            User user = USERS.get(i);
+
+            if (same(email, user.getEmail())) {
+
+                User updatedUser = new User(
+                        user.getId(),
+                        user.getUserType(),
+                        user.getName(),
+                        user.getEmail(),
+                        newPassword,
+                        user.getDocument(),
+                        user.isActive()
+                );
+
+                USERS.set(i, updatedUser);
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean same(String left, String right) {

@@ -35,11 +35,18 @@ public class LoginActivity extends AppCompatActivity {
         Button buttonLogin = findViewById(R.id.buttonLogin);
         TextView textRegisterUser = findViewById(R.id.textGoToRegisterUser);
         TextView textRegisterCompany = findViewById(R.id.textGoToRegisterCompany);
+        TextView textForgotPassword = findViewById(R.id.textForgotPassword);
 
         buttonLogin.setOnClickListener(v -> validateLogin());
+
+        textForgotPassword.setOnClickListener(v -> {
+            startActivity(new Intent(this, ResetPasswordActivity.class));
+        });
+
         textRegisterUser.setOnClickListener(v ->
                 openUserRegister(UserType.PERSON)
         );
+
         textRegisterCompany.setOnClickListener(v -> openCompanyRegister());
     }
 
@@ -73,6 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                 authenticatedUser.getEmail(),
                 authenticatedUser.getUserType()
         );
+
         Intent intent = new Intent(this, FeedActivity.class);
         intent.putExtra(IntentKeys.EXTRA_USER_ID, authenticatedUser.getId().longValue());
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, authenticatedUser.getUserType());

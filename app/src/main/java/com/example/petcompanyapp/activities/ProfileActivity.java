@@ -1,5 +1,6 @@
 package com.example.petcompanyapp.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +30,7 @@ public class ProfileActivity extends AppCompatActivity {
         editProfileEmail = findViewById(R.id.editProfileEmail);
         TextView textProfileType = findViewById(R.id.textProfileType);
         Button buttonSaveProfile = findViewById(R.id.buttonSaveProfile);
+        Button buttonLogout = findViewById(R.id.buttonLogout);
 
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (userType == null) {
@@ -52,6 +54,11 @@ public class ProfileActivity extends AppCompatActivity {
                 : R.string.profile_type_person);
 
         buttonSaveProfile.setOnClickListener(v -> saveProfile());
+
+        buttonLogout.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
     }
 
     private void saveProfile() {
