@@ -37,7 +37,6 @@ public class ProfileActivity extends AppCompatActivity {
         TextView textBack = findViewById(R.id.textBackProfile);
         TextView textLogout = findViewById(R.id.textLogoutProfile);
         Button buttonSaveProfile = findViewById(R.id.buttonSaveProfile);
-        Button buttonLogout = findViewById(R.id.buttonLogout);
 
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (userType == null) {
@@ -67,11 +66,6 @@ public class ProfileActivity extends AppCompatActivity {
         textBack.setOnClickListener(v -> finish());
         textLogout.setOnClickListener(v -> logout());
         buttonSaveProfile.setOnClickListener(v -> saveProfile());
-
-        buttonLogout.setOnClickListener(v -> {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        });
     }
 
     private void loadProfileFromApi() {

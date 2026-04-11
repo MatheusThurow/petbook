@@ -92,8 +92,8 @@
     <string name="button_confirm_location">Confirmar localizacao</string>
     <string name="button_open_external_map">Abrir no Google Maps</string>
     <string name="forgot_password_button">Atualizar senha</string>
-    <string name="filter_all_posts">Geral</string>
-    <string name="filter_lost_posts">Animais Perdidos</string>
+    <string name="filter_all_posts">Todos</string>
+    <string name="filter_lost_posts">Perdidos</string>
     <string name="filter_adoption_posts">Adocao</string>
     <string name="lost_location_title">Localizacao do animal perdido</string>
     <string name="location_not_captured">Localizacao ainda nao capturada.</string>
