@@ -101,6 +101,56 @@ public final class MaskUtils {
         });
     }
 
+    public static void applyCpfOrCnpjAutoMask(EditText editText) {
+        attachMask(editText, new TextWatcher() {
+            private boolean isUpdating;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (isUpdating) {
+                    return;
+                }
+
+                String digits = editable.toString().replaceAll("\\D", "");
+                StringBuilder builder = new StringBuilder();
+                int maxLength = digits.length() > 11 ? 14 : 11;
+                int length = Math.min(digits.length(), maxLength);
+
+                for (int i = 0; i < length; i++) {
+                    if (maxLength == 14) {
+                        if (i == 2 || i == 5) {
+                            builder.append('.');
+                        } else if (i == 8) {
+                            builder.append('/');
+                        } else if (i == 12) {
+                            builder.append('-');
+                        }
+                    } else {
+                        if (i == 3 || i == 6) {
+                            builder.append('.');
+                        } else if (i == 9) {
+                            builder.append('-');
+                        }
+                    }
+                    builder.append(digits.charAt(i));
+                }
+
+                isUpdating = true;
+                editText.setText(builder.toString());
+                editText.setSelection(builder.length());
+                isUpdating = false;
+            }
+        });
+    }
+
     public static void applyPhoneMask(EditText editText) {
         attachMask(editText, new TextWatcher() {
             private boolean isUpdating;

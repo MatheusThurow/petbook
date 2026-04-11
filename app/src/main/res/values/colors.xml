@@ -1,11 +1,16 @@
 <resources>
-    <color name="primary_color">#2E7D6A</color>
-    <color name="primary_dark">#1F5B4D</color>
-    <color name="accent_color">#C76B29</color>
-    <color name="screen_background">#F4F7F5</color>
-    <color name="primary_text">#20312E</color>
-    <color name="secondary_text">#60706C</color>
-    <color name="divider">#D9E2DE</color>
-    <color name="border_color">#CCD8D3</color>
+    <color name="primary_color">#FF8C00</color>
+    <color name="primary_dark">#904D00</color>
+    <color name="accent_color">#A75A08</color>
+    <color name="screen_background">#F9F9F9</color>
+    <color name="primary_text">#1A1C1C</color>
+    <color name="secondary_text">#7D8390</color>
+    <color name="divider">#E6E7EA</color>
+    <color name="border_color">#D9DDE3</color>
+    <color name="soft_surface">#F3F3F3</color>
+    <color name="soft_surface_strong">#ECECEC</color>
+    <color name="soft_orange">#FFF3E5</color>
     <color name="white">#FFFFFF</color>
+    <color name="glass_surface">#CCF9F9F9</color>
+    <color name="muted_dark">#232323</color>
 </resources>

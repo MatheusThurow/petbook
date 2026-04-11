@@ -23,10 +23,13 @@ import androidx.core.content.ContextCompat;
 
 import com.example.petcompanyapp.R;
 import com.example.petcompanyapp.models.AnimalPost;
-import com.example.petcompanyapp.models.User;
 import com.example.petcompanyapp.repositories.AnimalPostRepository;
+import com.example.petcompanyapp.repositories.ApiPostRepository;
 import com.example.petcompanyapp.repositories.UserRepository;
 import com.example.petcompanyapp.utils.IntentKeys;
+import com.example.petcompanyapp.utils.AsyncRunner;
+import com.example.petcompanyapp.utils.FeatureFlags;
+import com.example.petcompanyapp.utils.ImageUtils;
 import com.example.petcompanyapp.utils.LocationUtils;
 import com.example.petcompanyapp.utils.MaskUtils;
 import com.example.petcompanyapp.utils.PostType;
@@ -116,6 +119,7 @@ public class PostCreateActivity extends AppCompatActivity {
         layoutLostLocation = findViewById(R.id.layoutLostLocation);
         textLocationStatus = findViewById(R.id.textLocationStatus);
         imagePostPreview = findViewById(R.id.imagePostPreview);
+        TextView textBack = findViewById(R.id.textBackPostCreate);
         Button buttonSelectImage = findViewById(R.id.buttonSelectImage);
         Button buttonCaptureLocation = findViewById(R.id.buttonCaptureLocation);
         Button buttonSelectLocationOnMap = findViewById(R.id.buttonSelectLocationOnMap);
@@ -129,12 +133,7 @@ public class PostCreateActivity extends AppCompatActivity {
         if (authorName == null || authorName.trim().isEmpty()) {
             authorName = getString(R.string.default_user_name);
         }
-        User authorUser = UserRepository.findById(authorUserId);
-        if (authorUser != null) {
-            authorName = authorUser.getName();
-        } else {
-            authorName = UserProfileStorage.getName(this, authorName);
-        }
+        authorName = UserProfileStorage.getName(this, authorName);
         updatePostTypeUi(selectedPostType);
 
         radioGroupPostType.setOnCheckedChangeListener((group, checkedId) -> {
@@ -142,6 +141,7 @@ public class PostCreateActivity extends AppCompatActivity {
             updatePostTypeUi(selectedPostType);
         });
 
+        textBack.setOnClickListener(v -> finish());
         buttonCaptureLocation.setOnClickListener(v -> requestLocation());
         buttonSelectLocationOnMap.setOnClickListener(v -> openMapPicker());
         buttonSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
@@ -238,7 +238,7 @@ public class PostCreateActivity extends AppCompatActivity {
         String contactPhone = editContactPhone.getText().toString().replaceAll("\\D", "");
         String locationReference = editLocationReference.getText().toString().trim();
 
-        if (!UserRepository.isValidActiveUser(authorUserId)) {
+        if (authorUserId == null) {
             Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
             return;
         }
@@ -296,43 +296,82 @@ public class PostCreateActivity extends AppCompatActivity {
             }
         }
 
-        AnimalPost animalPost = new AnimalPost(
-                selectedPostType,
-                animalName,
-                species,
-                breed,
-                age,
-                description,
-                contactPhone,
-                selectedLatitude,
-                selectedLongitude,
-                locationReference,
-                selectedImageUri.toString()
-        );
-        AnimalPostRepository.addPost(new AnimalPost(
-                null,
-                authorUserId,
-                animalPost.getPostType(),
-                animalPost.getAnimalName(),
-                animalPost.getSpecies(),
-                animalPost.getBreed(),
-                animalPost.getAge(),
-                animalPost.getDescription(),
-                animalPost.getContactPhone(),
-                animalPost.getLatitude(),
-                animalPost.getLongitude(),
-                animalPost.getLocationReference(),
-                animalPost.getImageUri(),
-                UserRepository.findById(authorUserId).getName(),
-                System.currentTimeMillis(),
-                false,
-                0
-        ));
+        if (!FeatureFlags.useRemoteApi(this)) {
+            if (!UserRepository.isValidActiveUser(this, authorUserId)) {
+                Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
+                return;
+            }
 
-        int successMessage = PostType.isLost(animalPost.getPostType())
-                ? R.string.post_lost_success
-                : R.string.post_adoption_success;
-        Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
-        finish();
+            AnimalPost animalPost = new AnimalPost(
+                    selectedPostType,
+                    animalName,
+                    species,
+                    breed,
+                    age,
+                    description,
+                    contactPhone,
+                    selectedLatitude,
+                    selectedLongitude,
+                    locationReference,
+                    selectedImageUri.toString()
+            );
+
+            AnimalPostRepository.addPost(this, new AnimalPost(
+                    null,
+                    authorUserId,
+                    animalPost.getPostType(),
+                    animalPost.getAnimalName(),
+                    animalPost.getSpecies(),
+                    animalPost.getBreed(),
+                    animalPost.getAge(),
+                    animalPost.getDescription(),
+                    animalPost.getContactPhone(),
+                    animalPost.getLatitude(),
+                    animalPost.getLongitude(),
+                    animalPost.getLocationReference(),
+                    animalPost.getImageUri(),
+                    authorName,
+                    System.currentTimeMillis(),
+                    false,
+                    0
+            ));
+
+            int successMessage = PostType.isLost(animalPost.getPostType())
+                    ? R.string.post_lost_success
+                    : R.string.post_adoption_success;
+            Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
+        AsyncRunner.run(
+                () -> ApiPostRepository.createPost(
+                        this,
+                        authorUserId,
+                        selectedPostType,
+                        animalName,
+                        species,
+                        breed,
+                        age,
+                        description,
+                        contactPhone,
+                        selectedLatitude,
+                        selectedLongitude,
+                        locationReference,
+                        ImageUtils.encodeImageAsDataUrl(this, selectedImageUri)
+                ),
+                createdPost -> {
+                    int successMessage = PostType.isLost(createdPost.getPostType())
+                            ? R.string.post_lost_success
+                            : R.string.post_adoption_success;
+                    Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
+                    finish();
+                },
+                exception -> Toast.makeText(
+                        this,
+                        exception.getMessage() == null ? getString(R.string.error_server_unavailable) : exception.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show()
+        );
     }
 }

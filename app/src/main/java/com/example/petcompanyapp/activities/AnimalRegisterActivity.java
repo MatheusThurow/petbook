@@ -10,8 +10,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petcompanyapp.R;
+import com.example.petcompanyapp.repositories.AnimalRepository;
 import com.example.petcompanyapp.utils.IntentKeys;
 import com.example.petcompanyapp.utils.MaskUtils;
+import com.example.petcompanyapp.utils.UserProfileStorage;
 import com.example.petcompanyapp.utils.UserType;
 import com.example.petcompanyapp.utils.ValidationUtils;
 
@@ -22,6 +24,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
     private EditText editBreed;
     private EditText editAge;
     private EditText editWeight;
+    private Long userId;
     private String userType;
 
     @Override
@@ -34,6 +37,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         editBreed = findViewById(R.id.editAnimalBreed);
         editAge = findViewById(R.id.editAnimalAge);
         editWeight = findViewById(R.id.editAnimalWeight);
+        TextView textBack = findViewById(R.id.textBackAnimalRegister);
         TextView textAnimalRegisterSubtitle = findViewById(R.id.textAnimalRegisterSubtitle);
         Button buttonRegister = findViewById(R.id.buttonAnimalRegister);
 
@@ -41,6 +45,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         if (userType == null) {
             userType = UserType.PERSON;
         }
+        userId = UserProfileStorage.getUserId(this);
 
         textAnimalRegisterSubtitle.setText(UserType.isCompany(userType)
                 ? R.string.animal_register_subtitle_company
@@ -48,6 +53,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
 
         MaskUtils.configureSpeciesSpinner(this, spinnerSpecies);
 
+        textBack.setOnClickListener(v -> finish());
         buttonRegister.setOnClickListener(v -> registerAnimal());
     }
 
@@ -84,6 +90,21 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         if (ValidationUtils.isEmpty(weight)) {
             editWeight.setError(getString(R.string.error_required_field));
             editWeight.requestFocus();
+            return;
+        }
+
+        long animalId = AnimalRepository.saveAnimal(
+                this,
+                userId,
+                null,
+                animalName,
+                species,
+                breed,
+                Integer.parseInt(age),
+                Double.parseDouble(weight.replace(",", "."))
+        );
+        if (animalId < 0) {
+            Toast.makeText(this, R.string.error_animal_save_failed, Toast.LENGTH_SHORT).show();
             return;
         }
 

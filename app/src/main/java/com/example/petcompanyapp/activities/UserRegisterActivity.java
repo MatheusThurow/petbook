@@ -12,8 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petcompanyapp.R;
 import com.example.petcompanyapp.models.User;
+import com.example.petcompanyapp.repositories.ApiUserRepository;
 import com.example.petcompanyapp.repositories.UserRepository;
 import com.google.android.material.textfield.TextInputLayout;
+import com.example.petcompanyapp.utils.AsyncRunner;
+import com.example.petcompanyapp.utils.FeatureFlags;
 import com.example.petcompanyapp.utils.IntentKeys;
 import com.example.petcompanyapp.utils.MaskUtils;
 import com.example.petcompanyapp.utils.UserProfileStorage;
@@ -47,6 +50,7 @@ public class UserRegisterActivity extends AppCompatActivity {
         radioGroupUserType = findViewById(R.id.radioGroupUserType);
         inputLayoutUserName = findViewById(R.id.inputLayoutUserName);
         inputLayoutUserDocument = findViewById(R.id.inputLayoutUserDocument);
+        TextView textBack = findViewById(R.id.textBackUserRegister);
         Button buttonRegister = findViewById(R.id.buttonUserRegister);
 
         selectedUserType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
@@ -65,6 +69,7 @@ public class UserRegisterActivity extends AppCompatActivity {
             updateFormByUserType(selectedUserType);
         });
 
+        textBack.setOnClickListener(v -> finish());
         buttonRegister.setOnClickListener(v -> registerUser());
     }
 
@@ -111,13 +116,38 @@ public class UserRegisterActivity extends AppCompatActivity {
             return;
         }
 
-        User registeredUser = UserRepository.register(selectedUserType, name, email, password, document);
-        if (registeredUser == null) {
-            editEmail.setError(getString(R.string.error_email_already_registered));
-            editEmail.requestFocus();
+        if (!FeatureFlags.useRemoteApi(this)) {
+            User registeredUser = UserRepository.register(this, selectedUserType, name, email, password, document);
+            if (registeredUser == null) {
+                editEmail.setError(getString(R.string.error_email_already_registered));
+                editEmail.requestFocus();
+                return;
+            }
+            completeRegistration(registeredUser);
             return;
         }
 
+        AsyncRunner.run(
+                () -> ApiUserRepository.register(this, selectedUserType, name, email, password, document),
+                this::completeRegistration,
+                exception -> {
+                    String message = exception.getMessage();
+                    if (message != null && message.toLowerCase().contains("email")) {
+                        editEmail.setError(getString(R.string.error_email_already_registered));
+                        editEmail.requestFocus();
+                        return;
+                    }
+
+                    Toast.makeText(
+                            this,
+                            message == null ? getString(R.string.error_server_unavailable) : message,
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+        );
+    }
+
+    private void completeRegistration(User registeredUser) {
         Toast.makeText(this, R.string.user_register_success, Toast.LENGTH_SHORT).show();
         Intent intent;
         if (UserType.isCompany(selectedUserType)) {

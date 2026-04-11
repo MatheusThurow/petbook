@@ -49,4 +49,11 @@ public final class UserProfileStorage {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
                 .getString(KEY_TYPE, fallback);
     }
+
+    public static void clearProfile(Context context) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply();
+    }
 }

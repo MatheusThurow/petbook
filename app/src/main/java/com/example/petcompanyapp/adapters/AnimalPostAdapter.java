@@ -1,6 +1,5 @@
 package com.example.petcompanyapp.adapters;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.petcompanyapp.R;
 import com.example.petcompanyapp.models.AnimalPost;
+import com.example.petcompanyapp.utils.ImageUtils;
 import com.example.petcompanyapp.utils.PostType;
 
 import java.text.DateFormat;
@@ -57,11 +57,7 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
                 ? holder.itemView.getContext().getString(R.string.post_type_lost)
                 : holder.itemView.getContext().getString(R.string.post_type_adoption));
         holder.textBadge.setBackgroundResource(isLost ? R.drawable.bg_badge_lost : R.drawable.bg_badge_adoption);
-        if (post.getImageUri() != null && !post.getImageUri().trim().isEmpty()) {
-            holder.imagePost.setImageURI(Uri.parse(post.getImageUri()));
-        } else {
-            holder.imagePost.setImageResource(android.R.drawable.ic_menu_gallery);
-        }
+        ImageUtils.loadInto(holder.imagePost, post.getImageUri());
         holder.textAnimalName.setText(post.getAnimalName());
         holder.textMeta.setText(holder.itemView.getContext().getString(
                 R.string.feed_post_meta,

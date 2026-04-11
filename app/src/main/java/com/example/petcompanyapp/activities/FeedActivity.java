@@ -15,9 +15,13 @@ import com.example.petcompanyapp.R;
 import com.example.petcompanyapp.adapters.AnimalPostAdapter;
 import com.example.petcompanyapp.models.AnimalPost;
 import com.example.petcompanyapp.models.User;
+import com.example.petcompanyapp.repositories.ApiPostRepository;
+import com.example.petcompanyapp.repositories.ApiUserRepository;
 import com.example.petcompanyapp.repositories.AnimalPostRepository;
 import com.example.petcompanyapp.repositories.UserRepository;
 import com.example.petcompanyapp.utils.FeedFilter;
+import com.example.petcompanyapp.utils.AsyncRunner;
+import com.example.petcompanyapp.utils.FeatureFlags;
 import com.example.petcompanyapp.utils.IntentKeys;
 import com.example.petcompanyapp.utils.UserProfileStorage;
 import com.example.petcompanyapp.utils.UserType;
@@ -43,7 +47,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         userId = extraUserId >= 0 ? extraUserId : UserProfileStorage.getUserId(this);
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (userType == null) {
-            userType = UserType.PERSON;
+            userType = UserProfileStorage.getUserType(this, UserType.PERSON);
         }
 
         userName = getIntent().getStringExtra(IntentKeys.EXTRA_USER_NAME);
@@ -54,27 +58,26 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         if (userEmail == null || userEmail.trim().isEmpty()) {
             userEmail = userName;
         }
-        User activeUser = UserRepository.findById(userId);
-        if (activeUser != null) {
-            userName = activeUser.getName();
-            userEmail = activeUser.getEmail();
-            userType = activeUser.getUserType();
+        if (!FeatureFlags.useRemoteApi(this)) {
+            User activeUser = UserRepository.findById(this, userId);
+            if (activeUser != null) {
+                userName = activeUser.getName();
+                userEmail = activeUser.getEmail();
+                userType = activeUser.getUserType();
+            }
         }
         UserProfileStorage.saveProfile(this, userId, userName, userEmail, userType);
 
         textFeedTitle = findViewById(R.id.textFeedTitle);
         Button buttonCreatePost = findViewById(R.id.buttonCreatePost);
-        Button buttonGoAnimal = findViewById(R.id.buttonGoAnimalRegister);
-        Button buttonGoCompany = findViewById(R.id.buttonGoCompanyRegister);
         ImageButton buttonProfile = findViewById(R.id.buttonProfile);
+        TextView textLogout = findViewById(R.id.textLogout);
         MaterialButtonToggleGroup toggleGroupFeedFilter = findViewById(R.id.toggleGroupFeedFilter);
         RecyclerView recyclerFeedPosts = findViewById(R.id.recyclerFeedPosts);
         textEmptyFeed = findViewById(R.id.textEmptyFeed);
 
         bindProfileHeader();
-        buttonGoCompany.setText(UserType.isCompany(userType)
-                ? R.string.button_edit_company
-                : R.string.button_register_company);
+
 
         animalPostAdapter = new AnimalPostAdapter(this);
         recyclerFeedPosts.setLayoutManager(new LinearLayoutManager(this));
@@ -93,12 +96,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
                 }
         );
 
-        buttonGoAnimal.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AnimalRegisterActivity.class);
-            intent.putExtra(IntentKeys.EXTRA_USER_TYPE, userType);
-            intent.putExtra(IntentKeys.EXTRA_USER_NAME, userName);
-            startActivity(intent);
-        });
+
 
         buttonProfile.setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileActivity.class);
@@ -108,16 +106,9 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
             startActivity(intent);
         });
 
-        buttonGoCompany.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CompanyRegisterActivity.class);
-            if (userId != null) {
-                intent.putExtra(IntentKeys.EXTRA_USER_ID, userId.longValue());
-            }
-            intent.putExtra(IntentKeys.EXTRA_USER_TYPE, userType);
-            intent.putExtra(IntentKeys.EXTRA_USER_NAME, userName);
-            intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, userEmail);
-            startActivity(intent);
-        });
+        textLogout.setOnClickListener(v -> logout());
+
+       
 
         toggleGroupFeedFilter.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) {
@@ -142,27 +133,78 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         userEmail = UserProfileStorage.getEmail(this, userEmail);
         userId = UserProfileStorage.getUserId(this);
         bindProfileHeader();
+        if (FeatureFlags.useRemoteApi(this)) {
+            loadActiveUser();
+        }
         loadFeedPosts();
     }
 
     private void loadFeedPosts() {
-        java.util.List<com.example.petcompanyapp.models.AnimalPost> posts =
-                AnimalPostRepository.getPosts(selectedFilter);
-        animalPostAdapter.submitList(posts);
-        textEmptyFeed.setVisibility(posts.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+        if (!FeatureFlags.useRemoteApi(this)) {
+            java.util.List<com.example.petcompanyapp.models.AnimalPost> posts =
+                    AnimalPostRepository.getPosts(this, selectedFilter);
+            animalPostAdapter.submitList(posts);
+            textEmptyFeed.setVisibility(posts.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+            return;
+        }
+
+        AsyncRunner.run(
+                () -> ApiPostRepository.getPosts(this, selectedFilter),
+                posts -> {
+                    animalPostAdapter.submitList(posts);
+                    textEmptyFeed.setVisibility(posts.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+                },
+                exception -> Toast.makeText(
+                        this,
+                        exception.getMessage() == null ? getString(R.string.error_server_unavailable) : exception.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show()
+        );
+    }
+
+    private void loadActiveUser() {
+        if (userId == null) {
+            return;
+        }
+
+        AsyncRunner.run(
+                () -> ApiUserRepository.findById(this, userId),
+                activeUser -> {
+                    userName = activeUser.getName();
+                    userEmail = activeUser.getEmail();
+                    userType = activeUser.getUserType();
+                    UserProfileStorage.saveProfile(this, userId, userName, userEmail, userType);
+                    bindProfileHeader();
+                },
+                exception -> {
+                    // Mantem dados de sessao atuais se a leitura remota falhar.
+                }
+        );
     }
 
     private void bindProfileHeader() {
         textFeedTitle.setText(getString(R.string.feed_title, UserProfileStorage.getName(this, userName)));
     }
 
+    private void logout() {
+        UserProfileStorage.clearProfile(this);
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public void onLikeClicked(AnimalPost post) {
-        if (post.getId() == null) {
+        if (!FeatureFlags.useRemoteApi(this)) {
+            if (post.getId() == null) {
+                return;
+            }
+            AnimalPostRepository.toggleLike(this, post.getId());
+            loadFeedPosts();
             return;
         }
-        AnimalPostRepository.toggleLike(post.getId());
-        loadFeedPosts();
+        Toast.makeText(this, R.string.info_like_sync_pending, Toast.LENGTH_SHORT).show();
     }
 
     @Override

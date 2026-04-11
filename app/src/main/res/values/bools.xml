@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mantido em false para a apresentacao local. Trocar para true no proximo sprint para reativar a API compartilhada. -->
+    <bool name="use_remote_api">false</bool>
+</resources>

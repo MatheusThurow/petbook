@@ -10,6 +10,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petcompanyapp.R;
+import com.example.petcompanyapp.repositories.ApiCompanyRepository;
+import com.example.petcompanyapp.repositories.CompanyRepository;
+import com.example.petcompanyapp.utils.AsyncRunner;
+import com.example.petcompanyapp.utils.FeatureFlags;
 import com.example.petcompanyapp.utils.IntentKeys;
 import com.example.petcompanyapp.utils.MaskUtils;
 import com.example.petcompanyapp.utils.UserType;
@@ -35,7 +39,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         editCnpj = findViewById(R.id.editCompanyCnpj);
         editAddress = findViewById(R.id.editCompanyAddress);
         editPhone = findViewById(R.id.editCompanyPhone);
-        TextView textCompanySubtitle = findViewById(R.id.textCompanyRegisterSubtitle);
+        TextView textBack = findViewById(R.id.textBackCompanyRegister);
         Button buttonSave = findViewById(R.id.buttonCompanySave);
 
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
@@ -50,12 +54,9 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         MaskUtils.applyCnpjMask(editCnpj);
         MaskUtils.applyPhoneMask(editPhone);
 
-        if (UserType.isCompany(userType)) {
-            textCompanySubtitle.setText(R.string.company_register_subtitle_company);
-        } else {
-            textCompanySubtitle.setText(R.string.company_register_subtitle_person);
-        }
 
+
+        textBack.setOnClickListener(v -> finish());
         buttonSave.setOnClickListener(v -> saveCompany());
     }
 
@@ -89,11 +90,50 @@ public class CompanyRegisterActivity extends AppCompatActivity {
             return;
         }
 
+        if (userId == null) {
+            Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (!FeatureFlags.useRemoteApi(this)) {
+            long companyId = CompanyRepository.saveCompany(
+                    this,
+                    userId,
+                    companyName,
+                    editCnpj.getText().toString().trim(),
+                    address,
+                    editPhone.getText().toString().trim()
+            );
+            if (companyId < 0) {
+                Toast.makeText(this, R.string.error_company_save_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            openFeed(companyName);
+            return;
+        }
+
+        AsyncRunner.run(
+                () -> ApiCompanyRepository.saveCompany(
+                        this,
+                        userId,
+                        companyName,
+                        editCnpj.getText().toString().trim(),
+                        address,
+                        editPhone.getText().toString().trim()
+                ),
+                ignored -> openFeed(companyName),
+                exception -> Toast.makeText(
+                        this,
+                        exception.getMessage() == null ? getString(R.string.error_company_save_failed) : exception.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show()
+        );
+    }
+
+    private void openFeed(String companyName) {
         Toast.makeText(this, R.string.company_register_success, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, FeedActivity.class);
-        if (userId != null) {
-            intent.putExtra(IntentKeys.EXTRA_USER_ID, userId.longValue());
-        }
+        intent.putExtra(IntentKeys.EXTRA_USER_ID, userId.longValue());
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, UserType.COMPANY);
         intent.putExtra(IntentKeys.EXTRA_USER_NAME, userName != null ? userName : companyName);
         if (userEmail != null) {

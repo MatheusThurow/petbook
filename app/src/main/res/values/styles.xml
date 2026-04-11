@@ -1,0 +1,113 @@
+<resources>
+    <style name="AppBrandMark">
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppScreenTitle">
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="AppScreenSubtitle">
+        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="AppFieldLabel">
+        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppSectionChip">
+        <item name="android:background">@drawable/bg_chip_surface</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:textColor">@color/muted_dark</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppFormCard">
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <style name="AppFilledInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/white</item>
+        <item name="boxCornerRadiusTopStart">6dp</item>
+        <item name="boxCornerRadiusTopEnd">6dp</item>
+        <item name="boxCornerRadiusBottomStart">6dp</item>
+        <item name="boxCornerRadiusBottomEnd">6dp</item>
+        <item name="boxStrokeColor">@color/divider</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="hintTextColor">@color/secondary_text</item>
+        <item name="android:textColorHint">@color/secondary_text</item>
+    </style>
+
+    <style name="AppPrimaryButton" parent="Widget.Material3.Button">
+        <item name="android:layout_height">56dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="backgroundTint">@color/primary_color</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="AppSecondaryButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_height">54dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="AppUtilityButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="AppEditorialTab" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+</resources>
