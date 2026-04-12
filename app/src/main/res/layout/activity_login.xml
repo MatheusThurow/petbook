@@ -10,59 +10,68 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="28dp"
-        android:paddingTop="20dp"
-        android:paddingEnd="28dp"
-        android:paddingBottom="18dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:id="@+id/textLoginTitle"
             style="@style/AppBrandMark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PetBook" />
+            android:text="PetBook"
+            android:textSize="24sp"
+            android:letterSpacing="0.05" />
 
         <View
-            android:layout_width="44dp"
-            android:layout_height="2dp"
-            android:layout_marginTop="12dp"
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
             android:background="@color/accent_color" />
 
         <TextView
-            style="@style/AppScreenTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/login_title" />
+            android:layout_marginTop="18dp"
+            android:text="@string/login_title"
+            android:textColor="@color/primary_text"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.02" />
 
         <TextView
             style="@style/AppScreenSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:text="@string/login_subtitle" />
 
         <TextView
             style="@style/AppFieldLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
             android:text="@string/hint_email" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="@string/hint_email">
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_email"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editLoginEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
@@ -93,31 +102,35 @@
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/hint_password"
-            app:endIconMode="password_toggle">
+            app:endIconMode="password_toggle"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editLoginPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             style="@style/AppFieldLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="18dp"
             android:text="@string/label_access_type" />
 
         <RadioGroup
             android:id="@+id/radioGroupAccessType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:background="@color/soft_surface"
             android:gravity="center"
             android:orientation="horizontal"
@@ -156,12 +169,15 @@
             style="@style/AppPrimaryButton"
             android:layout_width="match_parent"
             android:layout_marginTop="18dp"
-            android:text="@string/button_login" />
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:text="@string/button_login"
+            app:cornerRadius="16dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="18dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -174,8 +190,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:text="OU"
                 android:textColor="@color/secondary_text"
                 android:textSize="13sp"
@@ -196,16 +212,19 @@
             android:icon="@drawable/ic_google_mark"
             android:text="@string/button_google_login"
             app:iconGravity="textStart"
-            app:iconPadding="12dp" />
+            app:iconPadding="12dp"
+            app:cornerRadius="14dp" />
 
         <TextView
             android:id="@+id/textGoToRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="18dp"
             android:gravity="center"
             android:text="@string/text_register_account"
             android:textColor="@color/accent_color"
-            android:textSize="18sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 </ScrollView>

@@ -10,10 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="28dp"
-        android:paddingTop="40dp"
-        android:paddingEnd="28dp"
-        android:paddingBottom="32dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="28dp">
 
         <TextView
             android:id="@+id/textBackUserRegister"
@@ -22,195 +22,184 @@
             android:text="@string/action_back"
             android:textColor="@color/accent_color"
             android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:padding="6dp" />
 
         <TextView
             style="@style/AppBrandMark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="PetBook" />
-
-        <View
-            android:layout_width="48dp"
-            android:layout_height="2dp"
-            android:layout_marginTop="18dp"
-            android:background="@color/accent_color" />
+            android:layout_marginTop="16dp"
+            android:text="PetBook"
+            android:textSize="20sp" />
 
         <TextView
-            style="@style/AppScreenTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="42dp"
-            android:text="@string/user_register_title" />
+            android:layout_marginTop="20dp"
+            android:text="@string/user_register_title"
+            android:textColor="@color/primary_text"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.02" />
 
         <TextView
             android:id="@+id/textUserRegisterSubtitle"
             style="@style/AppScreenSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="6dp"
             android:text="@string/user_register_subtitle" />
 
         <RadioGroup
             android:id="@+id/radioGroupUserType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:orientation="horizontal">
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:background="@color/soft_surface"
+            android:padding="6dp">
 
             <RadioButton
                 android:id="@+id/radioUserTypePerson"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:button="@null"
                 android:checked="true"
+                android:gravity="center"
+                android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:text="@string/user_type_person"
-                android:textColor="@color/selector_tab_text"
-                android:textSize="17sp" />
+                android:textColor="@color/selector_tab_text" />
 
             <RadioButton
                 android:id="@+id/radioUserTypeCompany"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
                 android:button="@null"
+                android:gravity="center"
+                android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:text="@string/user_type_company"
-                android:textColor="@color/selector_tab_text"
-                android:textSize="17sp" />
+                android:textColor="@color/selector_tab_text" />
         </RadioGroup>
-
-        <View
-            android:layout_width="124dp"
-            android:layout_height="2dp"
-            android:background="@color/primary_text" />
-
-        <TextView
-            style="@style/AppFieldLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="34dp"
-            android:text="@string/hint_name" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/inputLayoutUserName"
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="@string/hint_name">
+            android:layout_marginTop="24dp"
+            android:hint="@string/hint_name"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            style="@style/AppFieldLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:text="@string/hint_cpf" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/inputLayoutUserDocument"
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="@string/hint_cpf">
+            android:layout_marginTop="16dp"
+            android:hint="@string/hint_cpf"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editUserDocument"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            style="@style/AppFieldLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:text="@string/hint_email" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="@string/hint_email">
+            android:layout_marginTop="16dp"
+            android:hint="@string/hint_email"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editUserEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            style="@style/AppFieldLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:text="@string/hint_password" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="16dp"
             android:hint="@string/hint_password"
-            app:endIconMode="password_toggle">
+            app:endIconMode="password_toggle"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editUserPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            style="@style/AppFieldLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:text="@string/hint_confirm_password" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/AppFilledInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="16dp"
             android:hint="@string/hint_confirm_password"
-            app:endIconMode="password_toggle">
+            app:endIconMode="password_toggle"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editUserConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonUserRegister"
             style="@style/AppPrimaryButton"
             android:layout_width="match_parent"
-            android:layout_marginTop="34dp"
-            android:text="@string/button_register" />
+            android:layout_marginTop="28dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:text="@string/button_register"
+            app:cornerRadius="16dp" />
+
     </LinearLayout>
 </ScrollView>
