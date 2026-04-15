@@ -32,6 +32,10 @@ public final class ApiHttpClient {
         return request(context, "PUT", path, body);
     }
 
+    public static String delete(Context context, String path) throws ApiException {
+        return request(context, "DELETE", path, null);
+    }
+
     public static String request(Context context, String method, String path, JSONObject body) throws ApiException {
         HttpURLConnection connection = null;
         try {

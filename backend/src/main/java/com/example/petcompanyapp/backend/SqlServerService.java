@@ -241,6 +241,93 @@ public final class SqlServerService {
         return runJsonQuery(query);
     }
 
+    public String updateAnimalPost(long postId, Map<String, String> values) throws IOException {
+        String authorUserId = values.get("authorUserId");
+        String postType = values.get("postType");
+        String animalName = values.get("animalName");
+        String species = values.get("species");
+        String breed = values.get("breed");
+        String age = values.get("age");
+        String description = values.get("description");
+        String contactPhone = values.get("contactPhone");
+        String imageUrl = values.get("imageUri");
+        String locationReference = values.get("locationReference");
+        String latitude = values.get("latitude");
+        String longitude = values.get("longitude");
+
+        if (StringUtils.isBlank(authorUserId)
+                || StringUtils.isBlank(postType)
+                || StringUtils.isBlank(animalName)
+                || StringUtils.isBlank(species)
+                || StringUtils.isBlank(breed)
+                || StringUtils.isBlank(age)
+                || StringUtils.isBlank(description)
+                || StringUtils.isBlank(contactPhone)
+                || StringUtils.isBlank(imageUrl)) {
+            return null;
+        }
+
+        if ("LOST".equalsIgnoreCase(postType)
+                && (StringUtils.isBlank(latitude) || StringUtils.isBlank(longitude) || StringUtils.isBlank(locationReference))) {
+            return null;
+        }
+
+        String query = ""
+                + "SET NOCOUNT ON; "
+                + "UPDATE ap "
+                + "SET ap.PostTypeId = pt.PostTypeId, "
+                + "ap.AnimalName = " + StringUtils.sql(animalName) + ", "
+                + "ap.Species = " + StringUtils.sql(species) + ", "
+                + "ap.Breed = " + StringUtils.sql(breed) + ", "
+                + "ap.AgeDescription = " + StringUtils.sql(age) + ", "
+                + "ap.DescriptionText = " + StringUtils.sql(description) + ", "
+                + "ap.ContactPhone = " + StringUtils.sql(contactPhone) + ", "
+                + "ap.ImageUrl = " + StringUtils.sql(imageUrl) + ", "
+                + "ap.LocationReference = " + StringUtils.sql(locationReference) + ", "
+                + "ap.Latitude = " + StringUtils.sqlNumber(latitude) + ", "
+                + "ap.Longitude = " + StringUtils.sqlNumber(longitude) + " "
+                + "FROM app.AnimalPosts ap "
+                + "INNER JOIN app.PostTypes pt ON pt.Code = " + StringUtils.sql(postType) + " "
+                + "WHERE ap.AnimalPostId = " + postId + " "
+                + "AND ap.AuthorUserId = " + StringUtils.sqlNumber(authorUserId) + "; "
+                + "IF @@ROWCOUNT = 0 BEGIN SELECT CAST(NULL AS NVARCHAR(MAX)) AS JsonResult; RETURN; END; "
+                + "SELECT TOP 1 "
+                + "ap.AnimalPostId AS id, "
+                + "ap.AuthorUserId AS authorUserId, "
+                + "pt.Code AS postType, "
+                + "ap.AnimalName AS animalName, "
+                + "ap.Species AS species, "
+                + "ap.Breed AS breed, "
+                + "ap.AgeDescription AS age, "
+                + "ap.DescriptionText AS description, "
+                + "ap.ContactPhone AS contactPhone, "
+                + "ap.Latitude AS latitude, "
+                + "ap.Longitude AS longitude, "
+                + "ap.LocationReference AS locationReference, "
+                + "ap.ImageUrl AS imageUri, "
+                + "u.FullName AS authorName, "
+                + "DATEDIFF_BIG(MILLISECOND, '1970-01-01T00:00:00', ap.CreatedAt) AS createdAtMillis, "
+                + "CAST(0 AS bit) AS liked, "
+                + "CAST(0 AS int) AS likeCount "
+                + "FROM app.AnimalPosts ap "
+                + "INNER JOIN app.PostTypes pt ON pt.PostTypeId = ap.PostTypeId "
+                + "INNER JOIN app.Users u ON u.UserId = ap.AuthorUserId "
+                + "WHERE ap.AnimalPostId = " + postId + " "
+                + "FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;";
+        return runJsonQuery(query);
+    }
+
+    public boolean deleteAnimalPost(long postId, String authorUserId) throws IOException {
+        String query = ""
+                + "SET NOCOUNT ON; "
+                + "DELETE FROM app.AnimalPosts "
+                + "WHERE AnimalPostId = " + postId + " "
+                + "AND AuthorUserId = " + StringUtils.sqlNumber(authorUserId) + "; "
+                + "SELECT @@ROWCOUNT;";
+        String output = execute(query).trim();
+        return "1".equals(output);
+    }
+
     private String runJsonQuery(String query) throws IOException {
         String output = execute(query).trim();
         if (output.isEmpty() || "null".equalsIgnoreCase(output)) {

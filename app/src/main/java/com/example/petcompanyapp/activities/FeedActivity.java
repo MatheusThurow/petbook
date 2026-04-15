@@ -1,5 +1,6 @@
 package com.example.petcompanyapp.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -79,7 +80,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         bindProfileHeader();
 
 
-        animalPostAdapter = new AnimalPostAdapter(this);
+        animalPostAdapter = new AnimalPostAdapter(this, userId);
         recyclerFeedPosts.setLayoutManager(new LinearLayoutManager(this));
         recyclerFeedPosts.setAdapter(animalPostAdapter);
 
@@ -132,6 +133,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         userName = UserProfileStorage.getName(this, userName);
         userEmail = UserProfileStorage.getEmail(this, userEmail);
         userId = UserProfileStorage.getUserId(this);
+        animalPostAdapter.setCurrentUserId(userId);
         bindProfileHeader();
         if (FeatureFlags.useRemoteApi(this)) {
             loadActiveUser();
@@ -234,6 +236,79 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         intent.putExtra(IntentKeys.EXTRA_LOCATION_REFERENCE, post.getLocationReference());
         intent.putExtra(IntentKeys.EXTRA_USER_NAME, post.getAnimalName());
         startActivity(intent);
+    }
+
+    @Override
+    public void onEditClicked(AnimalPost post) {
+        if (post.getId() == null || userId == null) {
+            return;
+        }
+
+        Intent intent = new Intent(this, PostCreateActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_USER_ID, userId);
+        intent.putExtra(IntentKeys.EXTRA_USER_TYPE, userType);
+        intent.putExtra(IntentKeys.EXTRA_USER_NAME, userName);
+        intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, userEmail);
+        intent.putExtra(IntentKeys.EXTRA_POST_ID, post.getId());
+        intent.putExtra(IntentKeys.EXTRA_POST_TYPE, post.getPostType());
+        intent.putExtra(IntentKeys.EXTRA_POST_ANIMAL_NAME, post.getAnimalName());
+        intent.putExtra(IntentKeys.EXTRA_POST_SPECIES, post.getSpecies());
+        intent.putExtra(IntentKeys.EXTRA_POST_BREED, post.getBreed());
+        intent.putExtra(IntentKeys.EXTRA_POST_AGE, post.getAge());
+        intent.putExtra(IntentKeys.EXTRA_POST_DESCRIPTION, post.getDescription());
+        intent.putExtra(IntentKeys.EXTRA_POST_CONTACT_PHONE, post.getContactPhone());
+        intent.putExtra(IntentKeys.EXTRA_LOCATION_REFERENCE, post.getLocationReference());
+        intent.putExtra(IntentKeys.EXTRA_POST_IMAGE_URI, post.getImageUri());
+        if (post.getLatitude() != null) {
+            intent.putExtra(IntentKeys.EXTRA_LATITUDE, post.getLatitude());
+        }
+        if (post.getLongitude() != null) {
+            intent.putExtra(IntentKeys.EXTRA_LONGITUDE, post.getLongitude());
+        }
+        startActivity(intent);
+    }
+
+    @Override
+    public void onDeleteClicked(AnimalPost post) {
+        if (post.getId() == null || userId == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete_post_title)
+                .setMessage(R.string.delete_post_message)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_delete_post, (dialog, which) -> deletePost(post))
+                .show();
+    }
+
+    private void deletePost(AnimalPost post) {
+        if (!FeatureFlags.useRemoteApi(this)) {
+            boolean deleted = AnimalPostRepository.deletePost(this, post.getId(), userId);
+            if (!deleted) {
+                Toast.makeText(this, R.string.error_delete_post_failed, Toast.LENGTH_LONG).show();
+                return;
+            }
+            Toast.makeText(this, R.string.post_delete_success, Toast.LENGTH_SHORT).show();
+            loadFeedPosts();
+            return;
+        }
+
+        AsyncRunner.run(
+                () -> {
+                    ApiPostRepository.deletePost(this, post.getId(), userId);
+                    return true;
+                },
+                ignored -> {
+                    Toast.makeText(this, R.string.post_delete_success, Toast.LENGTH_SHORT).show();
+                    loadFeedPosts();
+                },
+                exception -> Toast.makeText(
+                        this,
+                        exception.getMessage() == null ? getString(R.string.error_delete_post_failed) : exception.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show()
+        );
     }
 
     private String PostTypeLabel(AnimalPost post) {

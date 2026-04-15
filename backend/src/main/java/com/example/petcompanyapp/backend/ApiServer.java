@@ -168,7 +168,11 @@ public final class ApiServer {
         }));
 
         server.createContext("/api/posts", jsonHandler("*", exchange -> {
-            if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
+            String[] segments = path.split("/");
+
+            if ("GET".equalsIgnoreCase(method) && segments.length <= 3) {
                 String query = exchange.getRequestURI().getQuery();
                 String filter = "ALL";
                 if (query != null && query.startsWith("filter=")) {
@@ -178,7 +182,7 @@ public final class ApiServer {
                 return;
             }
 
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            if ("POST".equalsIgnoreCase(method) && segments.length <= 3) {
                 Map<String, String> body = JsonUtils.parseFlatJson(readBody(exchange));
                 String createdPostJson = sqlServerService.createAnimalPost(body);
                 if (createdPostJson == null) {
@@ -187,6 +191,49 @@ public final class ApiServer {
                 }
                 writeJson(exchange, 201, createdPostJson);
                 return;
+            }
+
+            if (segments.length >= 4) {
+                long postId;
+                try {
+                    postId = Long.parseLong(segments[3]);
+                } catch (NumberFormatException exception) {
+                    writeJson(exchange, 400, "{\"error\":\"Invalid post id.\"}");
+                    return;
+                }
+
+                if ("PUT".equalsIgnoreCase(method)) {
+                    Map<String, String> body = JsonUtils.parseFlatJson(readBody(exchange));
+                    String updatedPostJson = sqlServerService.updateAnimalPost(postId, body);
+                    if (updatedPostJson == null) {
+                        writeJson(exchange, 400, "{\"error\":\"Unable to update post. Check author and required fields.\"}");
+                        return;
+                    }
+                    writeJson(exchange, 200, updatedPostJson);
+                    return;
+                }
+
+                if ("DELETE".equalsIgnoreCase(method)) {
+                    String query = exchange.getRequestURI().getQuery();
+                    String authorUserId = null;
+                    if (query != null && query.startsWith("authorUserId=")) {
+                        authorUserId = query.substring("authorUserId=".length());
+                    }
+
+                    if (StringUtils.isBlank(authorUserId)) {
+                        writeJson(exchange, 400, "{\"error\":\"authorUserId is required.\"}");
+                        return;
+                    }
+
+                    boolean deleted = sqlServerService.deleteAnimalPost(postId, authorUserId);
+                    if (!deleted) {
+                        writeJson(exchange, 404, "{\"error\":\"Post not found or user is not the author.\"}");
+                        return;
+                    }
+                    exchange.sendResponseHeaders(204, -1);
+                    exchange.close();
+                    return;
+                }
             }
 
             writeJson(exchange, 405, "{\"error\":\"Method not allowed.\"}");
@@ -198,7 +245,7 @@ public final class ApiServer {
             Headers headers = exchange.getResponseHeaders();
             headers.add("Access-Control-Allow-Origin", "*");
             headers.add("Access-Control-Allow-Headers", "Content-Type");
-            headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
+            headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(204, -1);

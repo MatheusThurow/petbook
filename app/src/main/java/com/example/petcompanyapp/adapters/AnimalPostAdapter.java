@@ -26,19 +26,27 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         void onLikeClicked(AnimalPost post);
         void onShareClicked(AnimalPost post);
         void onMapClicked(AnimalPost post);
+        void onEditClicked(AnimalPost post);
+        void onDeleteClicked(AnimalPost post);
     }
 
     private final List<AnimalPost> items = new ArrayList<>();
     private final OnPostActionListener listener;
+    private Long currentUserId;
 
-    public AnimalPostAdapter(OnPostActionListener listener) {
+    public AnimalPostAdapter(OnPostActionListener listener, Long currentUserId) {
         this.listener = listener;
+        this.currentUserId = currentUserId;
     }
 
     public void submitList(List<AnimalPost> posts) {
         items.clear();
         items.addAll(posts);
         notifyDataSetChanged();
+    }
+
+    public void setCurrentUserId(Long currentUserId) {
+        this.currentUserId = currentUserId;
     }
 
     @NonNull
@@ -86,6 +94,11 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         ).format(new Date(post.getCreatedAtMillis()));
         holder.textDate.setText(formattedDate);
 
+        boolean isOwner = currentUserId != null
+                && post.getAuthorUserId() != null
+                && currentUserId.longValue() == post.getAuthorUserId().longValue();
+        holder.layoutOwnerActions.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+
         if (isLost) {
             holder.textLocation.setVisibility(View.VISIBLE);
             holder.buttonMap.setVisibility(View.VISIBLE);
@@ -102,6 +115,8 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         holder.textLike.setOnClickListener(v -> listener.onLikeClicked(post));
         holder.textShare.setOnClickListener(v -> listener.onShareClicked(post));
         holder.buttonMap.setOnClickListener(v -> listener.onMapClicked(post));
+        holder.textEdit.setOnClickListener(v -> listener.onEditClicked(post));
+        holder.textDelete.setOnClickListener(v -> listener.onDeleteClicked(post));
     }
 
     @Override
@@ -122,6 +137,9 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         private final TextView textAuthor;
         private final TextView textDate;
         private final TextView buttonMap;
+        private final View layoutOwnerActions;
+        private final TextView textEdit;
+        private final TextView textDelete;
 
         PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -137,6 +155,9 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
             textAuthor = itemView.findViewById(R.id.textPostAuthor);
             textDate = itemView.findViewById(R.id.textPostDate);
             buttonMap = itemView.findViewById(R.id.textPostMap);
+            layoutOwnerActions = itemView.findViewById(R.id.layoutPostOwnerActions);
+            textEdit = itemView.findViewById(R.id.textPostEdit);
+            textDelete = itemView.findViewById(R.id.textPostDelete);
         }
     }
 }

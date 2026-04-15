@@ -87,6 +87,7 @@
     <string name="button_capture_location">Capturar localizacao atual</string>
     <string name="button_select_location_map">Selecionar localizacao no Google Maps</string>
     <string name="button_publish_post">Publicar Post</string>
+    <string name="button_save_post_changes">Salvar alteracoes</string>
     <string name="button_save_profile">Salvar alteracoes</string>
     <string name="button_select_image">Selecionar imagem do animal</string>
     <string name="button_confirm_location">Confirmar localizacao</string>
@@ -110,6 +111,9 @@
     <string name="action_like">Curtir (%1$d)</string>
     <string name="action_liked">Curtido (%1$d)</string>
     <string name="action_share_post">Compartilhar</string>
+    <string name="action_edit_post">Editar</string>
+    <string name="action_delete_post">Apagar</string>
+    <string name="action_cancel">Cancelar</string>
     <string name="forgot_password_document_label">Documento</string>
     <string name="forgot_password_document_hint">CPF ou CNPJ cadastrado</string>
     <string name="forgot_password_new_password_label">Nova senha</string>
@@ -153,7 +157,13 @@
     <string name="error_profile_save_failed">Nao foi possivel salvar o perfil no banco local.</string>
     <string name="post_lost_success">Post de animal perdido criado com sucesso.</string>
     <string name="post_adoption_success">Post de animal para adocao criado com sucesso.</string>
+    <string name="post_edit_success">Post atualizado com sucesso.</string>
+    <string name="post_delete_success">Post apagado com sucesso.</string>
     <string name="profile_save_success">Perfil atualizado com sucesso.</string>
+    <string name="delete_post_title">Apagar post</string>
+    <string name="delete_post_message">Tem certeza que deseja apagar este post?</string>
+    <string name="error_delete_post_failed">Nao foi possivel apagar o post.</string>
+    <string name="error_save_post_failed">Nao foi possivel salvar as alteracoes do post.</string>
     <string name="info_like_sync_pending">Curtidas compartilhadas ainda nao foram integradas ao servidor.</string>
     <string name="species_hint">Selecione uma especie</string>
 

@@ -69,6 +69,44 @@ public final class ApiPostRepository {
         return mapPost(new JSONObject(response));
     }
 
+    public static AnimalPost updatePost(
+            Context context,
+            long postId,
+            Long authorUserId,
+            String postType,
+            String animalName,
+            String species,
+            String breed,
+            String age,
+            String description,
+            String contactPhone,
+            Double latitude,
+            Double longitude,
+            String locationReference,
+            String imageUri
+    ) throws Exception {
+        JSONObject payload = new JSONObject();
+        payload.put("authorUserId", authorUserId);
+        payload.put("postType", postType);
+        payload.put("animalName", animalName);
+        payload.put("species", species);
+        payload.put("breed", breed);
+        payload.put("age", age);
+        payload.put("description", description);
+        payload.put("contactPhone", contactPhone);
+        payload.put("imageUri", imageUri);
+        payload.put("locationReference", locationReference == null ? "" : locationReference);
+        payload.put("latitude", latitude == null ? JSONObject.NULL : latitude);
+        payload.put("longitude", longitude == null ? JSONObject.NULL : longitude);
+
+        String response = ApiHttpClient.put(context, "/api/posts/" + postId, payload);
+        return mapPost(new JSONObject(response));
+    }
+
+    public static void deletePost(Context context, long postId, long authorUserId) throws Exception {
+        ApiHttpClient.delete(context, "/api/posts/" + postId + "?authorUserId=" + authorUserId);
+    }
+
     private static AnimalPost mapPost(JSONObject jsonObject) throws Exception {
         return new AnimalPost(
                 jsonObject.getLong("id"),

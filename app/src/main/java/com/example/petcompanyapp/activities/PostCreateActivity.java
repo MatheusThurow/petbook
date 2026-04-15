@@ -52,6 +52,7 @@ public class PostCreateActivity extends AppCompatActivity {
     private TextView textLocationStatus;
     private ImageView imagePostPreview;
     private Long authorUserId;
+    private Long editingPostId;
     private String selectedPostType = PostType.ADOPTION;
     private String authorName;
     private Double selectedLatitude;
@@ -134,6 +135,14 @@ public class PostCreateActivity extends AppCompatActivity {
             authorName = getString(R.string.default_user_name);
         }
         authorName = UserProfileStorage.getName(this, authorName);
+        editingPostId = getIntent().hasExtra(IntentKeys.EXTRA_POST_ID)
+                ? getIntent().getLongExtra(IntentKeys.EXTRA_POST_ID, -1L)
+                : null;
+        if (editingPostId != null && editingPostId < 0) {
+            editingPostId = null;
+        }
+
+        bindEditingData(buttonCreatePost);
         updatePostTypeUi(selectedPostType);
 
         radioGroupPostType.setOnCheckedChangeListener((group, checkedId) -> {
@@ -148,9 +157,76 @@ public class PostCreateActivity extends AppCompatActivity {
         buttonCreatePost.setOnClickListener(v -> createPost());
     }
 
+    private void bindEditingData(Button buttonCreatePost) {
+        if (editingPostId == null) {
+            return;
+        }
+
+        selectedPostType = getIntent().getStringExtra(IntentKeys.EXTRA_POST_TYPE);
+        if (selectedPostType == null || selectedPostType.trim().isEmpty()) {
+            selectedPostType = PostType.ADOPTION;
+        }
+
+        radioGroupPostType.check(PostType.isLost(selectedPostType)
+                ? R.id.radioPostLost
+                : R.id.radioPostAdoption);
+        editAnimalName.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_ANIMAL_NAME));
+        setSpinnerSelection(getIntent().getStringExtra(IntentKeys.EXTRA_POST_SPECIES));
+        editBreed.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_BREED));
+        editAge.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_AGE));
+        editDescription.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_DESCRIPTION));
+        editContactPhone.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_CONTACT_PHONE));
+        editLocationReference.setText(getIntent().getStringExtra(IntentKeys.EXTRA_LOCATION_REFERENCE));
+
+        if (getIntent().hasExtra(IntentKeys.EXTRA_LATITUDE)) {
+            selectedLatitude = getIntent().getDoubleExtra(IntentKeys.EXTRA_LATITUDE, 0d);
+        }
+        if (getIntent().hasExtra(IntentKeys.EXTRA_LONGITUDE)) {
+            selectedLongitude = getIntent().getDoubleExtra(IntentKeys.EXTRA_LONGITUDE, 0d);
+        }
+
+        String imageUri = getIntent().getStringExtra(IntentKeys.EXTRA_POST_IMAGE_URI);
+        if (imageUri != null && !imageUri.trim().isEmpty()) {
+            selectedImageUri = Uri.parse(imageUri);
+            imagePostPreview.setImageURI(selectedImageUri);
+        }
+
+        if (selectedLatitude != null && selectedLongitude != null) {
+            textLocationStatus.setText(getString(
+                    R.string.location_captured,
+                    String.format(Locale.US, "%.5f", selectedLatitude),
+                    String.format(Locale.US, "%.5f", selectedLongitude)
+            ));
+        }
+
+        buttonCreatePost.setText(R.string.button_save_post_changes);
+    }
+
+    private void setSpinnerSelection(String species) {
+        if (species == null || spinnerSpecies.getAdapter() == null) {
+            return;
+        }
+
+        for (int index = 0; index < spinnerSpecies.getAdapter().getCount(); index++) {
+            Object item = spinnerSpecies.getAdapter().getItem(index);
+            if (item != null && species.equalsIgnoreCase(item.toString())) {
+                spinnerSpecies.setSelection(index);
+                return;
+            }
+        }
+    }
+
     private void updatePostTypeUi(String postType) {
         if (PostType.isLost(postType)) {
-            textLocationStatus.setText(R.string.location_not_captured);
+            if (selectedLatitude != null && selectedLongitude != null) {
+                textLocationStatus.setText(getString(
+                        R.string.location_captured,
+                        String.format(Locale.US, "%.5f", selectedLatitude),
+                        String.format(Locale.US, "%.5f", selectedLongitude)
+                ));
+            } else {
+                textLocationStatus.setText(R.string.location_not_captured);
+            }
         } else {
             textLocationStatus.setText(R.string.location_optional);
         }
@@ -303,6 +379,8 @@ public class PostCreateActivity extends AppCompatActivity {
             }
 
             AnimalPost animalPost = new AnimalPost(
+                    editingPostId,
+                    authorUserId,
                     selectedPostType,
                     animalName,
                     species,
@@ -313,57 +391,71 @@ public class PostCreateActivity extends AppCompatActivity {
                     selectedLatitude,
                     selectedLongitude,
                     locationReference,
-                    selectedImageUri.toString()
-            );
-
-            AnimalPostRepository.addPost(this, new AnimalPost(
-                    null,
-                    authorUserId,
-                    animalPost.getPostType(),
-                    animalPost.getAnimalName(),
-                    animalPost.getSpecies(),
-                    animalPost.getBreed(),
-                    animalPost.getAge(),
-                    animalPost.getDescription(),
-                    animalPost.getContactPhone(),
-                    animalPost.getLatitude(),
-                    animalPost.getLongitude(),
-                    animalPost.getLocationReference(),
-                    animalPost.getImageUri(),
+                    selectedImageUri.toString(),
                     authorName,
                     System.currentTimeMillis(),
                     false,
                     0
-            ));
+            );
 
-            int successMessage = PostType.isLost(animalPost.getPostType())
-                    ? R.string.post_lost_success
-                    : R.string.post_adoption_success;
+            boolean success;
+            if (editingPostId == null) {
+                AnimalPostRepository.addPost(this, animalPost);
+                success = true;
+            } else {
+                success = AnimalPostRepository.updatePost(this, animalPost);
+            }
+
+            if (!success) {
+                Toast.makeText(this, R.string.error_save_post_failed, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            int successMessage = editingPostId == null
+                    ? (PostType.isLost(animalPost.getPostType()) ? R.string.post_lost_success : R.string.post_adoption_success)
+                    : R.string.post_edit_success;
             Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
         AsyncRunner.run(
-                () -> ApiPostRepository.createPost(
-                        this,
-                        authorUserId,
-                        selectedPostType,
-                        animalName,
-                        species,
-                        breed,
-                        age,
-                        description,
-                        contactPhone,
-                        selectedLatitude,
-                        selectedLongitude,
-                        locationReference,
-                        ImageUtils.encodeImageAsDataUrl(this, selectedImageUri)
-                ),
-                createdPost -> {
-                    int successMessage = PostType.isLost(createdPost.getPostType())
-                            ? R.string.post_lost_success
-                            : R.string.post_adoption_success;
+                () -> editingPostId == null
+                        ? ApiPostRepository.createPost(
+                                this,
+                                authorUserId,
+                                selectedPostType,
+                                animalName,
+                                species,
+                                breed,
+                                age,
+                                description,
+                                contactPhone,
+                                selectedLatitude,
+                                selectedLongitude,
+                                locationReference,
+                                ImageUtils.encodeImageAsDataUrl(this, selectedImageUri)
+                        )
+                        : ApiPostRepository.updatePost(
+                                this,
+                                editingPostId,
+                                authorUserId,
+                                selectedPostType,
+                                animalName,
+                                species,
+                                breed,
+                                age,
+                                description,
+                                contactPhone,
+                                selectedLatitude,
+                                selectedLongitude,
+                                locationReference,
+                                ImageUtils.encodeImageAsDataUrl(this, selectedImageUri)
+                        ),
+                savedPost -> {
+                    int successMessage = editingPostId == null
+                            ? (PostType.isLost(savedPost.getPostType()) ? R.string.post_lost_success : R.string.post_adoption_success)
+                            : R.string.post_edit_success;
                     Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
                     finish();
                 },

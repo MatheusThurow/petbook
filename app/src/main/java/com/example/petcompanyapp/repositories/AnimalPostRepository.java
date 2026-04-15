@@ -48,27 +48,7 @@ public final class AnimalPostRepository {
 
     public static void addPost(Context context, AnimalPost post) {
         SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("author_user_id", post.getAuthorUserId());
-        values.put("post_type", post.getPostType());
-        values.put("animal_name", post.getAnimalName());
-        values.put("species", post.getSpecies());
-        values.put("breed", post.getBreed());
-        values.put("age_description", post.getAge());
-        values.put("description_text", post.getDescription());
-        values.put("contact_phone", post.getContactPhone());
-        if (post.getLatitude() != null) {
-            values.put("latitude", post.getLatitude());
-        } else {
-            values.putNull("latitude");
-        }
-        if (post.getLongitude() != null) {
-            values.put("longitude", post.getLongitude());
-        } else {
-            values.putNull("longitude");
-        }
-        values.put("location_reference", post.getLocationReference());
-        values.put("image_uri", post.getImageUri());
+        ContentValues values = toContentValues(post);
         values.put("created_at_millis", System.currentTimeMillis());
         values.put("liked", post.isLiked() ? 1 : 0);
         values.put("like_count", post.getLikeCount());
@@ -113,6 +93,83 @@ public final class AnimalPostRepository {
             cursor.close();
             db.close();
         }
+    }
+
+    public static AnimalPost findById(Context context, long postId) {
+        SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT p.id, p.author_user_id, p.post_type, p.animal_name, p.species, p.breed, "
+                        + "p.age_description, p.description_text, p.contact_phone, p.latitude, p.longitude, "
+                        + "p.location_reference, p.image_uri, p.created_at_millis, p.liked, p.like_count, "
+                        + "u.name AS author_name "
+                        + "FROM " + AppDatabaseHelper.TABLE_POSTS + " p "
+                        + "INNER JOIN " + AppDatabaseHelper.TABLE_USERS + " u ON u.id = p.author_user_id "
+                        + "WHERE p.id = ?",
+                new String[]{String.valueOf(postId)}
+        );
+
+        try {
+            if (cursor.moveToFirst()) {
+                return mapPost(cursor);
+            }
+        } finally {
+            cursor.close();
+            db.close();
+        }
+        return null;
+    }
+
+    public static boolean updatePost(Context context, AnimalPost post) {
+        if (post.getId() == null || post.getAuthorUserId() == null) {
+            return false;
+        }
+
+        SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
+        ContentValues values = toContentValues(post);
+        int updatedRows = db.update(
+                AppDatabaseHelper.TABLE_POSTS,
+                values,
+                "id = ? AND author_user_id = ?",
+                new String[]{String.valueOf(post.getId()), String.valueOf(post.getAuthorUserId())}
+        );
+        db.close();
+        return updatedRows > 0;
+    }
+
+    public static boolean deletePost(Context context, long postId, long authorUserId) {
+        SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
+        int deletedRows = db.delete(
+                AppDatabaseHelper.TABLE_POSTS,
+                "id = ? AND author_user_id = ?",
+                new String[]{String.valueOf(postId), String.valueOf(authorUserId)}
+        );
+        db.close();
+        return deletedRows > 0;
+    }
+
+    private static ContentValues toContentValues(AnimalPost post) {
+        ContentValues values = new ContentValues();
+        values.put("author_user_id", post.getAuthorUserId());
+        values.put("post_type", post.getPostType());
+        values.put("animal_name", post.getAnimalName());
+        values.put("species", post.getSpecies());
+        values.put("breed", post.getBreed());
+        values.put("age_description", post.getAge());
+        values.put("description_text", post.getDescription());
+        values.put("contact_phone", post.getContactPhone());
+        if (post.getLatitude() != null) {
+            values.put("latitude", post.getLatitude());
+        } else {
+            values.putNull("latitude");
+        }
+        if (post.getLongitude() != null) {
+            values.put("longitude", post.getLongitude());
+        } else {
+            values.putNull("longitude");
+        }
+        values.put("location_reference", post.getLocationReference());
+        values.put("image_uri", post.getImageUri());
+        return values;
     }
 
     private static AnimalPost mapPost(Cursor cursor) {
