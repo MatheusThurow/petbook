@@ -1,12 +1,15 @@
-package com.example.petcompanyapp.repositories;
+package com.petbook.app.repositories;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.petcompanyapp.database.AppDatabaseHelper;
-import com.example.petcompanyapp.models.User;
+import com.petbook.app.database.AppDatabaseHelper;
+import com.petbook.app.models.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class UserRepository {
 
@@ -192,6 +195,45 @@ public final class UserRepository {
         );
     }
 
+    public static List<User> searchActiveUsers(Context context, String query, Long excludeUserId) {
+        SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+
+        String selection = "is_active = 1";
+        java.util.List<String> args = new ArrayList<>();
+        if (excludeUserId != null) {
+            selection += " AND id != ?";
+            args.add(String.valueOf(excludeUserId));
+        }
+        if (!normalizedQuery.isEmpty()) {
+            selection += " AND (LOWER(name) LIKE ? OR LOWER(email) LIKE ?)";
+            String likeValue = "%" + normalizedQuery + "%";
+            args.add(likeValue);
+            args.add(likeValue);
+        }
+
+        Cursor cursor = db.query(
+                AppDatabaseHelper.TABLE_USERS,
+                null,
+                selection,
+                args.toArray(new String[0]),
+                null,
+                null,
+                "name COLLATE NOCASE ASC"
+        );
+
+        try {
+            List<User> users = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                users.add(mapUser(cursor));
+            }
+            return users;
+        } finally {
+            cursor.close();
+            db.close();
+        }
+    }
+
     private static User mapUser(Cursor cursor) {
         return new User(
                 cursor.getLong(cursor.getColumnIndexOrThrow("id")),
@@ -204,3 +246,4 @@ public final class UserRepository {
         );
     }
 }
+

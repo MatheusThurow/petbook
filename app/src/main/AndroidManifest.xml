@@ -21,6 +21,12 @@
             android:name=".activities.PostLocationMapActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ConversationListActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.MapPickerActivity"
             android:exported="false" />
         <activity

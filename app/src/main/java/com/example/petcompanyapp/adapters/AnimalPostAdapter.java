@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.adapters;
+package com.petbook.app.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,10 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.models.AnimalPost;
-import com.example.petcompanyapp.utils.ImageUtils;
-import com.example.petcompanyapp.utils.PostType;
+import com.petbook.app.R;
+import com.petbook.app.models.AnimalPost;
+import com.petbook.app.utils.ImageUtils;
+import com.petbook.app.utils.PostType;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -161,3 +161,4 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         }
     }
 }
+

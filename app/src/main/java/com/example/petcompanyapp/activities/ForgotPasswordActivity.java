@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.activities;
+package com.petbook.app.activities;
 
 import android.os.Bundle;
 import android.widget.Button;
@@ -8,10 +8,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.repositories.UserRepository;
-import com.example.petcompanyapp.utils.MaskUtils;
-import com.example.petcompanyapp.utils.ValidationUtils;
+import com.petbook.app.R;
+import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.ValidationUtils;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
@@ -77,3 +77,4 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         finish();
     }
 }
+

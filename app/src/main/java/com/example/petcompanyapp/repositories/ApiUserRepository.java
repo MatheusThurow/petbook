@@ -1,9 +1,9 @@
-package com.example.petcompanyapp.repositories;
+package com.petbook.app.repositories;
 
 import android.content.Context;
 
-import com.example.petcompanyapp.models.User;
-import com.example.petcompanyapp.network.ApiHttpClient;
+import com.petbook.app.models.User;
+import com.petbook.app.network.ApiHttpClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,3 +64,4 @@ public final class ApiUserRepository {
         );
     }
 }
+

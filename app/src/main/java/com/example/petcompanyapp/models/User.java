@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.models;
+package com.petbook.app.models;
 
 public class User {
     private final Long id;
@@ -59,3 +59,4 @@ public class User {
         return active;
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 public final class PostType {
 
@@ -13,3 +13,4 @@ public final class PostType {
         return LOST.equals(type);
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.models;
+package com.petbook.app.models;
 
 public class AnimalPost {
     private final Long id;
@@ -159,3 +159,4 @@ public class AnimalPost {
         return likeCount;
     }
 }
+

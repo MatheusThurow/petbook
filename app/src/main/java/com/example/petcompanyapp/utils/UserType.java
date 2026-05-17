@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 public final class UserType {
 
@@ -13,3 +13,4 @@ public final class UserType {
         return COMPANY.equals(userType);
     }
 }
+

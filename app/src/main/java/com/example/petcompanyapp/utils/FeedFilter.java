@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 public final class FeedFilter {
 
@@ -10,3 +10,4 @@ public final class FeedFilter {
         // Constantes de filtro do feed.
     }
 }
+

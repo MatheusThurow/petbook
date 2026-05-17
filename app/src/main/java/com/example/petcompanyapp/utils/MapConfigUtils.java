@@ -1,8 +1,8 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.content.Context;
 
-import com.example.petcompanyapp.R;
+import com.petbook.app.R;
 
 public final class MapConfigUtils {
 
@@ -19,3 +19,4 @@ public final class MapConfigUtils {
                 && !PLACEHOLDER_KEY.equals(apiKey.trim());
     }
 }
+

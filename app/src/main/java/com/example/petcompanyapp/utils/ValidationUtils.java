@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.text.TextUtils;
 import android.util.Patterns;
@@ -21,3 +21,4 @@ public final class ValidationUtils {
         return !isEmpty(value) && value.trim().length() >= minLength;
     }
 }
+

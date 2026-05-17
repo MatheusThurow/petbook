@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -57,3 +57,4 @@ public final class UserProfileStorage {
                 .apply();
     }
 }
+

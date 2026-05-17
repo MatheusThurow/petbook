@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.activities;
+package com.petbook.app.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -21,20 +21,20 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.models.AnimalPost;
-import com.example.petcompanyapp.repositories.AnimalPostRepository;
-import com.example.petcompanyapp.repositories.ApiPostRepository;
-import com.example.petcompanyapp.repositories.UserRepository;
-import com.example.petcompanyapp.utils.IntentKeys;
-import com.example.petcompanyapp.utils.AsyncRunner;
-import com.example.petcompanyapp.utils.FeatureFlags;
-import com.example.petcompanyapp.utils.ImageUtils;
-import com.example.petcompanyapp.utils.LocationUtils;
-import com.example.petcompanyapp.utils.MaskUtils;
-import com.example.petcompanyapp.utils.PostType;
-import com.example.petcompanyapp.utils.UserProfileStorage;
-import com.example.petcompanyapp.utils.ValidationUtils;
+import com.petbook.app.R;
+import com.petbook.app.models.AnimalPost;
+import com.petbook.app.repositories.AnimalPostRepository;
+import com.petbook.app.repositories.ApiPostRepository;
+import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.FeatureFlags;
+import com.petbook.app.utils.ImageUtils;
+import com.petbook.app.utils.LocationUtils;
+import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.PostType;
+import com.petbook.app.utils.UserProfileStorage;
+import com.petbook.app.utils.ValidationUtils;
 
 import java.util.Locale;
 
@@ -467,3 +467,4 @@ public class PostCreateActivity extends AppCompatActivity {
         );
     }
 }
+

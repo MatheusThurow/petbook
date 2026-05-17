@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.database;
+package com.petbook.app.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,12 +8,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "petcompany.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public static final String TABLE_USERS = "users";
     public static final String TABLE_COMPANIES = "companies";
     public static final String TABLE_ANIMALS = "animals";
     public static final String TABLE_POSTS = "animal_posts";
+    public static final String TABLE_CONVERSATIONS = "chat_conversations";
+    public static final String TABLE_MESSAGES = "chat_messages";
 
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -21,7 +23,26 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + TABLE_USERS + " ("
+        createUsersTable(db);
+        createCompaniesTable(db);
+        createAnimalsTable(db);
+        createPostsTable(db);
+        createConversationsTable(db);
+        createMessagesTable(db);
+
+        seedInitialData(db);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 2) {
+            createConversationsTable(db);
+            createMessagesTable(db);
+        }
+    }
+
+    private void createUsersTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "user_type TEXT NOT NULL,"
                 + "name TEXT NOT NULL,"
@@ -30,8 +51,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "document_number TEXT NOT NULL,"
                 + "is_active INTEGER NOT NULL DEFAULT 1"
                 + ")");
+    }
 
-        db.execSQL("CREATE TABLE " + TABLE_COMPANIES + " ("
+    private void createCompaniesTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_COMPANIES + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "owner_user_id INTEGER,"
                 + "company_name TEXT NOT NULL,"
@@ -39,8 +62,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "address_line TEXT NOT NULL,"
                 + "phone_number TEXT NOT NULL"
                 + ")");
+    }
 
-        db.execSQL("CREATE TABLE " + TABLE_ANIMALS + " ("
+    private void createAnimalsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_ANIMALS + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "owner_user_id INTEGER,"
                 + "company_id INTEGER,"
@@ -50,8 +75,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "age_years INTEGER NOT NULL,"
                 + "weight_kg REAL NOT NULL"
                 + ")");
+    }
 
-        db.execSQL("CREATE TABLE " + TABLE_POSTS + " ("
+    private void createPostsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_POSTS + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "author_user_id INTEGER NOT NULL,"
                 + "post_type TEXT NOT NULL,"
@@ -70,13 +97,31 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "like_count INTEGER NOT NULL DEFAULT 0,"
                 + "FOREIGN KEY(author_user_id) REFERENCES " + TABLE_USERS + "(id)"
                 + ")");
-
-        seedInitialData(db);
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Sem migracao por enquanto.
+    private void createConversationsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_CONVERSATIONS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "user_one_id INTEGER NOT NULL,"
+                + "user_two_id INTEGER NOT NULL,"
+                + "created_at_millis INTEGER NOT NULL,"
+                + "last_message_text TEXT,"
+                + "last_message_at_millis INTEGER,"
+                + "UNIQUE(user_one_id, user_two_id)"
+                + ")");
+    }
+
+    private void createMessagesTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MESSAGES + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "conversation_id INTEGER NOT NULL,"
+                + "sender_user_id INTEGER NOT NULL,"
+                + "receiver_user_id INTEGER NOT NULL,"
+                + "message_text TEXT NOT NULL,"
+                + "sent_at_millis INTEGER NOT NULL,"
+                + "is_read INTEGER NOT NULL DEFAULT 0,"
+                + "FOREIGN KEY(conversation_id) REFERENCES " + TABLE_CONVERSATIONS + "(id)"
+                + ")");
     }
 
     private void seedInitialData(SQLiteDatabase db) {
@@ -181,3 +226,4 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         return db.insert(TABLE_USERS, null, values);
     }
 }
+

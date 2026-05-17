@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.activities;
+package com.petbook.app.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -12,20 +12,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.adapters.AnimalPostAdapter;
-import com.example.petcompanyapp.models.AnimalPost;
-import com.example.petcompanyapp.models.User;
-import com.example.petcompanyapp.repositories.ApiPostRepository;
-import com.example.petcompanyapp.repositories.ApiUserRepository;
-import com.example.petcompanyapp.repositories.AnimalPostRepository;
-import com.example.petcompanyapp.repositories.UserRepository;
-import com.example.petcompanyapp.utils.FeedFilter;
-import com.example.petcompanyapp.utils.AsyncRunner;
-import com.example.petcompanyapp.utils.FeatureFlags;
-import com.example.petcompanyapp.utils.IntentKeys;
-import com.example.petcompanyapp.utils.UserProfileStorage;
-import com.example.petcompanyapp.utils.UserType;
+import com.petbook.app.R;
+import com.petbook.app.adapters.AnimalPostAdapter;
+import com.petbook.app.models.AnimalPost;
+import com.petbook.app.models.User;
+import com.petbook.app.repositories.ApiPostRepository;
+import com.petbook.app.repositories.ApiUserRepository;
+import com.petbook.app.repositories.AnimalPostRepository;
+import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.FeedFilter;
+import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.FeatureFlags;
+import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.UserProfileStorage;
+import com.petbook.app.utils.UserType;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter.OnPostActionListener {
@@ -71,6 +71,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
 
         textFeedTitle = findViewById(R.id.textFeedTitle);
         Button buttonCreatePost = findViewById(R.id.buttonCreatePost);
+        ImageButton buttonChat = findViewById(R.id.buttonChat);
         ImageButton buttonProfile = findViewById(R.id.buttonProfile);
         TextView textLogout = findViewById(R.id.textLogout);
         MaterialButtonToggleGroup toggleGroupFeedFilter = findViewById(R.id.toggleGroupFeedFilter);
@@ -96,6 +97,8 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
                     startActivity(intent);
                 }
         );
+
+        buttonChat.setOnClickListener(v -> startActivity(new Intent(this, ConversationListActivity.class)));
 
 
 
@@ -143,7 +146,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
 
     private void loadFeedPosts() {
         if (!FeatureFlags.useRemoteApi(this)) {
-            java.util.List<com.example.petcompanyapp.models.AnimalPost> posts =
+            java.util.List<com.petbook.app.models.AnimalPost> posts =
                     AnimalPostRepository.getPosts(this, selectedFilter);
             animalPostAdapter.submitList(posts);
             textEmptyFeed.setVisibility(posts.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -312,8 +315,9 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
     }
 
     private String PostTypeLabel(AnimalPost post) {
-        return com.example.petcompanyapp.utils.PostType.isLost(post.getPostType())
+        return com.petbook.app.utils.PostType.isLost(post.getPostType())
                 ? getString(R.string.post_type_lost)
                 : getString(R.string.post_type_adoption);
     }
 }
+

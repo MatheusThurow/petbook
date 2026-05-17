@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.content.Context;
 import android.location.Address;
@@ -48,3 +48,4 @@ public final class LocationUtils {
         return buildCoordinateLabel(latitude, longitude);
     }
 }
+

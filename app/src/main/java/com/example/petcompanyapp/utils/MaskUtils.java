@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,7 +8,7 @@ import android.widget.Spinner;
 
 import android.content.Context;
 
-import com.example.petcompanyapp.R;
+import com.petbook.app.R;
 
 public final class MaskUtils {
 
@@ -213,3 +213,4 @@ public final class MaskUtils {
         editText.setTag(newWatcher);
     }
 }
+

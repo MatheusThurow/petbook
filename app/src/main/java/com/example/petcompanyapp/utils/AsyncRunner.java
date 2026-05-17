@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -31,3 +31,4 @@ public final class AsyncRunner {
         });
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 public final class IntentKeys {
 
@@ -18,8 +18,14 @@ public final class IntentKeys {
     public static final String EXTRA_POST_DESCRIPTION = "extra_post_description";
     public static final String EXTRA_POST_CONTACT_PHONE = "extra_post_contact_phone";
     public static final String EXTRA_POST_IMAGE_URI = "extra_post_image_uri";
+    public static final String EXTRA_CONVERSATION_ID = "extra_conversation_id";
+    public static final String EXTRA_TARGET_USER_ID = "extra_target_user_id";
+    public static final String EXTRA_TARGET_USER_NAME = "extra_target_user_name";
+    public static final String EXTRA_TARGET_USER_TYPE = "extra_target_user_type";
+    public static final String EXTRA_TARGET_USER_EMAIL = "extra_target_user_email";
 
     private IntentKeys() {
         // Classe utilitaria para chaves compartilhadas entre Activities.
     }
 }
+

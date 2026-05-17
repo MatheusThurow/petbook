@@ -1,10 +1,10 @@
-package com.example.petcompanyapp.repositories;
+package com.petbook.app.repositories;
 
 import android.content.Context;
 
-import com.example.petcompanyapp.models.AnimalPost;
-import com.example.petcompanyapp.network.ApiHttpClient;
-import com.example.petcompanyapp.utils.FeedFilter;
+import com.petbook.app.models.AnimalPost;
+import com.petbook.app.network.ApiHttpClient;
+import com.petbook.app.utils.FeedFilter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -129,3 +129,4 @@ public final class ApiPostRepository {
         );
     }
 }
+

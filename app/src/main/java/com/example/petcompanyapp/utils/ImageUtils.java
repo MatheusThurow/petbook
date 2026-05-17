@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -58,3 +58,4 @@ public final class ImageUtils {
         imageView.setImageURI(Uri.parse(imageValue));
     }
 }
+

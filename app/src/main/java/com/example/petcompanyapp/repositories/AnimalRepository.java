@@ -1,10 +1,10 @@
-package com.example.petcompanyapp.repositories;
+package com.petbook.app.repositories;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.petcompanyapp.database.AppDatabaseHelper;
+import com.petbook.app.database.AppDatabaseHelper;
 
 public final class AnimalRepository {
 
@@ -44,3 +44,4 @@ public final class AnimalRepository {
         return animalId;
     }
 }
+

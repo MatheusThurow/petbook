@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.network;
+package com.petbook.app.network;
 
 public class ApiException extends Exception {
 
@@ -10,3 +10,4 @@ public class ApiException extends Exception {
         super(message, cause);
     }
 }
+

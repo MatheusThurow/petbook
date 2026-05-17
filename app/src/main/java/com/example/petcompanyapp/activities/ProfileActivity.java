@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.activities;
+package com.petbook.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,15 +9,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.repositories.ApiUserRepository;
-import com.example.petcompanyapp.repositories.UserRepository;
-import com.example.petcompanyapp.utils.AsyncRunner;
-import com.example.petcompanyapp.utils.FeatureFlags;
-import com.example.petcompanyapp.utils.IntentKeys;
-import com.example.petcompanyapp.utils.UserProfileStorage;
-import com.example.petcompanyapp.utils.UserType;
-import com.example.petcompanyapp.utils.ValidationUtils;
+import com.petbook.app.R;
+import com.petbook.app.models.User;
+import com.petbook.app.repositories.ApiUserRepository;
+import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
+import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.FeatureFlags;
+import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.UserProfileStorage;
+import com.petbook.app.utils.UserType;
+import com.petbook.app.utils.ValidationUtils;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -114,6 +116,10 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.error_profile_save_failed, Toast.LENGTH_LONG).show();
                 return;
             }
+            FirebaseUserDirectoryRepository.syncUser(
+                    this,
+                    new User(userId, userType, name, email, null, null, true)
+            );
             UserProfileStorage.saveProfile(this, userId, name, email, userType);
             Toast.makeText(this, R.string.profile_save_success, Toast.LENGTH_SHORT).show();
             finish();
@@ -123,6 +129,7 @@ public class ProfileActivity extends AppCompatActivity {
         AsyncRunner.run(
                 () -> ApiUserRepository.updateProfile(this, userId, name, email),
                 user -> {
+                    FirebaseUserDirectoryRepository.syncUser(this, user);
                     UserProfileStorage.saveProfile(this, userId, user.getName(), user.getEmail(), user.getUserType());
                     Toast.makeText(this, R.string.profile_save_success, Toast.LENGTH_SHORT).show();
                     finish();
@@ -143,3 +150,4 @@ public class ProfileActivity extends AppCompatActivity {
         finish();
     }
 }
+

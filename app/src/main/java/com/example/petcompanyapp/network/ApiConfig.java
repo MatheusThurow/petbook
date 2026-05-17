@@ -1,8 +1,8 @@
-package com.example.petcompanyapp.network;
+package com.petbook.app.network;
 
 import android.content.Context;
 
-import com.example.petcompanyapp.R;
+import com.petbook.app.R;
 
 public final class ApiConfig {
 
@@ -17,3 +17,4 @@ public final class ApiConfig {
         return value;
     }
 }
+

@@ -2,4 +2,5 @@
 <resources>
     <!-- Mantido em false para a apresentacao local. Trocar para true no proximo sprint para reativar a API compartilhada. -->
     <bool name="use_remote_api">false</bool>
+    <bool name="use_firebase_chat">true</bool>
 </resources>

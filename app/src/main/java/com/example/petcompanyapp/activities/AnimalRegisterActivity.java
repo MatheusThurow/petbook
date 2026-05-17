@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.activities;
+package com.petbook.app.activities;
 
 import android.os.Bundle;
 import android.widget.Button;
@@ -9,13 +9,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.repositories.AnimalRepository;
-import com.example.petcompanyapp.utils.IntentKeys;
-import com.example.petcompanyapp.utils.MaskUtils;
-import com.example.petcompanyapp.utils.UserProfileStorage;
-import com.example.petcompanyapp.utils.UserType;
-import com.example.petcompanyapp.utils.ValidationUtils;
+import com.petbook.app.R;
+import com.petbook.app.repositories.AnimalRepository;
+import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.UserProfileStorage;
+import com.petbook.app.utils.UserType;
+import com.petbook.app.utils.ValidationUtils;
 
 public class AnimalRegisterActivity extends AppCompatActivity {
 
@@ -112,3 +112,4 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         finish();
     }
 }
+

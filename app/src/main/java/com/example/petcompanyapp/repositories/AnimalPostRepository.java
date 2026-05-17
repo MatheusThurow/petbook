@@ -1,13 +1,13 @@
-package com.example.petcompanyapp.repositories;
+package com.petbook.app.repositories;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.petcompanyapp.database.AppDatabaseHelper;
-import com.example.petcompanyapp.models.AnimalPost;
-import com.example.petcompanyapp.utils.FeedFilter;
+import com.petbook.app.database.AppDatabaseHelper;
+import com.petbook.app.models.AnimalPost;
+import com.petbook.app.utils.FeedFilter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -199,3 +199,4 @@ public final class AnimalPostRepository {
         );
     }
 }
+

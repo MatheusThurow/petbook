@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.network;
+package com.petbook.app.network;
 
 import android.content.Context;
 
@@ -111,3 +111,4 @@ public final class ApiHttpClient {
         return "Erro do servidor (" + statusCode + ").";
     }
 }
+

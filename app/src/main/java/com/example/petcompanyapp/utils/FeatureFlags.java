@@ -1,8 +1,8 @@
-package com.example.petcompanyapp.utils;
+package com.petbook.app.utils;
 
 import android.content.Context;
 
-import com.example.petcompanyapp.R;
+import com.petbook.app.R;
 
 public final class FeatureFlags {
 
@@ -12,4 +12,9 @@ public final class FeatureFlags {
     public static boolean useRemoteApi(Context context) {
         return context.getResources().getBoolean(R.bool.use_remote_api);
     }
+
+    public static boolean useFirebaseChat(Context context) {
+        return context.getResources().getBoolean(R.bool.use_firebase_chat);
+    }
 }
+

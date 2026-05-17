@@ -1,4 +1,4 @@
-package com.example.petcompanyapp.activities;
+package com.petbook.app.activities;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -8,9 +8,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.petcompanyapp.R;
-import com.example.petcompanyapp.utils.IntentKeys;
-import com.example.petcompanyapp.utils.LocationUtils;
+import com.petbook.app.R;
+import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.LocationUtils;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.camera.CameraPosition;
@@ -128,3 +128,4 @@ public class PostLocationMapActivity extends AppCompatActivity {
         mapView.onSaveInstanceState(outState);
     }
 }
+
