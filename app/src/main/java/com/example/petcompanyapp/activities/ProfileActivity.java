@@ -11,12 +11,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
 import com.petbook.app.models.User;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.petbook.app.repositories.ApiUserRepository;
+import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.ThemePreferenceManager;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
@@ -38,7 +42,9 @@ public class ProfileActivity extends AppCompatActivity {
         TextView textProfileType = findViewById(R.id.textProfileType);
         TextView textBack = findViewById(R.id.textBackProfile);
         TextView textLogout = findViewById(R.id.textLogoutProfile);
+        Button buttonOpenChangePassword = findViewById(R.id.buttonOpenChangePassword);
         Button buttonSaveProfile = findViewById(R.id.buttonSaveProfile);
+        MaterialSwitch switchDarkMode = findViewById(R.id.switchDarkMode);
 
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (userType == null) {
@@ -61,13 +67,29 @@ public class ProfileActivity extends AppCompatActivity {
         textProfileType.setText(UserType.isCompany(userType)
                 ? R.string.profile_type_company
                 : R.string.profile_type_person);
+        BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_PROFILE);
+        switchDarkMode.setChecked(ThemePreferenceManager.isDarkModeEnabled(this));
+        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) ->
+                ThemePreferenceManager.setDarkModeEnabled(this, isChecked)
+        );
 
-        if (FeatureFlags.useRemoteApi(this)) {
+        if (FirebaseUserRepository.isEnabled(this)) {
+            loadProfileFromFirebase();
+        } else if (FeatureFlags.useRemoteApi(this)) {
             loadProfileFromApi();
         }
         textBack.setOnClickListener(v -> finish());
         textLogout.setOnClickListener(v -> logout());
+        buttonOpenChangePassword.setOnClickListener(v ->
+                startActivity(new Intent(this, ChangePasswordActivity.class))
+        );
         buttonSaveProfile.setOnClickListener(v -> saveProfile());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavigationHelper.refreshNotificationBadge(this);
     }
 
     private void loadProfileFromApi() {
@@ -89,6 +111,28 @@ public class ProfileActivity extends AppCompatActivity {
         );
     }
 
+    private void loadProfileFromFirebase() {
+        if (userId == null) {
+            return;
+        }
+
+        FirebaseUserRepository.findById(this, userId, new FirebaseUserRepository.UserCallback() {
+            @Override
+            public void onSuccess(User user) {
+                runOnUiThread(() -> {
+                    editProfileName.setText(user.getName());
+                    editProfileEmail.setText(user.getEmail());
+                    userType = user.getUserType();
+                    UserProfileStorage.saveProfile(ProfileActivity.this, userId, user.getName(), user.getEmail(), userType);
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+            }
+        });
+    }
+
     private void saveProfile() {
         String name = editProfileName.getText().toString().trim();
         String email = editProfileEmail.getText().toString().trim();
@@ -107,6 +151,30 @@ public class ProfileActivity extends AppCompatActivity {
 
         if (userId == null) {
             Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (FirebaseUserRepository.isEnabled(this)) {
+            FirebaseUserRepository.updateProfile(this, userId, name, email, new FirebaseUserRepository.UserCallback() {
+                @Override
+                public void onSuccess(User user) {
+                    runOnUiThread(() -> {
+                        FirebaseUserDirectoryRepository.syncUser(ProfileActivity.this, user);
+                        UserProfileStorage.saveProfile(ProfileActivity.this, userId, user.getName(), user.getEmail(), user.getUserType());
+                        Toast.makeText(ProfileActivity.this, R.string.profile_save_success, Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                    runOnUiThread(() -> Toast.makeText(
+                            ProfileActivity.this,
+                            message == null ? getString(R.string.error_profile_save_failed) : message,
+                            Toast.LENGTH_LONG
+                    ).show());
+                }
+            });
             return;
         }
 

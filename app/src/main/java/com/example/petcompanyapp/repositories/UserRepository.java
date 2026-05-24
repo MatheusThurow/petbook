@@ -234,6 +234,10 @@ public final class UserRepository {
         }
     }
 
+    public static List<User> getActiveUsers(Context context) {
+        return searchActiveUsers(context, "", null);
+    }
+
     private static User mapUser(Cursor cursor) {
         return new User(
                 cursor.getLong(cursor.getColumnIndexOrThrow("id")),

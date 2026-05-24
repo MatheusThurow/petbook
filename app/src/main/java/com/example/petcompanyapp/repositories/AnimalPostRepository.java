@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.petbook.app.database.AppDatabaseHelper;
 import com.petbook.app.models.AnimalPost;
+import com.petbook.app.models.FairAnimal;
 import com.petbook.app.utils.FeedFilter;
+import com.petbook.app.utils.PostType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +27,8 @@ public final class AnimalPostRepository {
         String sql = "SELECT p.id, p.author_user_id, p.post_type, p.animal_name, p.species, p.breed, "
                 + "p.age_description, p.description_text, p.contact_phone, p.latitude, p.longitude, "
                 + "p.location_reference, p.image_uri, p.created_at_millis, p.liked, p.like_count, "
-                + "u.name AS author_name "
+                + "(SELECT COUNT(*) FROM " + AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS + " fair WHERE fair.post_id = p.id) AS fair_animal_count, "
+                + "u.name AS author_name, u.email AS author_email "
                 + "FROM " + AppDatabaseHelper.TABLE_POSTS + " p "
                 + "INNER JOIN " + AppDatabaseHelper.TABLE_USERS + " u ON u.id = p.author_user_id";
 
@@ -33,7 +36,7 @@ public final class AnimalPostRepository {
         try {
             while (cursor.moveToNext()) {
                 AnimalPost post = mapPost(cursor);
-                if (FeedFilter.ALL.equals(filter) || post.getPostType().equals(filter)) {
+                if (matchesFilter(post, filter)) {
                     result.add(post);
                 }
             }
@@ -46,14 +49,18 @@ public final class AnimalPostRepository {
         return result;
     }
 
-    public static void addPost(Context context, AnimalPost post) {
+    public static boolean addPost(Context context, AnimalPost post, List<FairAnimal> fairAnimals) {
         SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
         ContentValues values = toContentValues(post);
         values.put("created_at_millis", System.currentTimeMillis());
         values.put("liked", post.isLiked() ? 1 : 0);
         values.put("like_count", post.getLikeCount());
-        db.insert(AppDatabaseHelper.TABLE_POSTS, null, values);
+        long postId = db.insert(AppDatabaseHelper.TABLE_POSTS, null, values);
+        if (postId > 0) {
+            replaceFairAnimals(db, postId, fairAnimals);
+        }
         db.close();
+        return postId > 0;
     }
 
     public static void toggleLike(Context context, long postId) {
@@ -101,7 +108,8 @@ public final class AnimalPostRepository {
                 "SELECT p.id, p.author_user_id, p.post_type, p.animal_name, p.species, p.breed, "
                         + "p.age_description, p.description_text, p.contact_phone, p.latitude, p.longitude, "
                         + "p.location_reference, p.image_uri, p.created_at_millis, p.liked, p.like_count, "
-                        + "u.name AS author_name "
+                        + "(SELECT COUNT(*) FROM " + AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS + " fair WHERE fair.post_id = p.id) AS fair_animal_count, "
+                        + "u.name AS author_name, u.email AS author_email "
                         + "FROM " + AppDatabaseHelper.TABLE_POSTS + " p "
                         + "INNER JOIN " + AppDatabaseHelper.TABLE_USERS + " u ON u.id = p.author_user_id "
                         + "WHERE p.id = ?",
@@ -119,7 +127,7 @@ public final class AnimalPostRepository {
         return null;
     }
 
-    public static boolean updatePost(Context context, AnimalPost post) {
+    public static boolean updatePost(Context context, AnimalPost post, List<FairAnimal> fairAnimals) {
         if (post.getId() == null || post.getAuthorUserId() == null) {
             return false;
         }
@@ -132,12 +140,20 @@ public final class AnimalPostRepository {
                 "id = ? AND author_user_id = ?",
                 new String[]{String.valueOf(post.getId()), String.valueOf(post.getAuthorUserId())}
         );
+        if (updatedRows > 0) {
+            replaceFairAnimals(db, post.getId(), fairAnimals);
+        }
         db.close();
         return updatedRows > 0;
     }
 
     public static boolean deletePost(Context context, long postId, long authorUserId) {
         SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
+        db.delete(
+                AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS,
+                "post_id = ?",
+                new String[]{String.valueOf(postId)}
+        );
         int deletedRows = db.delete(
                 AppDatabaseHelper.TABLE_POSTS,
                 "id = ? AND author_user_id = ?",
@@ -145,6 +161,37 @@ public final class AnimalPostRepository {
         );
         db.close();
         return deletedRows > 0;
+    }
+
+    public static List<FairAnimal> getFairAnimalsForPost(Context context, long postId) {
+        List<FairAnimal> fairAnimals = new ArrayList<>();
+        SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
+        Cursor cursor = db.query(
+                AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS,
+                null,
+                "post_id = ?",
+                new String[]{String.valueOf(postId)},
+                null,
+                null,
+                "animal_name COLLATE NOCASE ASC"
+        );
+
+        try {
+            while (cursor.moveToNext()) {
+                fairAnimals.add(new FairAnimal(
+                        cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getLong(cursor.getColumnIndexOrThrow("post_id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("animal_name")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("species")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("breed")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("age_description"))
+                ));
+            }
+        } finally {
+            cursor.close();
+            db.close();
+        }
+        return fairAnimals;
     }
 
     private static ContentValues toContentValues(AnimalPost post) {
@@ -172,6 +219,41 @@ public final class AnimalPostRepository {
         return values;
     }
 
+    private static boolean matchesFilter(AnimalPost post, String filter) {
+        if (FeedFilter.ALL.equals(filter)) {
+            return true;
+        }
+        if (FeedFilter.LOST.equals(filter)) {
+            return PostType.isLost(post.getPostType());
+        }
+        if (FeedFilter.ADOPTION.equals(filter)) {
+            return PostType.isAdoptionRelated(post.getPostType());
+        }
+        return post.getPostType().equals(filter);
+    }
+
+    private static void replaceFairAnimals(SQLiteDatabase db, long postId, List<FairAnimal> fairAnimals) {
+        db.delete(
+                AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS,
+                "post_id = ?",
+                new String[]{String.valueOf(postId)}
+        );
+
+        if (fairAnimals == null || fairAnimals.isEmpty()) {
+            return;
+        }
+
+        for (FairAnimal fairAnimal : fairAnimals) {
+            ContentValues values = new ContentValues();
+            values.put("post_id", postId);
+            values.put("animal_name", fairAnimal.getName());
+            values.put("species", fairAnimal.getSpecies());
+            values.put("breed", fairAnimal.getBreed());
+            values.put("age_description", fairAnimal.getAgeDescription());
+            db.insert(AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS, null, values);
+        }
+    }
+
     private static AnimalPost mapPost(Cursor cursor) {
         int latitudeIndex = cursor.getColumnIndexOrThrow("latitude");
         int longitudeIndex = cursor.getColumnIndexOrThrow("longitude");
@@ -193,9 +275,11 @@ public final class AnimalPostRepository {
                 cursor.getString(cursor.getColumnIndexOrThrow("location_reference")),
                 cursor.getString(cursor.getColumnIndexOrThrow("image_uri")),
                 cursor.getString(cursor.getColumnIndexOrThrow("author_name")),
+                cursor.getString(cursor.getColumnIndexOrThrow("author_email")),
                 cursor.getLong(cursor.getColumnIndexOrThrow("created_at_millis")),
                 cursor.getInt(cursor.getColumnIndexOrThrow("liked")) == 1,
-                cursor.getInt(cursor.getColumnIndexOrThrow("like_count"))
+                cursor.getInt(cursor.getColumnIndexOrThrow("like_count")),
+                cursor.getInt(cursor.getColumnIndexOrThrow("fair_animal_count"))
         );
     }
 }

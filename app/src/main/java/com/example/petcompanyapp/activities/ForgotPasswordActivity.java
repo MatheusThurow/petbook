@@ -9,16 +9,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
-import com.petbook.app.repositories.UserRepository;
-import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.utils.ValidationUtils;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private EditText editEmail;
-    private EditText editDocument;
-    private EditText editNewPassword;
-    private EditText editConfirmPassword;
+    private EditText editConfirmEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,22 +23,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_forgot_password);
 
         editEmail = findViewById(R.id.editForgotPasswordEmail);
-        editDocument = findViewById(R.id.editForgotPasswordDocument);
-        editNewPassword = findViewById(R.id.editForgotPasswordNewPassword);
-        editConfirmPassword = findViewById(R.id.editForgotPasswordConfirmPassword);
+        editConfirmEmail = findViewById(R.id.editForgotPasswordConfirmEmail);
         TextView textBack = findViewById(R.id.textBackForgotPassword);
         Button buttonResetPassword = findViewById(R.id.buttonResetPassword);
 
-        MaskUtils.applyCpfOrCnpjAutoMask(editDocument);
         textBack.setOnClickListener(v -> finish());
         buttonResetPassword.setOnClickListener(v -> resetPassword());
     }
 
     private void resetPassword() {
         String email = editEmail.getText().toString().trim();
-        String document = editDocument.getText().toString().replaceAll("\\D", "");
-        String newPassword = editNewPassword.getText().toString().trim();
-        String confirmPassword = editConfirmPassword.getText().toString().trim();
+        String confirmEmail = editConfirmEmail.getText().toString().trim();
 
         if (!ValidationUtils.isValidEmail(email)) {
             editEmail.setError(getString(R.string.error_invalid_email));
@@ -49,32 +41,35 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             return;
         }
 
-        if (document.length() != 11 && document.length() != 14) {
-            editDocument.setError(getString(R.string.error_invalid_document));
-            editDocument.requestFocus();
+        if (!email.equalsIgnoreCase(confirmEmail)) {
+            editConfirmEmail.setError(getString(R.string.error_email_match));
+            editConfirmEmail.requestFocus();
             return;
         }
 
-        if (!ValidationUtils.hasMinLength(newPassword, 6)) {
-            editNewPassword.setError(getString(R.string.error_password_length));
-            editNewPassword.requestFocus();
+        if (FirebaseUserRepository.isEnabled(this)) {
+            FirebaseUserRepository.sendPasswordResetEmail(this, email, new FirebaseUserRepository.CompletionCallback() {
+                @Override
+                public void onSuccess() {
+                    runOnUiThread(() -> {
+                        Toast.makeText(ForgotPasswordActivity.this, R.string.forgot_password_email_sent_success, Toast.LENGTH_LONG).show();
+                        finish();
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                    runOnUiThread(() -> Toast.makeText(
+                            ForgotPasswordActivity.this,
+                            message == null ? getString(R.string.error_forgot_password_user_not_found) : message,
+                            Toast.LENGTH_LONG
+                    ).show());
+                }
+            });
             return;
         }
 
-        if (!newPassword.equals(confirmPassword)) {
-            editConfirmPassword.setError(getString(R.string.error_password_match));
-            editConfirmPassword.requestFocus();
-            return;
-        }
-
-        boolean updated = UserRepository.resetPassword(this, email, document, newPassword);
-        if (!updated) {
-            Toast.makeText(this, R.string.error_forgot_password_user_not_found, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        Toast.makeText(this, R.string.forgot_password_success, Toast.LENGTH_LONG).show();
-        finish();
+        Toast.makeText(this, R.string.error_password_reset_email_unavailable, Toast.LENGTH_LONG).show();
     }
 }
 

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -21,6 +22,7 @@ import com.petbook.app.repositories.ChatRepository;
 import com.petbook.app.repositories.FirebaseChatRepository;
 import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
 import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
@@ -38,8 +40,11 @@ public class ConversationListActivity extends AppCompatActivity implements
     private UserSearchAdapter userSearchAdapter;
     private TextView textEmptyConversations;
     private TextView textEmptyUserSearch;
+    private TextView textRecentConversationsToggle;
     private EditText editSearchUsers;
+    private RecyclerView recyclerConversations;
     private ListenerRegistration conversationsRegistration;
+    private boolean recentConversationsExpanded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +56,14 @@ public class ConversationListActivity extends AppCompatActivity implements
         ImageButton buttonBack = findViewById(R.id.buttonBackConversations);
         editSearchUsers = findViewById(R.id.editSearchUsers);
         RecyclerView recyclerUsers = findViewById(R.id.recyclerUsers);
-        RecyclerView recyclerConversations = findViewById(R.id.recyclerConversations);
+        recyclerConversations = findViewById(R.id.recyclerConversations);
         textEmptyConversations = findViewById(R.id.textEmptyConversations);
         textEmptyUserSearch = findViewById(R.id.textEmptyUserSearch);
+        textRecentConversationsToggle = findViewById(R.id.textRecentConversationsToggle);
+        View layoutRecentConversationsHeader = findViewById(R.id.layoutRecentConversationsHeader);
 
         buttonBack.setOnClickListener(v -> finish());
+        BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_CONVERSATIONS);
 
         userSearchAdapter = new UserSearchAdapter(this);
         recyclerUsers.setLayoutManager(new LinearLayoutManager(this));
@@ -64,6 +72,8 @@ public class ConversationListActivity extends AppCompatActivity implements
         conversationAdapter = new ConversationAdapter(this);
         recyclerConversations.setLayoutManager(new LinearLayoutManager(this));
         recyclerConversations.setAdapter(conversationAdapter);
+        updateRecentConversationsVisibility();
+        layoutRecentConversationsHeader.setOnClickListener(v -> toggleRecentConversations());
 
         editSearchUsers.addTextChangedListener(new TextWatcher() {
             @Override
@@ -86,6 +96,24 @@ public class ConversationListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        BottomNavigationHelper.refreshNotificationBadge(this);
+        if (FeatureFlags.useFirebaseChat(this) && FirebaseChatConfig.isConfigured(this)) {
+            FirebaseUserDirectoryRepository.bootstrapLocalUsersIfNeeded(this, new FirebaseUserDirectoryRepository.CompletionCallback() {
+                @Override
+                public void onSuccess() {
+                    loadUserSearch(editSearchUsers.getText() == null ? "" : editSearchUsers.getText().toString());
+                    loadConversations();
+                }
+
+                @Override
+                public void onError(String message) {
+                    loadUserSearch(editSearchUsers.getText() == null ? "" : editSearchUsers.getText().toString());
+                    loadConversations();
+                }
+            });
+            return;
+        }
+
         loadUserSearch(editSearchUsers.getText() == null ? "" : editSearchUsers.getText().toString());
         loadConversations();
     }
@@ -102,7 +130,7 @@ public class ConversationListActivity extends AppCompatActivity implements
     private void loadConversations() {
         if (currentUserId == null) {
             conversationAdapter.submitList(java.util.Collections.emptyList());
-            textEmptyConversations.setVisibility(android.view.View.VISIBLE);
+            updateRecentConversationsVisibility();
             return;
         }
 
@@ -117,12 +145,12 @@ public class ConversationListActivity extends AppCompatActivity implements
                         @Override
                         public void onSuccess(List<ConversationSummary> conversations) {
                             conversationAdapter.submitList(conversations);
-                            textEmptyConversations.setVisibility(conversations.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+                            updateRecentConversationsVisibility();
                         }
 
                         @Override
                         public void onError(String message) {
-                            textEmptyConversations.setVisibility(android.view.View.VISIBLE);
+                            updateRecentConversationsVisibility();
                         }
                     }
             );
@@ -131,7 +159,7 @@ public class ConversationListActivity extends AppCompatActivity implements
 
         List<ConversationSummary> conversations = ChatRepository.getConversations(this, currentUserId);
         conversationAdapter.submitList(conversations);
-        textEmptyConversations.setVisibility(conversations.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+        updateRecentConversationsVisibility();
     }
 
     private void loadUserSearch(String query) {
@@ -204,6 +232,33 @@ public class ConversationListActivity extends AppCompatActivity implements
         intent.putExtra(IntentKeys.EXTRA_TARGET_USER_TYPE, user.getUserType());
         intent.putExtra(IntentKeys.EXTRA_TARGET_USER_EMAIL, user.getEmail());
         startActivity(intent);
+    }
+
+    private void toggleRecentConversations() {
+        recentConversationsExpanded = !recentConversationsExpanded;
+        updateRecentConversationsVisibility();
+    }
+
+    private void updateRecentConversationsVisibility() {
+        if (textRecentConversationsToggle == null || recyclerConversations == null || textEmptyConversations == null) {
+            return;
+        }
+
+        textRecentConversationsToggle.setText(
+                recentConversationsExpanded
+                        ? getString(R.string.action_collapse_recent_conversations)
+                        : getString(R.string.action_expand_recent_conversations)
+        );
+
+        if (!recentConversationsExpanded) {
+            recyclerConversations.setVisibility(android.view.View.GONE);
+            textEmptyConversations.setVisibility(android.view.View.GONE);
+            return;
+        }
+
+        boolean hasConversations = conversationAdapter != null && conversationAdapter.getItemCount() > 0;
+        recyclerConversations.setVisibility(hasConversations ? android.view.View.VISIBLE : android.view.View.GONE);
+        textEmptyConversations.setVisibility(hasConversations ? android.view.View.GONE : android.view.View.VISIBLE);
     }
 }
 

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
 import com.petbook.app.models.User;
+import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.repositories.ApiUserRepository;
 import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
 import com.petbook.app.repositories.UserRepository;
@@ -114,6 +115,40 @@ public class UserRegisterActivity extends AppCompatActivity {
         if (!UserType.isCompany(selectedUserType) && document.length() != 11) {
             editDocument.setError(getString(R.string.error_invalid_cpf));
             editDocument.requestFocus();
+            return;
+        }
+
+        if (FirebaseUserRepository.isEnabled(this)) {
+            FirebaseUserRepository.register(
+                    this,
+                    selectedUserType,
+                    name,
+                    email,
+                    password,
+                    document,
+                    new FirebaseUserRepository.UserCallback() {
+                        @Override
+                        public void onSuccess(User user) {
+                            runOnUiThread(() -> completeRegistration(user));
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            runOnUiThread(() -> {
+                                if (message != null && message.toLowerCase().contains("email")) {
+                                    editEmail.setError(getString(R.string.error_email_already_registered));
+                                    editEmail.requestFocus();
+                                    return;
+                                }
+                                Toast.makeText(
+                                        UserRegisterActivity.this,
+                                        message == null ? getString(R.string.error_server_unavailable) : message,
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            });
+                        }
+                    }
+            );
             return;
         }
 

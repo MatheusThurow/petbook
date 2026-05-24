@@ -3,64 +3,59 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/screen_background"
+    android:background="@color/white"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="24dp"
-        android:paddingBottom="28dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:id="@+id/textBackPostCreate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/action_back"
-            android:textColor="@color/accent_color"
-            android:textSize="14sp"
+            android:textColor="@color/secondary_text"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:padding="6dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:text="@string/post_create_title"
             android:textColor="@color/primary_text"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.02" />
-
-        <View
-            android:layout_width="48dp"
-            android:layout_height="4dp"
-            android:layout_marginTop="6dp"
-            android:background="@color/accent_color" />
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <TextView
             style="@style/AppScreenSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="4dp"
             android:text="@string/post_create_subtitle" />
 
         <com.google.android.material.card.MaterialCardView
             style="@style/AppFormCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp">
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/soft_surface"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="16dp">
 
                 <TextView
                     style="@style/AppSectionChip"
@@ -72,10 +67,10 @@
                     android:id="@+id/radioGroupPostType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:background="@color/soft_surface"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="6dp">
 
                     <RadioButton
                         android:id="@+id/radioPostAdoption"
@@ -88,8 +83,16 @@
                         android:id="@+id/radioPostLost"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="4dp"
                         android:text="@string/post_type_lost" />
+
+                    <RadioButton
+                        android:id="@+id/radioPostFair"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/post_type_fair"
+                        android:visibility="gone" />
                 </RadioGroup>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -99,101 +102,115 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/soft_surface"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="16dp">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/inputPostAnimalName"
                     style="@style/AppFilledInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_animal_name"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusBottomEnd="12dp">
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editPostAnimalName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textCapWords"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
+                        android:paddingTop="11dp"
+                        android:paddingBottom="11dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/layoutSingleAnimalFields"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/label_species"
-                    android:textColor="@color/primary_text"
-                    android:textStyle="bold" />
+                    android:orientation="vertical">
 
-                <Spinner
-                    android:id="@+id/spinnerPostSpecies"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:background="@drawable/bg_spinner"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/AppFilledInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:hint="@string/hint_breed"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusBottomEnd="12dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editPostBreed"
+                    <TextView
+                        android:id="@+id/textSpeciesLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/label_species"
+                        android:textColor="@color/primary_text"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/AppFilledInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:hint="@string/hint_age"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusBottomEnd="12dp">
+                    <Spinner
+                        android:id="@+id/spinnerPostSpecies"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_spinner"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editPostAge"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/inputPostBreed"
+                        style="@style/AppFilledInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginTop="10dp"
+                        android:hint="@string/hint_breed"
+                        app:boxCornerRadiusTopStart="10dp"
+                        app:boxCornerRadiusTopEnd="10dp"
+                        app:boxCornerRadiusBottomStart="10dp"
+                        app:boxCornerRadiusBottomEnd="10dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editPostBreed"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapWords"
+                            android:paddingTop="11dp"
+                            android:paddingBottom="11dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/inputPostAge"
+                        style="@style/AppFilledInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="@string/hint_age"
+                        app:boxCornerRadiusTopStart="10dp"
+                        app:boxCornerRadiusTopEnd="10dp"
+                        app:boxCornerRadiusBottomStart="10dp"
+                        app:boxCornerRadiusBottomEnd="10dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editPostAge"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:paddingTop="11dp"
+                            android:paddingBottom="11dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/AppFilledInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="10dp"
                     android:hint="@string/hint_post_description"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusBottomEnd="12dp">
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editPostDescription"
@@ -202,55 +219,102 @@
                         android:gravity="top|start"
                         android:inputType="textMultiLine"
                         android:minLines="4"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
+                        android:paddingTop="11dp"
+                        android:paddingBottom="11dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/AppFilledInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="10dp"
                     android:hint="@string/hint_contact_phone"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusBottomEnd="12dp">
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editPostContactPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="phone"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp" />
+                        android:paddingTop="11dp"
+                        android:paddingBottom="11dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:text="@string/label_pet_image"
                     android:textColor="@color/primary_text"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/imagePostPreview"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="240dp"
+                    android:layout_marginTop="6dp"
                     android:background="@drawable/bg_spinner"
-                    android:scaleType="centerCrop"
-                    android:src="@android:drawable/ic_menu_gallery" />
+                    android:scaleType="centerCrop" />
 
                 <com.google.android.material.button.MaterialButton
                     style="@style/AppSecondaryButton"
                     android:id="@+id/buttonSelectImage"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/button_select_image"
-                    app:cornerRadius="14dp" />
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/button_select_image" />
 
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/layoutFairAnimalsSection"
+            style="@style/AppFormCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/soft_surface"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    style="@style/AppSectionChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fair_animals_section_title" />
+
+                <TextView
+                    android:id="@+id/textFairAnimalsHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/fair_animals_hint"
+                    android:textColor="@color/secondary_text" />
+
+                <LinearLayout
+                    android:id="@+id/containerFairAnimals"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical" />
+
+                <com.google.android.material.button.MaterialButton
+                    style="@style/AppSecondaryButton"
+                    android:id="@+id/buttonAddFairAnimal"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/button_add_fair_animal" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -265,14 +329,16 @@
                 style="@style/AppFormCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="6dp">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/soft_surface"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="16dp">
 
                     <TextView
                         style="@style/AppSectionChip"
@@ -284,7 +350,7 @@
                         android:id="@+id/textLocationStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="6dp"
                         android:text="@string/location_not_captured"
                         android:textColor="@color/secondary_text" />
 
@@ -292,28 +358,26 @@
                         style="@style/AppPrimaryButton"
                         android:id="@+id/buttonCaptureLocation"
                         android:layout_width="match_parent"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/button_capture_location"
-                        app:cornerRadius="14dp" />
+                        android:layout_marginTop="10dp"
+                        android:text="@string/button_capture_location" />
 
                     <com.google.android.material.button.MaterialButton
                         style="@style/AppSecondaryButton"
                         android:id="@+id/buttonSelectLocationOnMap"
                         android:layout_width="match_parent"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/button_select_location_map"
-                        app:cornerRadius="14dp" />
+                        android:layout_marginTop="8dp"
+                        android:text="@string/button_select_location_map" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/AppFilledInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:layout_marginTop="12dp"
                         android:hint="@string/hint_lost_location_reference"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp">
+                        app:boxCornerRadiusTopStart="10dp"
+                        app:boxCornerRadiusTopEnd="10dp"
+                        app:boxCornerRadiusBottomStart="10dp"
+                        app:boxCornerRadiusBottomEnd="10dp">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editLostLocationReference"
@@ -321,8 +385,8 @@
                             android:layout_height="wrap_content"
                             android:inputType="textMultiLine"
                             android:minLines="3"
-                            android:paddingTop="12dp"
-                            android:paddingBottom="12dp" />
+                            android:paddingTop="11dp"
+                            android:paddingBottom="11dp" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -332,12 +396,9 @@
             style="@style/AppPrimaryButton"
             android:id="@+id/buttonCreatePost"
             android:layout_width="match_parent"
-            android:layout_marginTop="22dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp"
+            android:layout_marginTop="18dp"
             android:text="@string/button_publish_post"
-            android:textSize="16sp"
-            app:cornerRadius="16dp" />
+            android:textSize="15sp" />
 
     </LinearLayout>
 </ScrollView>

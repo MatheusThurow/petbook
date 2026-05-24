@@ -5,10 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.petbook.app.R;
 import com.petbook.app.database.AppDatabaseHelper;
 import com.petbook.app.models.ChatMessage;
 import com.petbook.app.models.ConversationSummary;
 import com.petbook.app.models.User;
+import com.petbook.app.utils.NotificationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,6 +177,22 @@ public final class ChatRepository {
             );
 
             User sender = UserRepository.findById(context, senderUserId);
+            User receiver = UserRepository.findById(context, receiverUserId);
+            if (sender != null && receiver != null) {
+                NotificationRepository.addNotification(
+                        context,
+                        receiverUserId,
+                        NotificationType.CHAT_MESSAGE,
+                        context.getString(R.string.notification_chat_title),
+                        context.getString(R.string.notification_chat_message, sender.getName()),
+                        null,
+                        null,
+                        senderUserId,
+                        sender.getName(),
+                        sender.getEmail(),
+                        conversationId
+                );
+            }
             return new ChatMessage(
                     messageId,
                     conversationId,

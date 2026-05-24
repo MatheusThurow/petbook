@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="96dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom"
+        android:backgroundTint="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
+        app:strokeColor="@color/soft_surface"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <ImageButton
+                android:id="@+id/buttonNavFeed"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/button_open_feed"
+                android:padding="8dp"
+                android:src="@drawable/ic_nav_home"
+                android:tint="@color/selector_bottom_nav_icon" />
+
+            <ImageButton
+                android:id="@+id/buttonNavConversations"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/button_open_chat"
+                android:padding="8dp"
+                android:src="@drawable/ic_nav_chat"
+                android:tint="@color/selector_bottom_nav_icon" />
+
+            <Space
+                android:layout_width="64dp"
+                android:layout_height="1dp" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/buttonNavNotifications"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/button_open_notifications"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_nav_bell"
+                    android:tint="@color/selector_bottom_nav_icon" />
+
+                <TextView
+                    android:id="@+id/textBottomNavNotificationBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end|top"
+                    android:background="@drawable/bg_notification_dot"
+                    android:gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/buttonNavProfile"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/button_open_profile"
+                android:padding="8dp"
+                android:src="@drawable/ic_nav_profile"
+                android:tint="@color/selector_bottom_nav_icon" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonNavCreatePost"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center_horizontal|top"
+        android:contentDescription="@string/button_create_post"
+        android:src="@drawable/ic_add_minimal"
+        app:backgroundTint="@color/primary_color"
+        app:borderWidth="0dp"
+        app:elevation="4dp"
+        app:ensureMinTouchTargetSize="true"
+        app:maxImageSize="20dp"
+        app:rippleColor="@color/soft_orange"
+        app:tint="@android:color/white" />
+
+</FrameLayout>

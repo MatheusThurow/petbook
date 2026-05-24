@@ -15,9 +15,11 @@ public class AnimalPost {
     private final String locationReference;
     private final String imageUri;
     private final String authorName;
+    private final String authorEmail;
     private final long createdAtMillis;
     private final boolean liked;
     private final int likeCount;
+    private final int fairAnimalCount;
 
     public AnimalPost(
             String postType,
@@ -47,8 +49,10 @@ public class AnimalPost {
                 locationReference,
                 imageUri,
                 "usuario",
+                "",
                 System.currentTimeMillis(),
                 false,
+                0,
                 0
         );
     }
@@ -68,9 +72,11 @@ public class AnimalPost {
             String locationReference,
             String imageUri,
             String authorName,
+            String authorEmail,
             long createdAtMillis,
             boolean liked,
-            int likeCount
+            int likeCount,
+            int fairAnimalCount
     ) {
         this.id = id;
         this.authorUserId = authorUserId;
@@ -86,9 +92,11 @@ public class AnimalPost {
         this.locationReference = locationReference;
         this.imageUri = imageUri;
         this.authorName = authorName;
+        this.authorEmail = authorEmail;
         this.createdAtMillis = createdAtMillis;
         this.liked = liked;
         this.likeCount = likeCount;
+        this.fairAnimalCount = fairAnimalCount;
     }
 
     public Long getId() {
@@ -147,6 +155,10 @@ public class AnimalPost {
         return authorName;
     }
 
+    public String getAuthorEmail() {
+        return authorEmail;
+    }
+
     public long getCreatedAtMillis() {
         return createdAtMillis;
     }
@@ -157,6 +169,10 @@ public class AnimalPost {
 
     public int getLikeCount() {
         return likeCount;
+    }
+
+    public int getFairAnimalCount() {
+        return fairAnimalCount;
     }
 }
 

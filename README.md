@@ -1,142 +1,214 @@
 # PetBook
 
-Aplicativo Android em Java para publicacao e visualizacao de posts sobre animais perdidos e para adocao.
+Aplicativo Android em Java com proposta de rede social para:
+
+- animais perdidos
+- animais para adoção
+- feiras de adoção
 
 Pacote Android atual:
 
 - `com.petbook.app`
 
-O projeto foi desenvolvido no Android Studio com foco em:
+## Stack
 
-- interface mobile em XML
-- navegacao simples entre telas
-- persistencia local para demonstracao
-- base pronta para evolucao com API/backend
+- `Java`
+- `Android Studio`
+- `XML`
+- `Firebase Firestore`
+- `Firebase Auth`
+- `Firebase Cloud Messaging`
+- `SQLite` como fallback/local legado
 
-## Funcionalidades atuais
+## Funcionalidades implementadas
 
-- login local
-- login com Google preparado no front
-- cadastro de usuario com tipo:
-  - pessoa fisica
+- login único por e-mail e senha
+- login com Google
+- cadastro de usuário com tipo:
+  - pessoa física
   - empresa
+- cadastro automático de conta básica ao entrar com Google pela primeira vez
+- recuperação de senha por e-mail
+- alteração de senha dentro do perfil
+- perfil com edição de dados
+- dark mode com preferência salva
+- feed com filtros
+- posts de:
+  - animal perdido
+  - adoção
+  - feira de adoção
+- edição e exclusão de post apenas pelo autor
+- curtidas
+- comentários públicos em post perdido
+- respostas encadeadas em comentários
+- contato direto por chat em posts de adoção
+- chat entre usuários
+- notificações no app
+- push notification via FCM
 - cadastro de empresa
 - cadastro de animal
-- criacao de posts de:
-  - animal perdido
-  - animal para adocao
-- upload de imagem do animal
-- localizacao do post
-- feed com filtros:
+
+## Regras principais do produto
+
+- login não separa mais empresa e pessoa física
+- o tipo da conta é definido no cadastro e reconhecido automaticamente após o login
+- pessoa física pode criar:
+  - perdido
+  - adoção
+- empresa pode criar:
+  - perdido
+  - adoção
+  - feira
+- post de feira aceita vários animais em um único post
+- apenas o autor pode ver ações de editar/apagar
+- em post perdido:
+  - outros usuários veem `Comentar`
+  - o autor vê `Comentários`
+- em post de adoção/feira:
+  - outros usuários veem `Entrar em contato`
+  - o autor vê `Comentários`
+
+## Fluxos principais
+
+### 1. Login
+
+- o usuário entra com e-mail e senha
+- o app identifica o tipo da conta automaticamente
+- se usar Google:
+  - autentica no Firebase Auth
+  - procura o usuário no Firestore
+  - se não existir, cria uma conta básica pessoa física e entra
+
+### 2. Cadastro
+
+- o usuário escolhe:
+  - pessoa física
+  - empresa
+- pessoa física entra direto no feed após cadastro
+- empresa pode seguir para completar o cadastro institucional
+
+### 3. Recuperação de senha
+
+- tela `Esqueci minha senha`
+- usuário informa e confirma o e-mail
+- o app envia e-mail de recuperação pelo Firebase Auth
+
+### 4. Alteração de senha
+
+- disponível no perfil
+- exige:
+  - senha atual
+  - nova senha
+  - confirmação da nova senha
+
+### 5. Feed
+
+- filtros:
   - todos
   - perdidos
-  - adocao
-- perfil do usuario
-- recuperacao de senha local
-- logout e navegacao com voltar
-- chat separado entre usuarios
-- busca de usuarios para iniciar conversa
-- sincronizacao de chat preparada com Firebase Firestore
+  - adoção
+- barra inferior fixa com:
+  - feed
+  - conversas
+  - adicionar post
+  - notificações
+  - perfil
+
+### 6. Posts
+
+- perdido:
+  - interação pública por comentários
+- adoção:
+  - contato direto com o dono do post
+- feira:
+  - exclusivo para empresa
+  - mostra vários animais dentro do mesmo post
+
+### 7. Comentários
+
+- usados principalmente em posts de perdido
+- exibem todos os comentários públicos
+- permitem respostas encadeadas
+
+### 8. Chat
+
+- busca por usuário
+- conversa individual
+- sincronizado pelo Firebase
+
+### 9. Notificações
+
+- curtidas
+- comentários
+- mensagens
+- interesse em adoção
+- atualizações de post
+
+## Firebase usado no projeto
+
+### Firestore
+
+Coleções principais esperadas:
+
+- `users`
+- `posts`
+- `notifications`
+- `chat_conversations`
+
+Subcoleções:
+
+- `messages`
+- `comments`
+- `interests`
+
+### Authentication
+
+Provedores esperados:
+
+- `E-mail/senha`
+- `Google`
+
+### Cloud Messaging
+
+- usado para push notification
 
 ## Estrutura do projeto
 
 - `app/src/main/java/com/example/petcompanyapp/activities`
-  Telas do aplicativo.
+- `app/src/main/java/com/example/petcompanyapp/adapters`
+- `app/src/main/java/com/example/petcompanyapp/models`
 - `app/src/main/java/com/example/petcompanyapp/repositories`
-  Regras de acesso a dados locais, API e Firebase.
-- `app/src/main/java/com/example/petcompanyapp/database`
-  Banco SQLite local do app.
 - `app/src/main/java/com/example/petcompanyapp/utils`
-  Validacoes, mascaras, sessao e utilitarios gerais.
 - `app/src/main/res/layout`
-  Layouts XML das telas.
-- `backend`
-  Base de uma API Java para proximo sprint.
-- `database/sqlserver`
-  Scripts SQL Server do projeto.
+- `app/src/main/res/drawable`
 
-## Banco de dados
+## Arquivos centrais
 
-Hoje o app esta configurado para rodar localmente no telefone com persistencia em SQLite.
-
-Para chat em dois aparelhos, o projeto tambem esta preparado para usar Firebase Firestore.
-
-Arquivos principais:
-
-- `app/src/main/java/com/example/petcompanyapp/database/AppDatabaseHelper.java`
-- `app/src/main/java/com/example/petcompanyapp/repositories/UserRepository.java`
-- `app/src/main/java/com/example/petcompanyapp/repositories/AnimalPostRepository.java`
-- `app/src/main/java/com/example/petcompanyapp/repositories/CompanyRepository.java`
-- `app/src/main/java/com/example/petcompanyapp/repositories/AnimalRepository.java`
-
-O projeto tambem possui scripts SQL Server para evolucao da arquitetura:
-
-- `database/sqlserver/01_create_database.sql`
-- `database/sqlserver/02_create_tables.sql`
-- `database/sqlserver/03_seed_data.sql`
-- `database/sqlserver/04_views.sql`
-- `database/sqlserver/05_upgrade_local_instance.sql`
-
-## Backend
-
-Existe uma base de backend Java em `backend/`, preparada para integracao futura com banco compartilhado.
-
-No estado atual da apresentacao, o app esta em modo local.
-
-Arquivo de controle:
-
-- `app/src/main/res/values/bools.xml`
-
-Valor atual:
-
-- `use_remote_api = false`
-
-Chat Firebase:
-
-- `use_firebase_chat = true`
-
-Arquivos principais do chat:
-
-- `app/src/main/java/com/example/petcompanyapp/activities/ConversationListActivity.java`
-- `app/src/main/java/com/example/petcompanyapp/activities/ChatActivity.java`
-- `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseChatRepository.java`
-- `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseUserDirectoryRepository.java`
-- `app/src/main/java/com/example/petcompanyapp/utils/FirebaseChatConfig.java`
 - `app/google-services.json`
+- `app/build.gradle`
+- `app/src/main/AndroidManifest.xml`
+- `app/src/main/java/com/example/petcompanyapp/activities/LoginActivity.java`
+- `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseUserRepository.java`
+- `app/src/main/java/com/example/petcompanyapp/repositories/FirebasePostRepository.java`
+- `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseChatRepository.java`
+- `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseNotificationRepository.java`
 
-Colecoes esperadas no Firestore:
+## Como rodar
 
-- `users`
-- `chat_conversations`
-- `messages` (subcolecao por conversa)
+1. Abrir o projeto no Android Studio
+2. Sincronizar o Gradle
+3. Conferir se o Firebase está configurado
+4. Rodar no dispositivo Android
 
-## Como executar
+## Observações
 
-1. Abra a pasta do projeto no Android Studio.
-2. Aguarde a sincronizacao do Gradle.
-3. Rode o app em um emulador ou telefone Android.
+- o projeto passou a usar Firebase como base principal das interações
+- o SQLite ainda existe como fallback em alguns fluxos legados
+- para login com Google funcionar no aparelho:
+  - `google-services.json` precisa estar atualizado
+  - o `SHA-1` do debug precisa estar cadastrado no Firebase
+  - `google_web_client_id` precisa estar correto em `strings.xml`
 
-## Como testar o chat em dois aparelhos
+## Repositório
 
-1. Deixe os dois aparelhos conectados a internet.
-2. Instale o app nos dois aparelhos.
-3. Entre com usuarios diferentes.
-4. Abra `Conversas`.
-5. Pesquise o outro usuario.
-6. Inicie a conversa e envie mensagens.
-7. Verifique no Firebase se as colecoes foram criadas.
-
-## Observacoes importantes
-
-- O fluxo principal da apresentacao esta configurado para funcionar localmente no aparelho.
-- O login com Google esta preparado visualmente, mas depende de configuracao de credenciais para uso real.
-- O mapa usa integracao no app e pode exigir internet no dispositivo para carregar corretamente.
-- O chat com Firebase depende de `google-services.json` configurado para o pacote `com.petbook.app`.
-- O Firestore deve estar criado e com rules publicadas para testes entre aparelhos.
-- Arquivos locais do Android Studio, como configuracoes da pasta `.idea`, nao devem ser usados como referencia funcional do projeto.
-
-## Repositorio
-
-GitHub:
-
-- [https://github.com/MatheusThurow/petbook](https://github.com/MatheusThurow/petbook)
+- [petbook](https://github.com/MatheusThurow/petbook)

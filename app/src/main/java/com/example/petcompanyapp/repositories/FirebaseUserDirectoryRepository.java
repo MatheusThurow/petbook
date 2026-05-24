@@ -10,6 +10,7 @@ import com.petbook.app.utils.FirebaseChatConfig;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,11 @@ public final class FirebaseUserDirectoryRepository {
 
     public interface UserListCallback {
         void onSuccess(List<User> users);
+        void onError(String message);
+    }
+
+    public interface CompletionCallback {
+        void onSuccess();
         void onError(String message);
     }
 
@@ -43,7 +49,7 @@ public final class FirebaseUserDirectoryRepository {
 
         usersCollection(context)
                 .document(ChatIdentityUtils.userKeyFromEmail(user.getEmail()))
-                .set(values);
+                .set(values, SetOptions.merge());
     }
 
     public static void searchUsers(
@@ -90,6 +96,43 @@ public final class FirebaseUserDirectoryRepository {
                         ));
                     }
                     callback.onSuccess(users);
+                })
+                .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
+    }
+
+    public static void bootstrapLocalUsersIfNeeded(Context context, @NonNull CompletionCallback callback) {
+        if (!FirebaseChatConfig.isEnabled(context)) {
+            callback.onSuccess();
+            return;
+        }
+
+        usersCollection(context)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(result -> {
+                    if (!result.isEmpty()) {
+                        callback.onSuccess();
+                        return;
+                    }
+
+                    List<User> users = UserRepository.getActiveUsers(context);
+                    com.google.firebase.firestore.WriteBatch batch = usersCollection(context).getFirestore().batch();
+                    for (User user : users) {
+                        String userKey = ChatIdentityUtils.userKeyFromEmail(user.getEmail());
+                        Map<String, Object> values = new HashMap<>();
+                        values.put("userKey", userKey);
+                        values.put("name", user.getName());
+                        values.put("email", user.getEmail().trim().toLowerCase(Locale.ROOT));
+                        values.put("userType", user.getUserType());
+                        values.put("active", user.isActive());
+                        values.put("localUserId", user.getId());
+                        values.put("updatedAtMillis", System.currentTimeMillis());
+                        batch.set(usersCollection(context).document(userKey), values);
+                    }
+
+                    batch.commit()
+                            .addOnSuccessListener(unused -> callback.onSuccess())
+                            .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
                 })
                 .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
     }

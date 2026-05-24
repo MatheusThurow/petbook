@@ -123,9 +123,11 @@ public final class ApiPostRepository {
                 jsonObject.optString("locationReference"),
                 jsonObject.optString("imageUri"),
                 jsonObject.optString("authorName", "usuario"),
+                jsonObject.optString("authorEmail", ""),
                 jsonObject.optLong("createdAtMillis", System.currentTimeMillis()),
                 jsonObject.optBoolean("liked", false),
-                jsonObject.optInt("likeCount", 0)
+                jsonObject.optInt("likeCount", 0),
+                jsonObject.optInt("fairAnimalCount", 0)
         );
     }
 }

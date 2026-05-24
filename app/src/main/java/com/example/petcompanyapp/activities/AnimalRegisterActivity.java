@@ -10,9 +10,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
+import com.petbook.app.repositories.FirebaseAnimalRepository;
 import com.petbook.app.repositories.AnimalRepository;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
@@ -90,6 +92,38 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         if (ValidationUtils.isEmpty(weight)) {
             editWeight.setError(getString(R.string.error_required_field));
             editWeight.requestFocus();
+            return;
+        }
+
+        if (FirebaseChatConfig.isEnabled(this)) {
+            FirebaseAnimalRepository.saveAnimal(
+                    this,
+                    userId,
+                    null,
+                    animalName,
+                    species,
+                    breed,
+                    Integer.parseInt(age),
+                    Double.parseDouble(weight.replace(",", ".")),
+                    new FirebaseAnimalRepository.AnimalIdCallback() {
+                        @Override
+                        public void onSuccess(long animalId) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(AnimalRegisterActivity.this, R.string.animal_register_success, Toast.LENGTH_LONG).show();
+                                finish();
+                            });
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            runOnUiThread(() -> Toast.makeText(
+                                    AnimalRegisterActivity.this,
+                                    message == null ? getString(R.string.error_animal_save_failed) : message,
+                                    Toast.LENGTH_SHORT
+                            ).show());
+                        }
+                    }
+            );
             return;
         }
 

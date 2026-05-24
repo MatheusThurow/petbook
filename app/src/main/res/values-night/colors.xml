@@ -1,0 +1,16 @@
+<resources>
+    <color name="primary_color">#FF9A1F</color>
+    <color name="primary_dark">#C76B00</color>
+    <color name="accent_color">#E08B2C</color>
+    <color name="screen_background">#101214</color>
+    <color name="primary_text">#F3F4F6</color>
+    <color name="secondary_text">#A0A8B3</color>
+    <color name="divider">#2B3138</color>
+    <color name="border_color">#363D46</color>
+    <color name="soft_surface">#171A1F</color>
+    <color name="soft_surface_strong">#1D2228</color>
+    <color name="soft_orange">#3B2814</color>
+    <color name="white">#1A1E24</color>
+    <color name="glass_surface">#CC171A1F</color>
+    <color name="muted_dark">#ECEFF3</color>
+</resources>

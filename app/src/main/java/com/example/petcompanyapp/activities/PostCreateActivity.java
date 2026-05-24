@@ -1,16 +1,20 @@
 package com.petbook.app.activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,27 +25,43 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.petbook.app.R;
 import com.petbook.app.models.AnimalPost;
+import com.petbook.app.models.FairAnimal;
 import com.petbook.app.repositories.AnimalPostRepository;
 import com.petbook.app.repositories.ApiPostRepository;
+import com.petbook.app.repositories.FirebaseNotificationRepository;
+import com.petbook.app.repositories.FirebasePostRepository;
+import com.petbook.app.repositories.NotificationRepository;
 import com.petbook.app.repositories.UserRepository;
-import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.AsyncRunner;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.ImageUtils;
+import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.LocationUtils;
 import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
 import com.petbook.app.utils.UserProfileStorage;
+import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class PostCreateActivity extends AppCompatActivity {
 
     private RadioGroup radioGroupPostType;
+    private RadioButton radioPostFair;
+    private TextInputLayout inputAnimalName;
     private EditText editAnimalName;
+    private LinearLayout layoutSingleAnimalFields;
+    private TextInputLayout inputBreed;
+    private TextInputLayout inputAge;
     private Spinner spinnerSpecies;
     private EditText editBreed;
     private EditText editAge;
@@ -49,15 +69,21 @@ public class PostCreateActivity extends AppCompatActivity {
     private EditText editContactPhone;
     private EditText editLocationReference;
     private LinearLayout layoutLostLocation;
+    private MaterialCardView layoutFairAnimalsSection;
+    private LinearLayout containerFairAnimals;
+    private TextView textFairAnimalsHint;
     private TextView textLocationStatus;
     private ImageView imagePostPreview;
     private Long authorUserId;
     private Long editingPostId;
     private String selectedPostType = PostType.ADOPTION;
     private String authorName;
+    private String authorUserType;
     private Double selectedLatitude;
     private Double selectedLongitude;
     private Uri selectedImageUri;
+    private String selectedImageValue;
+    private final List<FairAnimal> fairAnimals = new ArrayList<>();
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -82,7 +108,8 @@ public class PostCreateActivity extends AppCompatActivity {
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
                 selectedImageUri = uri;
-                imagePostPreview.setImageURI(uri);
+                selectedImageValue = uri.toString();
+                ImageUtils.loadInto(this, imagePostPreview, uri);
             });
 
     private final ActivityResultLauncher<Intent> mapPickerLauncher =
@@ -110,7 +137,12 @@ public class PostCreateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_create);
 
         radioGroupPostType = findViewById(R.id.radioGroupPostType);
+        radioPostFair = findViewById(R.id.radioPostFair);
+        inputAnimalName = findViewById(R.id.inputPostAnimalName);
         editAnimalName = findViewById(R.id.editPostAnimalName);
+        layoutSingleAnimalFields = findViewById(R.id.layoutSingleAnimalFields);
+        inputBreed = findViewById(R.id.inputPostBreed);
+        inputAge = findViewById(R.id.inputPostAge);
         spinnerSpecies = findViewById(R.id.spinnerPostSpecies);
         editBreed = findViewById(R.id.editPostBreed);
         editAge = findViewById(R.id.editPostAge);
@@ -118,12 +150,16 @@ public class PostCreateActivity extends AppCompatActivity {
         editContactPhone = findViewById(R.id.editPostContactPhone);
         editLocationReference = findViewById(R.id.editLostLocationReference);
         layoutLostLocation = findViewById(R.id.layoutLostLocation);
+        layoutFairAnimalsSection = findViewById(R.id.layoutFairAnimalsSection);
+        containerFairAnimals = findViewById(R.id.containerFairAnimals);
+        textFairAnimalsHint = findViewById(R.id.textFairAnimalsHint);
         textLocationStatus = findViewById(R.id.textLocationStatus);
         imagePostPreview = findViewById(R.id.imagePostPreview);
         TextView textBack = findViewById(R.id.textBackPostCreate);
         Button buttonSelectImage = findViewById(R.id.buttonSelectImage);
         Button buttonCaptureLocation = findViewById(R.id.buttonCaptureLocation);
         Button buttonSelectLocationOnMap = findViewById(R.id.buttonSelectLocationOnMap);
+        Button buttonAddFairAnimal = findViewById(R.id.buttonAddFairAnimal);
         Button buttonCreatePost = findViewById(R.id.buttonCreatePost);
 
         MaskUtils.applyPhoneMask(editContactPhone);
@@ -135,6 +171,10 @@ public class PostCreateActivity extends AppCompatActivity {
             authorName = getString(R.string.default_user_name);
         }
         authorName = UserProfileStorage.getName(this, authorName);
+        authorUserType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
+        if (authorUserType == null || authorUserType.trim().isEmpty()) {
+            authorUserType = UserProfileStorage.getUserType(this, UserType.PERSON);
+        }
         editingPostId = getIntent().hasExtra(IntentKeys.EXTRA_POST_ID)
                 ? getIntent().getLongExtra(IntentKeys.EXTRA_POST_ID, -1L)
                 : null;
@@ -142,11 +182,23 @@ public class PostCreateActivity extends AppCompatActivity {
             editingPostId = null;
         }
 
+        if (UserType.isCompany(authorUserType)) {
+            radioPostFair.setVisibility(View.VISIBLE);
+        } else {
+            radioPostFair.setVisibility(View.GONE);
+        }
+
         bindEditingData(buttonCreatePost);
         updatePostTypeUi(selectedPostType);
 
         radioGroupPostType.setOnCheckedChangeListener((group, checkedId) -> {
-            selectedPostType = checkedId == R.id.radioPostLost ? PostType.LOST : PostType.ADOPTION;
+            if (checkedId == R.id.radioPostLost) {
+                selectedPostType = PostType.LOST;
+            } else if (checkedId == R.id.radioPostFair) {
+                selectedPostType = PostType.FAIR;
+            } else {
+                selectedPostType = PostType.ADOPTION;
+            }
             updatePostTypeUi(selectedPostType);
         });
 
@@ -154,6 +206,7 @@ public class PostCreateActivity extends AppCompatActivity {
         buttonCaptureLocation.setOnClickListener(v -> requestLocation());
         buttonSelectLocationOnMap.setOnClickListener(v -> openMapPicker());
         buttonSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
+        buttonAddFairAnimal.setOnClickListener(v -> showFairAnimalDialog(null, -1));
         buttonCreatePost.setOnClickListener(v -> createPost());
     }
 
@@ -167,9 +220,14 @@ public class PostCreateActivity extends AppCompatActivity {
             selectedPostType = PostType.ADOPTION;
         }
 
-        radioGroupPostType.check(PostType.isLost(selectedPostType)
-                ? R.id.radioPostLost
-                : R.id.radioPostAdoption);
+        if (PostType.isLost(selectedPostType)) {
+            radioGroupPostType.check(R.id.radioPostLost);
+        } else if (PostType.isFair(selectedPostType) && UserType.isCompany(authorUserType)) {
+            radioGroupPostType.check(R.id.radioPostFair);
+        } else {
+            radioGroupPostType.check(R.id.radioPostAdoption);
+        }
+
         editAnimalName.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_ANIMAL_NAME));
         setSpinnerSelection(getIntent().getStringExtra(IntentKeys.EXTRA_POST_SPECIES));
         editBreed.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_BREED));
@@ -187,8 +245,35 @@ public class PostCreateActivity extends AppCompatActivity {
 
         String imageUri = getIntent().getStringExtra(IntentKeys.EXTRA_POST_IMAGE_URI);
         if (imageUri != null && !imageUri.trim().isEmpty()) {
-            selectedImageUri = Uri.parse(imageUri);
-            imagePostPreview.setImageURI(selectedImageUri);
+            selectedImageValue = imageUri;
+            if (!imageUri.startsWith("data:image")) {
+                selectedImageUri = Uri.parse(imageUri);
+                ImageUtils.loadInto(this, imagePostPreview, selectedImageUri);
+            } else {
+                ImageUtils.loadInto(imagePostPreview, imageUri);
+            }
+        }
+
+        if (PostType.isFair(selectedPostType)) {
+            if (FirebasePostRepository.isEnabled(this)) {
+                FirebasePostRepository.getFairAnimals(this, editingPostId, new FirebasePostRepository.FairAnimalsCallback() {
+                    @Override
+                    public void onSuccess(List<FairAnimal> loadedFairAnimals) {
+                        fairAnimals.clear();
+                        fairAnimals.addAll(loadedFairAnimals);
+                        renderFairAnimals();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(PostCreateActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else if (!FeatureFlags.useRemoteApi(this)) {
+                fairAnimals.clear();
+                fairAnimals.addAll(AnimalPostRepository.getFairAnimalsForPost(this, editingPostId));
+                renderFairAnimals();
+            }
         }
 
         if (selectedLatitude != null && selectedLongitude != null) {
@@ -217,7 +302,17 @@ public class PostCreateActivity extends AppCompatActivity {
     }
 
     private void updatePostTypeUi(String postType) {
-        if (PostType.isLost(postType)) {
+        boolean isLost = PostType.isLost(postType);
+        boolean isFair = PostType.isFair(postType);
+
+        layoutLostLocation.setVisibility(isLost ? View.VISIBLE : View.GONE);
+        layoutFairAnimalsSection.setVisibility(isFair ? View.VISIBLE : View.GONE);
+        layoutSingleAnimalFields.setVisibility(isFair ? View.GONE : View.VISIBLE);
+        inputAnimalName.setHint(isFair
+                ? getString(R.string.hint_fair_title)
+                : getString(R.string.hint_animal_name));
+
+        if (isLost) {
             if (selectedLatitude != null && selectedLongitude != null) {
                 textLocationStatus.setText(getString(
                         R.string.location_captured,
@@ -230,6 +325,122 @@ public class PostCreateActivity extends AppCompatActivity {
         } else {
             textLocationStatus.setText(R.string.location_optional);
         }
+
+        if (isFair) {
+            renderFairAnimals();
+        }
+    }
+
+    private void renderFairAnimals() {
+        containerFairAnimals.removeAllViews();
+
+        if (fairAnimals.isEmpty()) {
+            textFairAnimalsHint.setText(R.string.fair_animals_hint);
+            return;
+        }
+
+        textFairAnimalsHint.setText(getString(R.string.fair_animals_count, fairAnimals.size()));
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (int index = 0; index < fairAnimals.size(); index++) {
+            FairAnimal fairAnimal = fairAnimals.get(index);
+            View itemView = inflater.inflate(R.layout.item_fair_animal_editor, containerFairAnimals, false);
+
+            TextView textName = itemView.findViewById(R.id.textFairAnimalEditorName);
+            TextView textMeta = itemView.findViewById(R.id.textFairAnimalEditorMeta);
+            TextView textEdit = itemView.findViewById(R.id.textFairAnimalEditorEdit);
+            TextView textRemove = itemView.findViewById(R.id.textFairAnimalEditorRemove);
+
+            textName.setText(fairAnimal.getName());
+            textMeta.setText(getString(
+                    R.string.feed_post_meta,
+                    fairAnimal.getSpecies(),
+                    fairAnimal.getBreed(),
+                    fairAnimal.getAgeDescription()
+            ));
+
+            final int itemIndex = index;
+            textEdit.setOnClickListener(v -> showFairAnimalDialog(fairAnimal, itemIndex));
+            textRemove.setOnClickListener(v -> {
+                fairAnimals.remove(itemIndex);
+                renderFairAnimals();
+            });
+
+            containerFairAnimals.addView(itemView);
+        }
+    }
+
+    private void showFairAnimalDialog(FairAnimal existingAnimal, int editIndex) {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fair_animal, null, false);
+        TextInputEditText editName = dialogView.findViewById(R.id.editFairAnimalName);
+        Spinner spinnerDialogSpecies = dialogView.findViewById(R.id.spinnerFairAnimalSpecies);
+        TextInputEditText editBreed = dialogView.findViewById(R.id.editFairAnimalBreed);
+        TextInputEditText editAge = dialogView.findViewById(R.id.editFairAnimalAge);
+
+        MaskUtils.configureSpeciesSpinner(this, spinnerDialogSpecies);
+
+        if (existingAnimal != null) {
+            editName.setText(existingAnimal.getName());
+            editBreed.setText(existingAnimal.getBreed());
+            editAge.setText(existingAnimal.getAgeDescription());
+
+            for (int index = 0; index < spinnerDialogSpecies.getAdapter().getCount(); index++) {
+                Object item = spinnerDialogSpecies.getAdapter().getItem(index);
+                if (item != null && existingAnimal.getSpecies().equalsIgnoreCase(item.toString())) {
+                    spinnerDialogSpecies.setSelection(index);
+                    break;
+                }
+            }
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(existingAnimal == null ? R.string.dialog_add_fair_animal : R.string.dialog_edit_fair_animal)
+                .setView(dialogView)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.button_save, null)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String animalName = String.valueOf(editName.getText()).trim();
+            String species = String.valueOf(spinnerDialogSpecies.getSelectedItem());
+            String breed = String.valueOf(editBreed.getText()).trim();
+            String age = String.valueOf(editAge.getText()).trim();
+
+            if (ValidationUtils.isEmpty(animalName)) {
+                editName.setError(getString(R.string.error_required_field));
+                return;
+            }
+            if (species.equals(getString(R.string.species_hint))) {
+                Toast.makeText(this, R.string.error_species_required, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (ValidationUtils.isEmpty(breed)) {
+                editBreed.setError(getString(R.string.error_required_field));
+                return;
+            }
+            if (ValidationUtils.isEmpty(age)) {
+                editAge.setError(getString(R.string.error_required_field));
+                return;
+            }
+
+            FairAnimal fairAnimal = new FairAnimal(
+                    existingAnimal == null ? null : existingAnimal.getId(),
+                    existingAnimal == null ? null : existingAnimal.getPostId(),
+                    animalName,
+                    species,
+                    breed,
+                    age
+            );
+
+            if (editIndex >= 0) {
+                fairAnimals.set(editIndex, fairAnimal);
+            } else {
+                fairAnimals.add(fairAnimal);
+            }
+            renderFairAnimals();
+            dialog.dismiss();
+        }));
+
+        dialog.show();
     }
 
     private void requestLocation() {
@@ -306,16 +517,28 @@ public class PostCreateActivity extends AppCompatActivity {
     }
 
     private void createPost() {
-        String animalName = editAnimalName.getText().toString().trim();
+        String postTitle = editAnimalName.getText().toString().trim();
         String species = spinnerSpecies.getSelectedItem().toString();
         String breed = editBreed.getText().toString().trim();
         String age = editAge.getText().toString().trim();
         String description = editDescription.getText().toString().trim();
         String contactPhone = editContactPhone.getText().toString().replaceAll("\\D", "");
         String locationReference = editLocationReference.getText().toString().trim();
+        boolean isLost = PostType.isLost(selectedPostType);
+        boolean isFair = PostType.isFair(selectedPostType);
 
         if (authorUserId == null) {
             Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (isFair && !UserType.isCompany(authorUserType)) {
+            Toast.makeText(this, R.string.error_fair_company_only, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (FeatureFlags.useRemoteApi(this) && isFair) {
+            Toast.makeText(this, R.string.error_fair_remote_unavailable, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -324,24 +547,24 @@ public class PostCreateActivity extends AppCompatActivity {
             return;
         }
 
-        if (ValidationUtils.isEmpty(animalName)) {
+        if (ValidationUtils.isEmpty(postTitle)) {
             editAnimalName.setError(getString(R.string.error_required_field));
             editAnimalName.requestFocus();
             return;
         }
 
-        if (species.equals(getString(R.string.species_hint))) {
+        if (!isFair && species.equals(getString(R.string.species_hint))) {
             Toast.makeText(this, R.string.error_species_required, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (ValidationUtils.isEmpty(breed)) {
+        if (!isFair && ValidationUtils.isEmpty(breed)) {
             editBreed.setError(getString(R.string.error_required_field));
             editBreed.requestFocus();
             return;
         }
 
-        if (ValidationUtils.isEmpty(age)) {
+        if (!isFair && ValidationUtils.isEmpty(age)) {
             editAge.setError(getString(R.string.error_required_field));
             editAge.requestFocus();
             return;
@@ -359,7 +582,7 @@ public class PostCreateActivity extends AppCompatActivity {
             return;
         }
 
-        if (PostType.isLost(selectedPostType)) {
+        if (isLost) {
             if (selectedLatitude == null || selectedLongitude == null) {
                 Toast.makeText(this, R.string.error_location_required, Toast.LENGTH_SHORT).show();
                 return;
@@ -372,7 +595,17 @@ public class PostCreateActivity extends AppCompatActivity {
             }
         }
 
+        if (isFair && fairAnimals.isEmpty()) {
+            Toast.makeText(this, R.string.error_fair_animals_required, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (!FeatureFlags.useRemoteApi(this)) {
+            if (FirebasePostRepository.isEnabled(this)) {
+                savePostWithFirebase(postTitle, species, breed, age, description, contactPhone, locationReference, isLost, isFair);
+                return;
+            }
+
             if (!UserRepository.isValidActiveUser(this, authorUserId)) {
                 Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
                 return;
@@ -382,37 +615,51 @@ public class PostCreateActivity extends AppCompatActivity {
                     editingPostId,
                     authorUserId,
                     selectedPostType,
-                    animalName,
-                    species,
-                    breed,
-                    age,
+                    postTitle,
+                    isFair ? getString(R.string.fair_species_label) : species,
+                    isFair ? getString(R.string.fair_breed_label) : breed,
+                    isFair ? getString(R.string.fair_animals_count_short, fairAnimals.size()) : age,
                     description,
                     contactPhone,
-                    selectedLatitude,
-                    selectedLongitude,
-                    locationReference,
+                    isLost ? selectedLatitude : null,
+                    isLost ? selectedLongitude : null,
+                    isLost ? locationReference : "",
                     selectedImageUri.toString(),
                     authorName,
+                    UserProfileStorage.getEmail(this, ""),
                     System.currentTimeMillis(),
                     false,
-                    0
+                    0,
+                    fairAnimals.size()
             );
 
-            boolean success;
-            if (editingPostId == null) {
-                AnimalPostRepository.addPost(this, animalPost);
-                success = true;
-            } else {
-                success = AnimalPostRepository.updatePost(this, animalPost);
-            }
+            boolean success = editingPostId == null
+                    ? AnimalPostRepository.addPost(this, animalPost, fairAnimals)
+                    : AnimalPostRepository.updatePost(this, animalPost, fairAnimals);
 
             if (!success) {
                 Toast.makeText(this, R.string.error_save_post_failed, Toast.LENGTH_LONG).show();
                 return;
             }
 
+            if (editingPostId != null) {
+                NotificationRepository.addNotification(
+                        this,
+                        authorUserId,
+                        NotificationType.POST_UPDATED,
+                        getString(R.string.notification_post_updated_title),
+                        getString(R.string.notification_post_updated_message, postTitle),
+                        editingPostId,
+                        selectedPostType,
+                        authorUserId,
+                        authorName,
+                        UserProfileStorage.getEmail(this, ""),
+                        null
+                );
+            }
+
             int successMessage = editingPostId == null
-                    ? (PostType.isLost(animalPost.getPostType()) ? R.string.post_lost_success : R.string.post_adoption_success)
+                    ? resolveSuccessMessage(selectedPostType)
                     : R.string.post_edit_success;
             Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
             finish();
@@ -425,7 +672,7 @@ public class PostCreateActivity extends AppCompatActivity {
                                 this,
                                 authorUserId,
                                 selectedPostType,
-                                animalName,
+                                postTitle,
                                 species,
                                 breed,
                                 age,
@@ -441,7 +688,7 @@ public class PostCreateActivity extends AppCompatActivity {
                                 editingPostId,
                                 authorUserId,
                                 selectedPostType,
-                                animalName,
+                                postTitle,
                                 species,
                                 breed,
                                 age,
@@ -454,7 +701,7 @@ public class PostCreateActivity extends AppCompatActivity {
                         ),
                 savedPost -> {
                     int successMessage = editingPostId == null
-                            ? (PostType.isLost(savedPost.getPostType()) ? R.string.post_lost_success : R.string.post_adoption_success)
+                            ? resolveSuccessMessage(savedPost.getPostType())
                             : R.string.post_edit_success;
                     Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
                     finish();
@@ -466,5 +713,111 @@ public class PostCreateActivity extends AppCompatActivity {
                 ).show()
         );
     }
-}
 
+    private int resolveSuccessMessage(String postType) {
+        if (PostType.isLost(postType)) {
+            return R.string.post_lost_success;
+        }
+        if (PostType.isFair(postType)) {
+            return R.string.post_fair_success;
+        }
+        return R.string.post_adoption_success;
+    }
+
+    private void savePostWithFirebase(
+            String postTitle,
+            String species,
+            String breed,
+            String age,
+            String description,
+            String contactPhone,
+            String locationReference,
+            boolean isLost,
+            boolean isFair
+    ) {
+        long postId = editingPostId == null ? System.currentTimeMillis() : editingPostId;
+        String imageValue = selectedImageValue;
+        if (imageValue == null || imageValue.trim().isEmpty()) {
+            if (selectedImageUri == null) {
+                Toast.makeText(this, R.string.error_image_required, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                imageValue = ImageUtils.encodeImageAsDataUrl(this, selectedImageUri);
+            } catch (Exception exception) {
+                Toast.makeText(this, R.string.error_save_post_failed, Toast.LENGTH_LONG).show();
+                return;
+            }
+        } else if (!imageValue.startsWith("data:image")) {
+            try {
+                imageValue = ImageUtils.encodeImageAsDataUrl(this, selectedImageUri);
+            } catch (Exception exception) {
+                Toast.makeText(this, R.string.error_save_post_failed, Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        AnimalPost animalPost = new AnimalPost(
+                postId,
+                authorUserId,
+                selectedPostType,
+                postTitle,
+                isFair ? getString(R.string.fair_species_label) : species,
+                isFair ? getString(R.string.fair_breed_label) : breed,
+                isFair ? getString(R.string.fair_animals_count_short, fairAnimals.size()) : age,
+                description,
+                contactPhone,
+                isLost ? selectedLatitude : null,
+                isLost ? selectedLongitude : null,
+                isLost ? locationReference : "",
+                imageValue,
+                authorName,
+                UserProfileStorage.getEmail(this, ""),
+                editingPostId == null ? System.currentTimeMillis() : System.currentTimeMillis(),
+                false,
+                0,
+                fairAnimals.size()
+        );
+
+        FirebasePostRepository.savePost(
+                this,
+                animalPost,
+                fairAnimals,
+                new FirebasePostRepository.PostCallback() {
+                    @Override
+                    public void onSuccess(AnimalPost post) {
+                        if (editingPostId != null) {
+                            FirebaseNotificationRepository.addNotification(
+                                    PostCreateActivity.this,
+                                    UserProfileStorage.getEmail(PostCreateActivity.this, ""),
+                                    NotificationType.POST_UPDATED,
+                                    getString(R.string.notification_post_updated_title),
+                                    getString(R.string.notification_post_updated_message, postTitle),
+                                    post.getId(),
+                                    post.getPostType(),
+                                    authorUserId,
+                                    authorName,
+                                    UserProfileStorage.getEmail(PostCreateActivity.this, ""),
+                                    null
+                            );
+                        }
+                        Toast.makeText(
+                                PostCreateActivity.this,
+                                editingPostId == null ? resolveSuccessMessage(post.getPostType()) : R.string.post_edit_success,
+                                Toast.LENGTH_LONG
+                        ).show();
+                        finish();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(
+                                PostCreateActivity.this,
+                                message == null ? getString(R.string.error_save_post_failed) : message,
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                }
+        );
+    }
+}

@@ -8,12 +8,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "petcompany.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 5;
 
     public static final String TABLE_USERS = "users";
     public static final String TABLE_COMPANIES = "companies";
     public static final String TABLE_ANIMALS = "animals";
     public static final String TABLE_POSTS = "animal_posts";
+    public static final String TABLE_FAIR_POST_ANIMALS = "fair_post_animals";
+    public static final String TABLE_POST_COMMENTS = "post_comments";
+    public static final String TABLE_ADOPTION_INTERESTS = "adoption_interests";
+    public static final String TABLE_NOTIFICATIONS = "notifications";
     public static final String TABLE_CONVERSATIONS = "chat_conversations";
     public static final String TABLE_MESSAGES = "chat_messages";
 
@@ -27,6 +31,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         createCompaniesTable(db);
         createAnimalsTable(db);
         createPostsTable(db);
+        createFairPostAnimalsTable(db);
+        createPostCommentsTable(db);
+        createAdoptionInterestsTable(db);
+        createNotificationsTable(db);
         createConversationsTable(db);
         createMessagesTable(db);
 
@@ -38,6 +46,17 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 2) {
             createConversationsTable(db);
             createMessagesTable(db);
+        }
+        if (oldVersion < 3) {
+            createFairPostAnimalsTable(db);
+        }
+        if (oldVersion < 4) {
+            createPostCommentsTable(db);
+            createAdoptionInterestsTable(db);
+            createNotificationsTable(db);
+        }
+        if (oldVersion < 5) {
+            db.execSQL("ALTER TABLE " + TABLE_POST_COMMENTS + " ADD COLUMN parent_comment_id INTEGER");
         }
     }
 
@@ -108,6 +127,61 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "last_message_text TEXT,"
                 + "last_message_at_millis INTEGER,"
                 + "UNIQUE(user_one_id, user_two_id)"
+                + ")");
+    }
+
+    private void createFairPostAnimalsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_FAIR_POST_ANIMALS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "post_id INTEGER NOT NULL,"
+                + "animal_name TEXT NOT NULL,"
+                + "species TEXT NOT NULL,"
+                + "breed TEXT NOT NULL,"
+                + "age_description TEXT NOT NULL,"
+                + "FOREIGN KEY(post_id) REFERENCES " + TABLE_POSTS + "(id)"
+                + ")");
+    }
+
+    private void createPostCommentsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_POST_COMMENTS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "post_id INTEGER NOT NULL,"
+                + "author_user_id INTEGER NOT NULL,"
+                + "message_text TEXT NOT NULL,"
+                + "parent_comment_id INTEGER,"
+                + "created_at_millis INTEGER NOT NULL,"
+                + "FOREIGN KEY(post_id) REFERENCES " + TABLE_POSTS + "(id),"
+                + "FOREIGN KEY(author_user_id) REFERENCES " + TABLE_USERS + "(id),"
+                + "FOREIGN KEY(parent_comment_id) REFERENCES " + TABLE_POST_COMMENTS + "(id)"
+                + ")");
+    }
+
+    private void createAdoptionInterestsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_ADOPTION_INTERESTS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "post_id INTEGER NOT NULL,"
+                + "interested_user_id INTEGER NOT NULL,"
+                + "animal_name TEXT,"
+                + "created_at_millis INTEGER NOT NULL,"
+                + "UNIQUE(post_id, interested_user_id, animal_name)"
+                + ")");
+    }
+
+    private void createNotificationsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_NOTIFICATIONS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "recipient_user_id INTEGER NOT NULL,"
+                + "notification_type TEXT NOT NULL,"
+                + "title TEXT NOT NULL,"
+                + "message_text TEXT NOT NULL,"
+                + "related_post_id INTEGER,"
+                + "related_post_type TEXT,"
+                + "related_user_id INTEGER,"
+                + "related_user_name TEXT,"
+                + "related_user_email TEXT,"
+                + "related_conversation_id INTEGER,"
+                + "created_at_millis INTEGER NOT NULL,"
+                + "is_read INTEGER NOT NULL DEFAULT 0"
                 + ")");
     }
 
@@ -206,6 +280,45 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         lunaPost.put("liked", 1);
         lunaPost.put("like_count", 27);
         db.insert(TABLE_POSTS, null, lunaPost);
+
+        ContentValues fairPost = new ContentValues();
+        fairPost.put("author_user_id", clinicUserId);
+        fairPost.put("post_type", "FAIR");
+        fairPost.put("animal_name", "Feira de Adocao de Sabado");
+        fairPost.put("species", "Feira");
+        fairPost.put("breed", "Varios perfis");
+        fairPost.put("age_description", "3 animais");
+        fairPost.put("description_text", "Evento especial da Clinica Feliz com varios animais prontos para encontrar um novo lar.");
+        fairPost.put("contact_phone", "(11) 99999-1234");
+        fairPost.putNull("latitude");
+        fairPost.putNull("longitude");
+        fairPost.put("location_reference", "");
+        fairPost.put("image_uri", "");
+        fairPost.put("created_at_millis", System.currentTimeMillis() - 1000L * 60L * 10L);
+        fairPost.put("liked", 0);
+        fairPost.put("like_count", 8);
+        long fairPostId = db.insert(TABLE_POSTS, null, fairPost);
+
+        insertFairAnimal(db, fairPostId, "Milo", "Cachorro", "SRD", "1 ano");
+        insertFairAnimal(db, fairPostId, "Nina", "Gato", "Persa", "2 anos");
+        insertFairAnimal(db, fairPostId, "Tico", "Coelho", "Mini lop", "8 meses");
+    }
+
+    private void insertFairAnimal(
+            SQLiteDatabase db,
+            long postId,
+            String animalName,
+            String species,
+            String breed,
+            String ageDescription
+    ) {
+        ContentValues values = new ContentValues();
+        values.put("post_id", postId);
+        values.put("animal_name", animalName);
+        values.put("species", species);
+        values.put("breed", breed);
+        values.put("age_description", ageDescription);
+        db.insert(TABLE_FAIR_POST_ANIMALS, null, values);
     }
 
     private long insertUser(

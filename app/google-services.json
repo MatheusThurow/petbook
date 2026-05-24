@@ -12,7 +12,20 @@
           "package_name": "com.petbook.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "766727193603-e3ddq93f4k9pt0i5ph7v85lghcda9ubo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.petbook.app",
+            "certificate_hash": "7ba3ed1e36b666fd66484bf8a697e84ef9e11cf1"
+          }
+        },
+        {
+          "client_id": "766727193603-ptpt2vrls1rpk6egs39951ra58v931d7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC4vTtVHy3ySpEvA-UEMeWkrGAMMV-Wldo"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "766727193603-ptpt2vrls1rpk6egs39951ra58v931d7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

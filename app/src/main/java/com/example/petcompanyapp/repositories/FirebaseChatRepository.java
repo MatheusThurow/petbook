@@ -8,6 +8,7 @@ import com.petbook.app.models.ChatMessage;
 import com.petbook.app.models.ConversationSummary;
 import com.petbook.app.utils.ChatIdentityUtils;
 import com.petbook.app.utils.FirebaseChatConfig;
+import com.petbook.app.utils.NotificationType;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -191,6 +192,20 @@ public final class FirebaseChatRepository {
                 com.google.firebase.firestore.FieldValue.increment(1));
         conversationUpdate.put(currentIsUserOne ? "unreadCountUserOne" : "unreadCountUserTwo", 0);
         conversationRef.set(conversationUpdate, com.google.firebase.firestore.SetOptions.merge());
+
+        FirebaseNotificationRepository.addNotification(
+                context,
+                targetUserEmail,
+                NotificationType.CHAT_MESSAGE,
+                context.getString(com.petbook.app.R.string.notification_chat_title),
+                context.getString(com.petbook.app.R.string.notification_chat_message, currentUserName),
+                null,
+                null,
+                null,
+                currentUserName,
+                currentUserEmail,
+                null
+        );
     }
 
     public static void markConversationAsRead(

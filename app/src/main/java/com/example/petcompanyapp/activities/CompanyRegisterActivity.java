@@ -12,8 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.petbook.app.R;
 import com.petbook.app.repositories.ApiCompanyRepository;
 import com.petbook.app.repositories.CompanyRepository;
+import com.petbook.app.repositories.FirebaseCompanyRepository;
 import com.petbook.app.utils.AsyncRunner;
 import com.petbook.app.utils.FeatureFlags;
+import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
 import com.petbook.app.utils.UserType;
@@ -92,6 +94,33 @@ public class CompanyRegisterActivity extends AppCompatActivity {
 
         if (userId == null) {
             Toast.makeText(this, R.string.error_post_user_invalid, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (FirebaseChatConfig.isEnabled(this)) {
+            FirebaseCompanyRepository.saveCompany(
+                    this,
+                    userId,
+                    companyName,
+                    editCnpj.getText().toString().trim(),
+                    address,
+                    editPhone.getText().toString().trim(),
+                    new FirebaseCompanyRepository.CompanyIdCallback() {
+                        @Override
+                        public void onSuccess(long companyId) {
+                            runOnUiThread(() -> openFeed(companyName));
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            runOnUiThread(() -> Toast.makeText(
+                                    CompanyRegisterActivity.this,
+                                    message == null ? getString(R.string.error_company_save_failed) : message,
+                                    Toast.LENGTH_LONG
+                            ).show());
+                        }
+                    }
+            );
             return;
         }
 

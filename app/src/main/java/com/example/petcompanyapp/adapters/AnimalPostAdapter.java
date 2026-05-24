@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,6 +27,8 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         void onLikeClicked(AnimalPost post);
         void onShareClicked(AnimalPost post);
         void onMapClicked(AnimalPost post);
+        void onCommentClicked(AnimalPost post);
+        void onInterestClicked(AnimalPost post);
         void onEditClicked(AnimalPost post);
         void onDeleteClicked(AnimalPost post);
     }
@@ -60,27 +63,42 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         AnimalPost post = items.get(position);
         boolean isLost = PostType.isLost(post.getPostType());
+        boolean isFair = PostType.isFair(post.getPostType());
 
         holder.textBadge.setText(isLost
                 ? holder.itemView.getContext().getString(R.string.post_type_lost)
-                : holder.itemView.getContext().getString(R.string.post_type_adoption));
-        holder.textBadge.setBackgroundResource(isLost ? R.drawable.bg_badge_lost : R.drawable.bg_badge_adoption);
+                : (isFair
+                ? holder.itemView.getContext().getString(R.string.post_type_fair)
+                : holder.itemView.getContext().getString(R.string.post_type_adoption)));
+        holder.textBadge.setBackgroundResource(isLost
+                ? R.drawable.bg_badge_lost
+                : (isFair ? R.drawable.bg_badge_fair : R.drawable.bg_badge_adoption));
         ImageUtils.loadInto(holder.imagePost, post.getImageUri());
         holder.textAnimalName.setText(post.getAnimalName());
-        holder.textMeta.setText(holder.itemView.getContext().getString(
-                R.string.feed_post_meta,
-                post.getSpecies(),
-                post.getBreed(),
-                post.getAge()
-        ));
+        if (isFair) {
+            holder.textMeta.setText(holder.itemView.getContext().getString(
+                    R.string.feed_post_fair_meta,
+                    post.getFairAnimalCount()
+            ));
+        } else {
+            holder.textMeta.setText(holder.itemView.getContext().getString(
+                    R.string.feed_post_meta,
+                    post.getSpecies(),
+                    post.getBreed(),
+                    post.getAge()
+            ));
+        }
         holder.textDescription.setText(post.getDescription());
         holder.textContact.setText(holder.itemView.getContext().getString(
                 R.string.feed_post_contact,
                 post.getContactPhone()
         ));
-        holder.textLike.setText(holder.itemView.getContext().getString(
-                post.isLiked() ? R.string.action_liked : R.string.action_like,
-                post.getLikeCount()
+        holder.textLike.setText(post.isLiked()
+                ? "♥ " + post.getLikeCount()
+                : "♡ " + post.getLikeCount());
+        holder.textLike.setTextColor(ContextCompat.getColor(
+                holder.itemView.getContext(),
+                post.isLiked() ? R.color.accent_color : R.color.primary_text
         ));
         holder.textAuthor.setText(holder.itemView.getContext().getString(
                 R.string.feed_post_author,
@@ -98,6 +116,17 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
                 && post.getAuthorUserId() != null
                 && currentUserId.longValue() == post.getAuthorUserId().longValue();
         holder.layoutOwnerActions.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+        holder.textInterest.setVisibility(!isOwner && PostType.isAdoptionRelated(post.getPostType()) ? View.VISIBLE : View.GONE);
+        holder.textComment.setText(isOwner
+                ? holder.itemView.getContext().getString(R.string.action_comments)
+                : (isLost
+                ? holder.itemView.getContext().getString(R.string.action_comment)
+                : holder.itemView.getContext().getString(R.string.action_contact_owner)));
+        holder.textComment.setBackgroundResource(R.drawable.bg_post_primary_action);
+        holder.textComment.setTextColor(ContextCompat.getColor(
+                holder.itemView.getContext(),
+                R.color.primary_dark
+        ));
 
         if (isLost) {
             holder.textLocation.setVisibility(View.VISIBLE);
@@ -107,6 +136,14 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
                     post.getLocationReference()
             ));
             holder.buttonMap.setText(R.string.action_view_more_location);
+        } else if (isFair) {
+            holder.textLocation.setVisibility(View.VISIBLE);
+            holder.buttonMap.setVisibility(View.VISIBLE);
+            holder.textLocation.setText(holder.itemView.getContext().getString(
+                    R.string.feed_post_fair_animals,
+                    post.getFairAnimalCount()
+            ));
+            holder.buttonMap.setText(R.string.action_view_fair_animals);
         } else {
             holder.textLocation.setVisibility(View.GONE);
             holder.buttonMap.setVisibility(View.GONE);
@@ -115,6 +152,8 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         holder.textLike.setOnClickListener(v -> listener.onLikeClicked(post));
         holder.textShare.setOnClickListener(v -> listener.onShareClicked(post));
         holder.buttonMap.setOnClickListener(v -> listener.onMapClicked(post));
+        holder.textComment.setOnClickListener(v -> listener.onCommentClicked(post));
+        holder.textInterest.setOnClickListener(v -> listener.onInterestClicked(post));
         holder.textEdit.setOnClickListener(v -> listener.onEditClicked(post));
         holder.textDelete.setOnClickListener(v -> listener.onDeleteClicked(post));
     }
@@ -134,6 +173,8 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         private final TextView textContact;
         private final TextView textLike;
         private final TextView textShare;
+        private final TextView textComment;
+        private final TextView textInterest;
         private final TextView textAuthor;
         private final TextView textDate;
         private final TextView buttonMap;
@@ -152,6 +193,8 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
             textContact = itemView.findViewById(R.id.textPostContact);
             textLike = itemView.findViewById(R.id.textPostLike);
             textShare = itemView.findViewById(R.id.textPostShare);
+            textComment = itemView.findViewById(R.id.textPostComment);
+            textInterest = itemView.findViewById(R.id.textPostInterest);
             textAuthor = itemView.findViewById(R.id.textPostAuthor);
             textDate = itemView.findViewById(R.id.textPostDate);
             buttonMap = itemView.findViewById(R.id.textPostMap);
