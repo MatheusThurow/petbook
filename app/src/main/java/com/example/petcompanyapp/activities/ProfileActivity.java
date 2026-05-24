@@ -2,6 +2,7 @@ package com.petbook.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.petbook.app.utils.AsyncRunner;
 import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.ThemePreferenceManager;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
@@ -31,6 +33,7 @@ public class ProfileActivity extends AppCompatActivity {
     private EditText editProfileEmail;
     private Long userId;
     private String userType;
+    private SwipeNavigationHelper swipeNavigationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,7 @@ public class ProfileActivity extends AppCompatActivity {
                 ? R.string.profile_type_company
                 : R.string.profile_type_person);
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_PROFILE);
+        swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_PROFILE);
         switchDarkMode.setChecked(ThemePreferenceManager.isDarkModeEnabled(this));
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) ->
                 ThemePreferenceManager.setDarkModeEnabled(this, isChecked)
@@ -84,6 +88,12 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ChangePasswordActivity.class))
         );
         buttonSaveProfile.setOnClickListener(v -> saveProfile());
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean handled = swipeNavigationHelper != null && swipeNavigationHelper.onTouchEvent(event);
+        return handled || super.dispatchTouchEvent(event);
     }
 
     @Override

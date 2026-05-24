@@ -106,17 +106,13 @@ public class UserRegisterActivity extends AppCompatActivity {
             return;
         }
 
-        if (UserType.isCompany(selectedUserType) && document.length() != 14) {
-            editDocument.setError(getString(R.string.error_invalid_cnpj));
-            editDocument.requestFocus();
-            return;
-        }
-
         if (!UserType.isCompany(selectedUserType) && document.length() != 11) {
             editDocument.setError(getString(R.string.error_invalid_cpf));
             editDocument.requestFocus();
             return;
         }
+
+        String finalDocument = UserType.isCompany(selectedUserType) ? "" : document;
 
         if (FirebaseUserRepository.isEnabled(this)) {
             FirebaseUserRepository.register(
@@ -125,7 +121,7 @@ public class UserRegisterActivity extends AppCompatActivity {
                     name,
                     email,
                     password,
-                    document,
+                    finalDocument,
                     new FirebaseUserRepository.UserCallback() {
                         @Override
                         public void onSuccess(User user) {
@@ -153,7 +149,7 @@ public class UserRegisterActivity extends AppCompatActivity {
         }
 
         if (!FeatureFlags.useRemoteApi(this)) {
-            User registeredUser = UserRepository.register(this, selectedUserType, name, email, password, document);
+            User registeredUser = UserRepository.register(this, selectedUserType, name, email, password, finalDocument);
             if (registeredUser == null) {
                 editEmail.setError(getString(R.string.error_email_already_registered));
                 editEmail.requestFocus();
@@ -164,7 +160,7 @@ public class UserRegisterActivity extends AppCompatActivity {
         }
 
         AsyncRunner.run(
-                () -> ApiUserRepository.register(this, selectedUserType, name, email, password, document),
+                () -> ApiUserRepository.register(this, selectedUserType, name, email, password, finalDocument),
                 this::completeRegistration,
                 exception -> {
                     String message = exception.getMessage();
@@ -210,12 +206,13 @@ public class UserRegisterActivity extends AppCompatActivity {
     private void updateFormByUserType(String userType) {
         if (UserType.isCompany(userType)) {
             inputLayoutUserName.setHint(getString(R.string.hint_company_responsible_name));
-            inputLayoutUserDocument.setHint(getString(R.string.hint_cnpj));
             textUserRegisterSubtitle.setText(R.string.user_register_subtitle_company);
+            inputLayoutUserDocument.setVisibility(android.view.View.GONE);
         } else {
             inputLayoutUserName.setHint(getString(R.string.hint_name));
             inputLayoutUserDocument.setHint(getString(R.string.hint_cpf));
             textUserRegisterSubtitle.setText(R.string.user_register_subtitle_person);
+            inputLayoutUserDocument.setVisibility(android.view.View.VISIBLE);
         }
     }
 }

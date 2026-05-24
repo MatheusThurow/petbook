@@ -1,10 +1,11 @@
 package com.petbook.app.activities;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.petbook.app.R;
@@ -83,6 +85,9 @@ public class PostCreateActivity extends AppCompatActivity {
     private Double selectedLongitude;
     private Uri selectedImageUri;
     private String selectedImageValue;
+    private Uri selectedFairAnimalImageUri;
+    private String selectedFairAnimalImageValue;
+    private ImageView currentFairAnimalPreview;
     private final List<FairAnimal> fairAnimals = new ArrayList<>();
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
@@ -103,10 +108,22 @@ public class PostCreateActivity extends AppCompatActivity {
                     return;
                 }
 
-                getContentResolver().takePersistableUriPermission(
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
+                try {
+                    getContentResolver().takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+                } catch (SecurityException ignored) {
+                    // Segue com a URI normalmente.
+                }
+
+                if (currentFairAnimalPreview != null) {
+                    selectedFairAnimalImageUri = uri;
+                    selectedFairAnimalImageValue = uri.toString();
+                    ImageUtils.loadInto(this, currentFairAnimalPreview, uri);
+                    return;
+                }
+
                 selectedImageUri = uri;
                 selectedImageValue = uri.toString();
                 ImageUtils.loadInto(this, imagePostPreview, uri);
@@ -349,6 +366,7 @@ public class PostCreateActivity extends AppCompatActivity {
             TextView textMeta = itemView.findViewById(R.id.textFairAnimalEditorMeta);
             TextView textEdit = itemView.findViewById(R.id.textFairAnimalEditorEdit);
             TextView textRemove = itemView.findViewById(R.id.textFairAnimalEditorRemove);
+            ImageView imageAnimal = itemView.findViewById(R.id.imageFairAnimalEditor);
 
             textName.setText(fairAnimal.getName());
             textMeta.setText(getString(
@@ -357,6 +375,7 @@ public class PostCreateActivity extends AppCompatActivity {
                     fairAnimal.getBreed(),
                     fairAnimal.getAgeDescription()
             ));
+            ImageUtils.loadInto(imageAnimal, fairAnimal.getImageUri());
 
             final int itemIndex = index;
             textEdit.setOnClickListener(v -> showFairAnimalDialog(fairAnimal, itemIndex));
@@ -371,17 +390,28 @@ public class PostCreateActivity extends AppCompatActivity {
 
     private void showFairAnimalDialog(FairAnimal existingAnimal, int editIndex) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fair_animal, null, false);
+        TextView textDialogTitle = dialogView.findViewById(R.id.textFairAnimalDialogTitle);
         TextInputEditText editName = dialogView.findViewById(R.id.editFairAnimalName);
         Spinner spinnerDialogSpecies = dialogView.findViewById(R.id.spinnerFairAnimalSpecies);
         TextInputEditText editBreed = dialogView.findViewById(R.id.editFairAnimalBreed);
-        TextInputEditText editAge = dialogView.findViewById(R.id.editFairAnimalAge);
+        TextInputEditText editAgeYears = dialogView.findViewById(R.id.editFairAnimalAgeYears);
+        TextInputEditText editAgeMonths = dialogView.findViewById(R.id.editFairAnimalAgeMonths);
+        ImageView imagePreview = dialogView.findViewById(R.id.imageFairAnimalPreview);
+        Button buttonSelectImage = dialogView.findViewById(R.id.buttonSelectFairAnimalImage);
+        Button buttonCancel = dialogView.findViewById(R.id.buttonCancelFairAnimal);
+        Button buttonSave = dialogView.findViewById(R.id.buttonSaveFairAnimal);
 
         MaskUtils.configureSpeciesSpinner(this, spinnerDialogSpecies);
+        selectedFairAnimalImageUri = null;
+        selectedFairAnimalImageValue = existingAnimal == null ? "" : existingAnimal.getImageUri();
+        currentFairAnimalPreview = imagePreview;
+        ImageUtils.loadInto(imagePreview, selectedFairAnimalImageValue);
+        textDialogTitle.setText(existingAnimal == null ? R.string.dialog_add_fair_animal : R.string.dialog_edit_fair_animal);
 
         if (existingAnimal != null) {
             editName.setText(existingAnimal.getName());
             editBreed.setText(existingAnimal.getBreed());
-            editAge.setText(existingAnimal.getAgeDescription());
+            populateFairAnimalAgeFields(existingAnimal.getAgeDescription(), editAgeYears, editAgeMonths);
 
             for (int index = 0; index < spinnerDialogSpecies.getAdapter().getCount(); index++) {
                 Object item = spinnerDialogSpecies.getAdapter().getItem(index);
@@ -392,18 +422,19 @@ public class PostCreateActivity extends AppCompatActivity {
             }
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(existingAnimal == null ? R.string.dialog_add_fair_animal : R.string.dialog_edit_fair_animal)
+        buttonSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setView(dialogView)
-                .setNegativeButton(R.string.action_cancel, null)
-                .setPositiveButton(R.string.button_save, null)
                 .create();
 
-        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+        buttonCancel.setOnClickListener(v -> dialog.dismiss());
+        buttonSave.setOnClickListener(v -> {
             String animalName = String.valueOf(editName.getText()).trim();
             String species = String.valueOf(spinnerDialogSpecies.getSelectedItem());
             String breed = String.valueOf(editBreed.getText()).trim();
-            String age = String.valueOf(editAge.getText()).trim();
+            String yearsValue = String.valueOf(editAgeYears.getText()).trim();
+            String monthsValue = String.valueOf(editAgeMonths.getText()).trim();
 
             if (ValidationUtils.isEmpty(animalName)) {
                 editName.setError(getString(R.string.error_required_field));
@@ -417,9 +448,40 @@ public class PostCreateActivity extends AppCompatActivity {
                 editBreed.setError(getString(R.string.error_required_field));
                 return;
             }
-            if (ValidationUtils.isEmpty(age)) {
-                editAge.setError(getString(R.string.error_required_field));
+            if (ValidationUtils.isEmpty(yearsValue) && ValidationUtils.isEmpty(monthsValue)) {
+                editAgeYears.setError(getString(R.string.error_fair_animal_age_required));
+                editAgeYears.requestFocus();
                 return;
+            }
+
+            int years = 0;
+            int months = 0;
+            if (!ValidationUtils.isEmpty(yearsValue)) {
+                years = Integer.parseInt(yearsValue);
+            }
+            if (!ValidationUtils.isEmpty(monthsValue)) {
+                months = Integer.parseInt(monthsValue);
+                if (months < 0 || months > 11) {
+                    editAgeMonths.setError(getString(R.string.error_fair_animal_age_months_invalid));
+                    editAgeMonths.requestFocus();
+                    return;
+                }
+            }
+
+            String age = buildFairAnimalAgeDescription(years, months);
+            if ((selectedFairAnimalImageValue == null || selectedFairAnimalImageValue.trim().isEmpty()) && selectedFairAnimalImageUri == null) {
+                Toast.makeText(this, R.string.error_image_required, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String imageValue = selectedFairAnimalImageValue;
+            if (selectedFairAnimalImageUri != null) {
+                try {
+                    imageValue = ImageUtils.encodeImageAsDataUrl(this, selectedFairAnimalImageUri);
+                } catch (Exception exception) {
+                    Toast.makeText(this, R.string.error_save_post_failed, Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
 
             FairAnimal fairAnimal = new FairAnimal(
@@ -428,7 +490,8 @@ public class PostCreateActivity extends AppCompatActivity {
                     animalName,
                     species,
                     breed,
-                    age
+                    age,
+                    imageValue
             );
 
             if (editIndex >= 0) {
@@ -437,10 +500,63 @@ public class PostCreateActivity extends AppCompatActivity {
                 fairAnimals.add(fairAnimal);
             }
             renderFairAnimals();
+            clearFairAnimalSelectionState();
             dialog.dismiss();
-        }));
+        });
 
+        dialog.setOnDismissListener(dialogInterface -> clearFairAnimalSelectionState());
         dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    private String buildFairAnimalAgeDescription(int years, int months) {
+        if (years > 0 && months > 0) {
+            return years + " ano" + (years > 1 ? "s" : "") + " e " + months + " mes" + (months > 1 ? "es" : "");
+        }
+        if (years > 0) {
+            return years + " ano" + (years > 1 ? "s" : "");
+        }
+        return months + " mes" + (months > 1 ? "es" : "");
+    }
+
+    private void populateFairAnimalAgeFields(
+            String ageDescription,
+            TextInputEditText editAgeYears,
+            TextInputEditText editAgeMonths
+    ) {
+        if (ageDescription == null || ageDescription.trim().isEmpty()) {
+            return;
+        }
+
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(\\d+)\\s*ano[s]?|(?:(?:e\\s*)?(\\d+)\\s*mes(?:es)?)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(ageDescription);
+
+        Integer years = null;
+        Integer months = null;
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
+                years = Integer.parseInt(matcher.group(1));
+            }
+            if (matcher.group(2) != null) {
+                months = Integer.parseInt(matcher.group(2));
+            }
+        }
+
+        if (years != null) {
+            editAgeYears.setText(String.valueOf(years));
+        }
+        if (months != null) {
+            editAgeMonths.setText(String.valueOf(months));
+        }
+    }
+
+    private void clearFairAnimalSelectionState() {
+        selectedFairAnimalImageUri = null;
+        selectedFairAnimalImageValue = null;
+        currentFairAnimalPreview = null;
     }
 
     private void requestLocation() {

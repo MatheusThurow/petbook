@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
+import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -51,6 +53,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
     private AnimalPostAdapter animalPostAdapter;
     private TextView textEmptyFeed;
     private TextView textFeedTitle;
+    private SwipeNavigationHelper swipeNavigationHelper;
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (Boolean.TRUE.equals(granted)) {
@@ -99,6 +102,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
 
         bindProfileHeader();
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_FEED);
+        swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_FEED);
 
 
         animalPostAdapter = new AnimalPostAdapter(this, userId);
@@ -238,6 +242,12 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
             public void onError(String message) {
             }
         });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean handled = swipeNavigationHelper != null && swipeNavigationHelper.onTouchEvent(event);
+        return handled || super.dispatchTouchEvent(event);
     }
 
     private void ensureNotificationPermissionIfNeeded() {

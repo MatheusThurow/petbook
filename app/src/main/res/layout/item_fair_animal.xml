@@ -16,10 +16,19 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <ImageView
+            android:id="@+id/imageFairAnimal"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_spinner"
+            android:scaleType="centerCrop" />
+
         <TextView
             android:id="@+id/textFairAnimalName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:textColor="@color/primary_text"
             android:textSize="18sp"
             android:textStyle="bold" />

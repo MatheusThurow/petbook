@@ -20,6 +20,8 @@
     <string name="change_password_subtitle">Atualize sua senha com seguranca para manter sua conta protegida.</string>
     <string name="company_register_subtitle_person">Associe uma empresa ao seu perfil pessoa fisica</string>
     <string name="company_register_subtitle_company">Complete o cadastro institucional da empresa</string>
+    <string name="company_register_edit_title">Editar empresa</string>
+    <string name="company_register_edit_subtitle">Atualize os dados institucionais da empresa e mantenha o perfil sempre pronto para publicacoes e contato.</string>
     <string name="animal_register_title">Cadastro de Animal</string>
     <string name="animal_register_subtitle">Registre os dados do animal</string>
     <string name="animal_register_subtitle_person">Cadastro disponivel para usuarios pessoa fisica</string>
@@ -68,6 +70,8 @@
     <string name="hint_animal_name">Nome do Animal</string>
     <string name="hint_breed">Raca</string>
     <string name="hint_age">Idade</string>
+    <string name="hint_age_years">Anos</string>
+    <string name="hint_age_months">Meses</string>
     <string name="hint_weight">Peso (kg)</string>
     <string name="hint_post_description">Descricao do post</string>
     <string name="hint_contact_phone">Telefone para contato</string>
@@ -109,6 +113,7 @@
     <string name="button_open_change_password">Alterar senha</string>
     <string name="button_change_password">Salvar nova senha</string>
     <string name="button_select_image">Selecionar imagem do animal</string>
+    <string name="button_select_fair_animal_image">Selecionar foto do animal</string>
     <string name="button_confirm_location">Confirmar localizacao</string>
     <string name="button_open_external_map">Abrir no Google Maps</string>
     <string name="button_add_fair_animal">Adicionar animal a feira</string>
@@ -186,6 +191,8 @@
     <string name="error_species_required">Selecione uma especie</string>
     <string name="error_fair_company_only">Somente usuarios empresa podem publicar uma feira de adocao.</string>
     <string name="error_fair_animals_required">Adicione pelo menos um animal para publicar a feira.</string>
+    <string name="error_fair_animal_age_required">Informe ao menos anos ou meses para a idade do animal.</string>
+    <string name="error_fair_animal_age_months_invalid">Os meses devem ficar entre 0 e 11.</string>
     <string name="error_fair_remote_unavailable">O tipo Feira esta disponivel apenas no modo local nesta versao.</string>
     <string name="error_server_unavailable">Nao foi possivel conectar ao servidor local. Verifique a API e a rede Wi-Fi.</string>
     <string name="error_firebase_chat_not_configured">Configure as credenciais do Firebase para testar o chat em dois aparelhos.</string>
@@ -196,6 +203,7 @@
     <string name="forgot_password_email_sent_success">Enviamos um email de recuperacao. Verifique sua caixa de entrada.</string>
     <string name="change_password_success">Senha alterada com sucesso.</string>
     <string name="company_register_success">Empresa salva com sucesso</string>
+    <string name="company_update_success">Empresa atualizada com sucesso</string>
     <string name="animal_register_success">Animal cadastrado com sucesso</string>
     <string name="error_company_save_failed">Nao foi possivel salvar a empresa no banco local.</string>
     <string name="error_animal_save_failed">Nao foi possivel salvar o animal no banco local.</string>
@@ -244,6 +252,9 @@
     <string name="fair_detail_subtitle">%1$s - %2$d animais disponiveis</string>
     <string name="fair_species_label">Feira</string>
     <string name="fair_breed_label">Adocao coletiva</string>
+    <string name="fair_animal_dialog_subtitle">Preencha os dados do animal para incluir na feira de adocao.</string>
+    <string name="fair_animal_dialog_info_label">Dados do animal</string>
+    <string name="fair_animal_age_label">Idade</string>
     <string name="dialog_add_fair_animal">Adicionar animal</string>
     <string name="dialog_edit_fair_animal">Editar animal</string>
     <string name="dialog_interest_select_animal">Escolha o animal da feira</string>

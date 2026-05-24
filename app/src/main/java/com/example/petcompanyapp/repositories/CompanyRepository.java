@@ -2,9 +2,11 @@ package com.petbook.app.repositories;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.petbook.app.database.AppDatabaseHelper;
+import com.petbook.app.models.CompanyProfile;
 
 public final class CompanyRepository {
 
@@ -39,6 +41,40 @@ public final class CompanyRepository {
         );
         db.close();
         return companyId;
+    }
+
+    public static CompanyProfile findByOwnerUserId(Context context, Long ownerUserId) {
+        if (ownerUserId == null) {
+            return null;
+        }
+
+        SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
+        Cursor cursor = db.query(
+                AppDatabaseHelper.TABLE_COMPANIES,
+                new String[]{"id", "owner_user_id", "company_name", "cnpj", "address_line", "phone_number"},
+                "owner_user_id = ?",
+                new String[]{String.valueOf(ownerUserId)},
+                null,
+                null,
+                "id DESC",
+                "1"
+        );
+
+        CompanyProfile company = null;
+        if (cursor.moveToFirst()) {
+            company = new CompanyProfile(
+                    cursor.getLong(0),
+                    cursor.isNull(1) ? null : cursor.getLong(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4),
+                    cursor.getString(5)
+            );
+        }
+
+        cursor.close();
+        db.close();
+        return company;
     }
 }
 

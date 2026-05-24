@@ -26,6 +26,7 @@
             android:padding="6dp" />
 
         <TextView
+            android:id="@+id/textCompanyRegisterTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -42,11 +43,21 @@
             android:layout_marginTop="8dp"
             android:background="@color/accent_color" />
 
+        <TextView
+            android:id="@+id/textCompanyRegisterSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/company_register_subtitle_company"
+            android:textColor="@color/secondary_text"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp" />
+
         <com.google.android.material.card.MaterialCardView
             style="@style/AppFormCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="18dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="8dp">
 

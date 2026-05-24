@@ -2,6 +2,7 @@ package com.petbook.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
+import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.UserProfileStorage;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
     private Long currentUserId;
     private NotificationAdapter adapter;
     private TextView textEmptyState;
+    private SwipeNavigationHelper swipeNavigationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
 
         buttonBack.setOnClickListener(v -> finish());
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_NOTIFICATIONS);
+        swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_NOTIFICATIONS);
         textMarkAllRead.setOnClickListener(v -> {
             if (currentUserId != null) {
                 if (FirebasePostRepository.isEnabled(this)) {
@@ -61,6 +65,12 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
         adapter = new NotificationAdapter(this);
         recyclerNotifications.setLayoutManager(new LinearLayoutManager(this));
         recyclerNotifications.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean handled = swipeNavigationHelper != null && swipeNavigationHelper.onTouchEvent(event);
+        return handled || super.dispatchTouchEvent(event);
     }
 
     @Override

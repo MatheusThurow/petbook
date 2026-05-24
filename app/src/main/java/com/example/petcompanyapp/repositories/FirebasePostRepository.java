@@ -495,7 +495,7 @@ public final class FirebasePostRepository {
         );
     }
 
-    private static List<Map<String, Object>> mapFairAnimals(List<FairAnimal> fairAnimals) {
+    private static List<Map<String, Object>> mapFairAnimals(Context context, List<FairAnimal> fairAnimals) {
         List<Map<String, Object>> items = new ArrayList<>();
         if (fairAnimals == null) {
             return items;
@@ -507,6 +507,7 @@ public final class FirebasePostRepository {
             map.put("species", fairAnimal.getSpecies());
             map.put("breed", fairAnimal.getBreed());
             map.put("ageDescription", fairAnimal.getAgeDescription());
+            map.put("imageUri", normalizeImageValue(context, fairAnimal.getImageUri()));
             items.add(map);
         }
         return items;
@@ -531,7 +532,7 @@ public final class FirebasePostRepository {
         values.put("imageUri", normalizeImageValue(context, post.getImageUri()));
         values.put("createdAtMillis", post.getCreatedAtMillis());
         values.put("fairAnimalCount", fairAnimals == null ? 0 : fairAnimals.size());
-        values.put("fairAnimals", mapFairAnimals(fairAnimals));
+        values.put("fairAnimals", mapFairAnimals(context, fairAnimals));
         return values;
     }
 
@@ -567,7 +568,8 @@ public final class FirebasePostRepository {
                     safe(map.get("name")),
                     safe(map.get("species")),
                     safe(map.get("breed")),
-                    safe(map.get("ageDescription"))
+                    safe(map.get("ageDescription")),
+                    safe(map.get("imageUri"))
             ));
         }
         return fairAnimals;

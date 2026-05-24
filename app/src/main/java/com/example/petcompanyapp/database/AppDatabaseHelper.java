@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "petcompany.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public static final String TABLE_USERS = "users";
     public static final String TABLE_COMPANIES = "companies";
@@ -57,6 +57,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         }
         if (oldVersion < 5) {
             db.execSQL("ALTER TABLE " + TABLE_POST_COMMENTS + " ADD COLUMN parent_comment_id INTEGER");
+        }
+        if (oldVersion < 6) {
+            db.execSQL("ALTER TABLE " + TABLE_FAIR_POST_ANIMALS + " ADD COLUMN image_uri TEXT");
         }
     }
 
@@ -138,6 +141,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "species TEXT NOT NULL,"
                 + "breed TEXT NOT NULL,"
                 + "age_description TEXT NOT NULL,"
+                + "image_uri TEXT,"
                 + "FOREIGN KEY(post_id) REFERENCES " + TABLE_POSTS + "(id)"
                 + ")");
     }
@@ -299,9 +303,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         fairPost.put("like_count", 8);
         long fairPostId = db.insert(TABLE_POSTS, null, fairPost);
 
-        insertFairAnimal(db, fairPostId, "Milo", "Cachorro", "SRD", "1 ano");
-        insertFairAnimal(db, fairPostId, "Nina", "Gato", "Persa", "2 anos");
-        insertFairAnimal(db, fairPostId, "Tico", "Coelho", "Mini lop", "8 meses");
+        insertFairAnimal(db, fairPostId, "Milo", "Cachorro", "SRD", "1 ano", "");
+        insertFairAnimal(db, fairPostId, "Nina", "Gato", "Persa", "2 anos", "");
+        insertFairAnimal(db, fairPostId, "Tico", "Coelho", "Mini lop", "8 meses", "");
     }
 
     private void insertFairAnimal(
@@ -310,7 +314,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             String animalName,
             String species,
             String breed,
-            String ageDescription
+            String ageDescription,
+            String imageUri
     ) {
         ContentValues values = new ContentValues();
         values.put("post_id", postId);
@@ -318,6 +323,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         values.put("species", species);
         values.put("breed", breed);
         values.put("age_description", ageDescription);
+        values.put("image_uri", imageUri);
         db.insert(TABLE_FAIR_POST_ANIMALS, null, values);
     }
 

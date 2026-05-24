@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.EditText;
@@ -26,6 +27,7 @@ import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.UserProfileStorage;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -45,6 +47,7 @@ public class ConversationListActivity extends AppCompatActivity implements
     private RecyclerView recyclerConversations;
     private ListenerRegistration conversationsRegistration;
     private boolean recentConversationsExpanded;
+    private SwipeNavigationHelper swipeNavigationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,7 @@ public class ConversationListActivity extends AppCompatActivity implements
 
         buttonBack.setOnClickListener(v -> finish());
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_CONVERSATIONS);
+        swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_CONVERSATIONS);
 
         userSearchAdapter = new UserSearchAdapter(this);
         recyclerUsers.setLayoutManager(new LinearLayoutManager(this));
@@ -91,6 +95,12 @@ public class ConversationListActivity extends AppCompatActivity implements
                 // Sem acao.
             }
         });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean handled = swipeNavigationHelper != null && swipeNavigationHelper.onTouchEvent(event);
+        return handled || super.dispatchTouchEvent(event);
     }
 
     @Override

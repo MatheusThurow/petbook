@@ -184,7 +184,8 @@ public final class AnimalPostRepository {
                         cursor.getString(cursor.getColumnIndexOrThrow("animal_name")),
                         cursor.getString(cursor.getColumnIndexOrThrow("species")),
                         cursor.getString(cursor.getColumnIndexOrThrow("breed")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("age_description"))
+                        cursor.getString(cursor.getColumnIndexOrThrow("age_description")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("image_uri"))
                 ));
             }
         } finally {
@@ -250,6 +251,7 @@ public final class AnimalPostRepository {
             values.put("species", fairAnimal.getSpecies());
             values.put("breed", fairAnimal.getBreed());
             values.put("age_description", fairAnimal.getAgeDescription());
+            values.put("image_uri", fairAnimal.getImageUri());
             db.insert(AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS, null, values);
         }
     }

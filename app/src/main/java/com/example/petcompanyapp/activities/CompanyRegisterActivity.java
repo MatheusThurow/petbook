@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
+import com.petbook.app.models.CompanyProfile;
 import com.petbook.app.repositories.ApiCompanyRepository;
 import com.petbook.app.repositories.CompanyRepository;
 import com.petbook.app.repositories.FirebaseCompanyRepository;
@@ -27,10 +28,14 @@ public class CompanyRegisterActivity extends AppCompatActivity {
     private EditText editCnpj;
     private EditText editAddress;
     private EditText editPhone;
+    private TextView textCompanyRegisterTitle;
+    private TextView textCompanyRegisterSubtitle;
+    private Button buttonSave;
     private String userType;
     private Long userId;
     private String userName;
     private String userEmail;
+    private boolean editingExistingCompany;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +46,10 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         editCnpj = findViewById(R.id.editCompanyCnpj);
         editAddress = findViewById(R.id.editCompanyAddress);
         editPhone = findViewById(R.id.editCompanyPhone);
+        textCompanyRegisterTitle = findViewById(R.id.textCompanyRegisterTitle);
+        textCompanyRegisterSubtitle = findViewById(R.id.textCompanyRegisterSubtitle);
         TextView textBack = findViewById(R.id.textBackCompanyRegister);
-        Button buttonSave = findViewById(R.id.buttonCompanySave);
+        buttonSave = findViewById(R.id.buttonCompanySave);
 
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (userType == null) {
@@ -55,11 +62,54 @@ public class CompanyRegisterActivity extends AppCompatActivity {
 
         MaskUtils.applyCnpjMask(editCnpj);
         MaskUtils.applyPhoneMask(editPhone);
-
-
+        loadExistingCompany();
 
         textBack.setOnClickListener(v -> finish());
         buttonSave.setOnClickListener(v -> saveCompany());
+    }
+
+    private void loadExistingCompany() {
+        if (userId == null) {
+            return;
+        }
+
+        if (FirebaseChatConfig.isEnabled(this)) {
+            FirebaseCompanyRepository.findByOwnerUserId(this, userId, new FirebaseCompanyRepository.CompanyProfileCallback() {
+                @Override
+                public void onSuccess(CompanyProfile companyProfile) {
+                    runOnUiThread(() -> bindExistingCompany(companyProfile));
+                }
+
+                @Override
+                public void onEmpty() {
+                }
+
+                @Override
+                public void onError(String message) {
+                }
+            });
+            return;
+        }
+
+        CompanyProfile companyProfile = CompanyRepository.findByOwnerUserId(this, userId);
+        if (companyProfile != null) {
+            bindExistingCompany(companyProfile);
+        }
+    }
+
+    private void bindExistingCompany(CompanyProfile companyProfile) {
+        if (companyProfile == null) {
+            return;
+        }
+
+        editingExistingCompany = true;
+        editCompanyName.setText(companyProfile.getCompanyName());
+        editCnpj.setText(companyProfile.getCnpj());
+        editAddress.setText(companyProfile.getAddress());
+        editPhone.setText(companyProfile.getPhone());
+        textCompanyRegisterTitle.setText(R.string.company_register_edit_title);
+        textCompanyRegisterSubtitle.setText(R.string.company_register_edit_subtitle);
+        buttonSave.setText(R.string.button_save_post_changes);
     }
 
     private void saveCompany() {
@@ -97,6 +147,8 @@ public class CompanyRegisterActivity extends AppCompatActivity {
             return;
         }
 
+        buttonSave.setEnabled(false);
+
         if (FirebaseChatConfig.isEnabled(this)) {
             FirebaseCompanyRepository.saveCompany(
                     this,
@@ -113,11 +165,14 @@ public class CompanyRegisterActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String message) {
-                            runOnUiThread(() -> Toast.makeText(
-                                    CompanyRegisterActivity.this,
-                                    message == null ? getString(R.string.error_company_save_failed) : message,
-                                    Toast.LENGTH_LONG
-                            ).show());
+                            runOnUiThread(() -> {
+                                buttonSave.setEnabled(true);
+                                Toast.makeText(
+                                        CompanyRegisterActivity.this,
+                                        message == null ? getString(R.string.error_company_save_failed) : message,
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            });
                         }
                     }
             );
@@ -134,6 +189,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
                     editPhone.getText().toString().trim()
             );
             if (companyId < 0) {
+                buttonSave.setEnabled(true);
                 Toast.makeText(this, R.string.error_company_save_failed, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -151,16 +207,20 @@ public class CompanyRegisterActivity extends AppCompatActivity {
                         editPhone.getText().toString().trim()
                 ),
                 ignored -> openFeed(companyName),
-                exception -> Toast.makeText(
-                        this,
-                        exception.getMessage() == null ? getString(R.string.error_company_save_failed) : exception.getMessage(),
-                        Toast.LENGTH_LONG
-                ).show()
+                exception -> {
+                    buttonSave.setEnabled(true);
+                    Toast.makeText(
+                            this,
+                            exception.getMessage() == null ? getString(R.string.error_company_save_failed) : exception.getMessage(),
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
         );
     }
 
     private void openFeed(String companyName) {
-        Toast.makeText(this, R.string.company_register_success, Toast.LENGTH_SHORT).show();
+        buttonSave.setEnabled(true);
+        Toast.makeText(this, editingExistingCompany ? R.string.company_update_success : R.string.company_register_success, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, FeedActivity.class);
         intent.putExtra(IntentKeys.EXTRA_USER_ID, userId.longValue());
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, UserType.COMPANY);

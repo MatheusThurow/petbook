@@ -23,6 +23,12 @@ public final class BottomNavigationHelper {
     public static final String DESTINATION_CONVERSATIONS = "conversations";
     public static final String DESTINATION_NOTIFICATIONS = "notifications";
     public static final String DESTINATION_PROFILE = "profile";
+    private static final String[] DESTINATION_ORDER = new String[]{
+            DESTINATION_FEED,
+            DESTINATION_CONVERSATIONS,
+            DESTINATION_NOTIFICATIONS,
+            DESTINATION_PROFILE
+    };
 
     private BottomNavigationHelper() {
         // Helper estatico para a barra inferior principal.
@@ -131,7 +137,82 @@ public final class BottomNavigationHelper {
         }
 
         Intent intent = new Intent(activity, destinationClass);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+        );
         activity.startActivity(intent);
+        applyTransition(activity, currentDestination, targetDestination);
+        activity.finish();
+    }
+
+    public static boolean openAdjacentSection(
+            AppCompatActivity activity,
+            String currentDestination,
+            boolean forward
+    ) {
+        int currentIndex = findDestinationIndex(currentDestination);
+        if (currentIndex < 0) {
+            return false;
+        }
+
+        int targetIndex = forward ? currentIndex + 1 : currentIndex - 1;
+        if (targetIndex < 0 || targetIndex >= DESTINATION_ORDER.length) {
+            return false;
+        }
+
+        String targetDestination = DESTINATION_ORDER[targetIndex];
+        Class<?> destinationClass = resolveDestinationClass(targetDestination);
+        if (destinationClass == null) {
+            return false;
+        }
+
+        openSection(activity, currentDestination, targetDestination, destinationClass);
+        return true;
+    }
+
+    private static int findDestinationIndex(String destination) {
+        for (int index = 0; index < DESTINATION_ORDER.length; index++) {
+            if (DESTINATION_ORDER[index].equals(destination)) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    private static Class<?> resolveDestinationClass(String destination) {
+        if (DESTINATION_FEED.equals(destination)) {
+            return FeedActivity.class;
+        }
+        if (DESTINATION_CONVERSATIONS.equals(destination)) {
+            return ConversationListActivity.class;
+        }
+        if (DESTINATION_NOTIFICATIONS.equals(destination)) {
+            return NotificationsActivity.class;
+        }
+        if (DESTINATION_PROFILE.equals(destination)) {
+            return ProfileActivity.class;
+        }
+        return null;
+    }
+
+    private static void applyTransition(
+            AppCompatActivity activity,
+            String currentDestination,
+            String targetDestination
+    ) {
+        int currentIndex = findDestinationIndex(currentDestination);
+        int targetIndex = findDestinationIndex(targetDestination);
+        if (currentIndex < 0 || targetIndex < 0 || currentIndex == targetIndex) {
+            return;
+        }
+
+        if (targetIndex > currentIndex) {
+            activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            return;
+        }
+
+        activity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

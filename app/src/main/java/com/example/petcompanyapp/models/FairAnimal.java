@@ -8,6 +8,7 @@ public class FairAnimal {
     private final String species;
     private final String breed;
     private final String ageDescription;
+    private final String imageUri;
 
     public FairAnimal(
             Long id,
@@ -15,7 +16,8 @@ public class FairAnimal {
             String name,
             String species,
             String breed,
-            String ageDescription
+            String ageDescription,
+            String imageUri
     ) {
         this.id = id;
         this.postId = postId;
@@ -23,6 +25,7 @@ public class FairAnimal {
         this.species = species;
         this.breed = breed;
         this.ageDescription = ageDescription;
+        this.imageUri = imageUri;
     }
 
     public Long getId() {
@@ -47,5 +50,9 @@ public class FairAnimal {
 
     public String getAgeDescription() {
         return ageDescription;
+    }
+
+    public String getImageUri() {
+        return imageUri;
     }
 }

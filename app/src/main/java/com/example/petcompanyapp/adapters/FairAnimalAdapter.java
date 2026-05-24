@@ -3,6 +3,7 @@ package com.petbook.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.petbook.app.R;
 import com.petbook.app.models.FairAnimal;
+import com.petbook.app.utils.ImageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public class FairAnimalAdapter extends RecyclerView.Adapter<FairAnimalAdapter.Fa
                 animal.getBreed(),
                 animal.getAgeDescription()
         ));
+        ImageUtils.loadInto(holder.imageAnimal, animal.getImageUri());
     }
 
     @Override
@@ -51,9 +54,11 @@ public class FairAnimalAdapter extends RecyclerView.Adapter<FairAnimalAdapter.Fa
     static class FairAnimalViewHolder extends RecyclerView.ViewHolder {
         private final TextView textName;
         private final TextView textMeta;
+        private final ImageView imageAnimal;
 
         FairAnimalViewHolder(@NonNull View itemView) {
             super(itemView);
+            imageAnimal = itemView.findViewById(R.id.imageFairAnimal);
             textName = itemView.findViewById(R.id.textFairAnimalName);
             textMeta = itemView.findViewById(R.id.textFairAnimalMeta);
         }
