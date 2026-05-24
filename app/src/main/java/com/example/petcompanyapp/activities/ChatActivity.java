@@ -16,6 +16,7 @@ import com.petbook.app.models.ConversationSummary;
 import com.petbook.app.models.User;
 import com.petbook.app.repositories.ChatRepository;
 import com.petbook.app.repositories.FirebaseChatRepository;
+import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.FeatureFlags;
@@ -110,13 +111,35 @@ public class ChatActivity extends AppCompatActivity {
         String fallbackName = targetUserName;
         String fallbackType = targetUserType;
 
-        if (targetUserId != null) {
+        if (!FeatureFlags.useFirebaseChat(this) && targetUserId != null) {
             User targetUser = UserRepository.findById(this, targetUserId);
             if (targetUser != null) {
                 fallbackName = targetUser.getName();
                 fallbackType = targetUser.getUserType();
                 targetUserEmail = targetUser.getEmail();
             }
+        } else if (FeatureFlags.useFirebaseChat(this)
+                && (fallbackName == null || fallbackName.trim().isEmpty())
+                && targetUserId != null) {
+            FirebaseUserRepository.findById(this, targetUserId, new FirebaseUserRepository.UserCallback() {
+                @Override
+                public void onSuccess(User user) {
+                    runOnUiThread(() -> {
+                        targetUserName = user.getName();
+                        targetUserType = user.getUserType();
+                        targetUserEmail = user.getEmail();
+                        textChatTitle.setText(targetUserName);
+                        textChatSubtitle.setText(getString(
+                                R.string.chat_partner_type,
+                                getUserTypeLabel(targetUserType)
+                        ));
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                }
+            });
         }
 
         if (fallbackName == null || fallbackName.trim().isEmpty()) {

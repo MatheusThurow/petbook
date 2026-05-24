@@ -40,7 +40,6 @@ public class FairPostDetailActivity extends AppCompatActivity {
             return;
         }
 
-        List<FairAnimal> fairAnimals = AnimalPostRepository.getFairAnimalsForPost(this, postId);
         FairAnimalAdapter adapter = new FairAnimalAdapter();
         recyclerAnimals.setLayoutManager(new LinearLayoutManager(this));
         recyclerAnimals.setAdapter(adapter);
@@ -93,6 +92,7 @@ public class FairPostDetailActivity extends AppCompatActivity {
         ));
         textDescription.setText(post.getDescription());
         textContact.setText(getString(R.string.feed_post_contact, post.getContactPhone()));
+        List<FairAnimal> fairAnimals = AnimalPostRepository.getFairAnimalsForPost(this, postId);
         adapter.submitList(fairAnimals);
         textEmpty.setVisibility(fairAnimals.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
     }
