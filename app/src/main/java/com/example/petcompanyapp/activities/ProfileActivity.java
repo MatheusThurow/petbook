@@ -92,8 +92,10 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        boolean handled = swipeNavigationHelper != null && swipeNavigationHelper.onTouchEvent(event);
-        return handled || super.dispatchTouchEvent(event);
+        if (swipeNavigationHelper != null) {
+            swipeNavigationHelper.onTouchEvent(event);
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     @Override
