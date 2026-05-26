@@ -2,33 +2,35 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="96dp"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="12dp">
+    android:layout_height="100dp">
 
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="72dp"
         android:layout_gravity="bottom"
-        android:backgroundTint="@color/white"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="2dp"
-        app:strokeColor="@color/soft_surface"
-        app:strokeWidth="1dp">
+        android:background="@color/white"
+        android:elevation="0dp"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/soft_surface" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="71dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp">
+            android:paddingStart="10dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp">
 
             <ImageButton
                 android:id="@+id/buttonNavFeed"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/button_open_feed"
@@ -39,7 +41,7 @@
             <ImageButton
                 android:id="@+id/buttonNavConversations"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/button_open_chat"
@@ -48,18 +50,18 @@
                 android:tint="@color/selector_bottom_nav_icon" />
 
             <Space
-                android:layout_width="64dp"
+                android:layout_width="72dp"
                 android:layout_height="1dp" />
 
             <FrameLayout
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1">
 
                 <ImageButton
                     android:id="@+id/buttonNavNotifications"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="44dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/button_open_notifications"
                     android:padding="8dp"
@@ -82,7 +84,7 @@
             <ImageButton
                 android:id="@+id/buttonNavProfile"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/button_open_profile"
@@ -90,18 +92,18 @@
                 android:src="@drawable/ic_nav_profile"
                 android:tint="@color/selector_bottom_nav_icon" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/buttonNavCreatePost"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="center_horizontal|top"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_gravity="center"
         android:contentDescription="@string/button_create_post"
         android:src="@drawable/ic_add_minimal"
         app:backgroundTint="@color/primary_color"
         app:borderWidth="0dp"
-        app:elevation="4dp"
+        app:elevation="0dp"
         app:ensureMinTouchTargetSize="true"
         app:maxImageSize="20dp"
         app:rippleColor="@color/soft_orange"

@@ -1,6 +1,6 @@
 # PetBook
 
-Aplicativo Android em Java com proposta de rede social para:
+Aplicativo Android em `Java` com proposta de rede social para:
 
 - animais perdidos
 - animais para adoção
@@ -20,14 +20,13 @@ Pacote Android atual:
 - `Firebase Cloud Messaging`
 - `SQLite` como fallback/local legado
 
-## Funcionalidades implementadas
+## Funcionalidades atuais
 
 - login único por e-mail e senha
 - login com Google
-- cadastro de usuário com tipo:
+- cadastro de conta para:
   - pessoa física
   - empresa
-- cadastro automático de conta básica ao entrar com Google pela primeira vez
 - recuperação de senha por e-mail
 - alteração de senha dentro do perfil
 - perfil com edição de dados
@@ -39,116 +38,116 @@ Pacote Android atual:
   - feira de adoção
 - edição e exclusão de post apenas pelo autor
 - curtidas
-- comentários públicos em post perdido
+- comentários públicos em posts de perdido
 - respostas encadeadas em comentários
-- contato direto por chat em posts de adoção
+- contato direto por chat em posts de adoção e feira
 - chat entre usuários
 - notificações no app
-- push notification via FCM
+- push notification com FCM
 - cadastro de empresa
 - cadastro de animal
+- navegação inferior fixa
+- navegação horizontal por gesto entre telas principais
 
 ## Regras principais do produto
 
-- login não separa mais empresa e pessoa física
-- o tipo da conta é definido no cadastro e reconhecido automaticamente após o login
+- o login não separa mais empresa e pessoa física
+- o tipo da conta é escolhido no cadastro e reconhecido automaticamente após o login
 - pessoa física pode criar:
-  - perdido
-  - adoção
+  - post de animal perdido
+  - post de adoção
 - empresa pode criar:
-  - perdido
-  - adoção
-  - feira
+  - post de animal perdido
+  - post de adoção
+  - post de feira
 - post de feira aceita vários animais em um único post
-- apenas o autor pode ver ações de editar/apagar
-- em post perdido:
+- apenas o autor pode editar ou apagar o próprio post
+- em post de perdido:
   - outros usuários veem `Comentar`
   - o autor vê `Comentários`
-- em post de adoção/feira:
+- em post de adoção ou feira:
   - outros usuários veem `Entrar em contato`
   - o autor vê `Comentários`
 
-## Fluxos principais
+## Fluxo atual do app
 
 ### 1. Login
 
 - o usuário entra com e-mail e senha
-- o app identifica o tipo da conta automaticamente
-- se usar Google:
+- o app identifica automaticamente o tipo da conta
+- no login com Google:
   - autentica no Firebase Auth
   - procura o usuário no Firestore
-  - se não existir, cria uma conta básica pessoa física e entra
+  - se não existir, cria uma conta básica de pessoa física
 
 ### 2. Cadastro
 
-- o usuário escolhe:
+- o usuário escolhe o tipo da conta:
   - pessoa física
   - empresa
-- pessoa física entra direto no feed após cadastro
-- empresa pode seguir para completar o cadastro institucional
+- pessoa física vai direto para o feed após o cadastro
+- empresa pode seguir para completar os dados institucionais
 
-### 3. Recuperação de senha
+### 3. Recuperação e alteração de senha
 
-- tela `Esqueci minha senha`
-- usuário informa e confirma o e-mail
-- o app envia e-mail de recuperação pelo Firebase Auth
-
-### 4. Alteração de senha
-
-- disponível no perfil
-- exige:
+- `Esqueci minha senha` envia e-mail de redefinição pelo Firebase Auth
+- `Alterar senha` fica disponível dentro do perfil
+- o fluxo de alteração exige:
   - senha atual
   - nova senha
   - confirmação da nova senha
 
-### 5. Feed
+### 4. Feed
 
-- filtros:
+- filtros disponíveis:
   - todos
   - perdidos
   - adoção
-- barra inferior fixa com:
+- navegação inferior com:
   - feed
   - conversas
   - adicionar post
   - notificações
   - perfil
+- troca de telas também por gesto lateral
 
-### 6. Posts
+### 5. Posts
 
 - perdido:
-  - interação pública por comentários
+  - funciona como post público de rede social
+  - recebe comentários públicos
 - adoção:
-  - contato direto com o dono do post
+  - prioriza contato direto com o autor
 - feira:
-  - exclusivo para empresa
-  - mostra vários animais dentro do mesmo post
+  - exclusiva para empresa
+  - reúne vários animais em um único post
 
-### 7. Comentários
+### 6. Comentários
 
 - usados principalmente em posts de perdido
-- exibem todos os comentários públicos
-- permitem respostas encadeadas
+- mostram comentários públicos de todos os usuários
+- suportam respostas encadeadas
 
-### 8. Chat
+### 7. Chat
 
 - busca por usuário
 - conversa individual
-- sincronizado pelo Firebase
+- sincronização via Firebase
+- área de conversas recentes na tela de conversas
 
-### 9. Notificações
+### 8. Notificações
 
 - curtidas
 - comentários
 - mensagens
 - interesse em adoção
-- atualizações de post
+- atualização de post
 
 ## Firebase usado no projeto
 
 ### Firestore
 
-Coleções principais esperadas:
+Coleções principais:
 
 - `users`
 - `posts`
@@ -172,7 +171,30 @@ Provedores esperados:
 
 - usado para push notification
 
-## Estrutura do projeto
+## Observações importantes
+
+- o Firebase é a base principal das interações do app
+- o SQLite ainda existe como fallback em fluxos legados
+- o app não cria mais postagens de exemplo no banco local
+- o feed também faz limpeza das postagens de exemplo antigas no Firebase quando necessário
+- a foto de perfil não está ativa no fluxo atual
+
+## Como rodar
+
+1. Abrir o projeto no Android Studio
+2. Sincronizar o Gradle
+3. Conferir a configuração do Firebase
+4. Rodar em um dispositivo Android
+
+## Login com Google
+
+Para o login com Google funcionar no aparelho:
+
+- `google-services.json` precisa estar atualizado
+- o `SHA-1` do debug precisa estar cadastrado no Firebase
+- o `google_web_client_id` precisa estar correto em `strings.xml`
+
+## Estrutura principal
 
 - `app/src/main/java/com/example/petcompanyapp/activities`
 - `app/src/main/java/com/example/petcompanyapp/adapters`
@@ -188,26 +210,11 @@ Provedores esperados:
 - `app/build.gradle`
 - `app/src/main/AndroidManifest.xml`
 - `app/src/main/java/com/example/petcompanyapp/activities/LoginActivity.java`
+- `app/src/main/java/com/example/petcompanyapp/activities/FeedActivity.java`
 - `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseUserRepository.java`
 - `app/src/main/java/com/example/petcompanyapp/repositories/FirebasePostRepository.java`
 - `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseChatRepository.java`
 - `app/src/main/java/com/example/petcompanyapp/repositories/FirebaseNotificationRepository.java`
-
-## Como rodar
-
-1. Abrir o projeto no Android Studio
-2. Sincronizar o Gradle
-3. Conferir se o Firebase está configurado
-4. Rodar no dispositivo Android
-
-## Observações
-
-- o projeto passou a usar Firebase como base principal das interações
-- o SQLite ainda existe como fallback em alguns fluxos legados
-- para login com Google funcionar no aparelho:
-  - `google-services.json` precisa estar atualizado
-  - o `SHA-1` do debug precisa estar cadastrado no Firebase
-  - `google_web_client_id` precisa estar correto em `strings.xml`
 
 ## Repositório
 

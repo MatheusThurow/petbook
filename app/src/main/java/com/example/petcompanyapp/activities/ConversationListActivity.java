@@ -217,7 +217,7 @@ public class ConversationListActivity extends AppCompatActivity implements
             intent.putExtra(IntentKeys.EXTRA_CONVERSATION_ID, conversation.getConversationId());
         }
         if (conversation.getPartnerUserId() != null) {
-            intent.putExtra(IntentKeys.EXTRA_TARGET_USER_ID, conversation.getPartnerUserId());
+        intent.putExtra(IntentKeys.EXTRA_TARGET_USER_ID, conversation.getPartnerUserId());
         }
         intent.putExtra(IntentKeys.EXTRA_TARGET_USER_NAME, conversation.getPartnerName());
         intent.putExtra(IntentKeys.EXTRA_TARGET_USER_TYPE, conversation.getPartnerType());

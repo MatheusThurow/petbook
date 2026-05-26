@@ -1,6 +1,7 @@
 package com.petbook.app.repositories;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
@@ -27,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class FirebasePostRepository {
+
+    private static final String CLEANUP_PREFS = "firebase_post_cleanup";
+    private static final String KEY_SAMPLE_POSTS_REMOVED = "sample_posts_removed";
 
     public interface PostsCallback {
         void onSuccess(List<AnimalPost> posts);
@@ -84,6 +88,42 @@ public final class FirebasePostRepository {
                         }
                     }
                     callback.onSuccess(posts);
+                })
+                .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
+    }
+
+    public static void cleanupSamplePostsIfNeeded(Context context, @NonNull CompletionCallback callback) {
+        if (!isEnabled(context)) {
+            callback.onSuccess();
+            return;
+        }
+
+        SharedPreferences preferences = context.getSharedPreferences(CLEANUP_PREFS, Context.MODE_PRIVATE);
+        if (preferences.getBoolean(KEY_SAMPLE_POSTS_REMOVED, false)) {
+            callback.onSuccess();
+            return;
+        }
+
+        postsCollection(context)
+                .whereIn("animalName", java.util.Arrays.asList("Thor", "Luna", "Feira de Adocao de Sabado"))
+                .get()
+                .addOnSuccessListener(result -> {
+                    if (result.isEmpty()) {
+                        preferences.edit().putBoolean(KEY_SAMPLE_POSTS_REMOVED, true).apply();
+                        callback.onSuccess();
+                        return;
+                    }
+
+                    WriteBatch batch = FirebaseChatConfig.getFirestore(context).batch();
+                    for (QueryDocumentSnapshot document : result) {
+                        batch.delete(document.getReference());
+                    }
+                    batch.commit()
+                            .addOnSuccessListener(unused -> {
+                                preferences.edit().putBoolean(KEY_SAMPLE_POSTS_REMOVED, true).apply();
+                                callback.onSuccess();
+                            })
+                            .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
                 })
                 .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
     }

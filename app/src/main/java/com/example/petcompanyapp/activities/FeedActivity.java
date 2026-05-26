@@ -150,14 +150,24 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
 
     private void loadFeedPosts() {
         if (FirebasePostRepository.isEnabled(this)) {
-            FirebasePostRepository.bootstrapLocalPostsIfNeeded(this, new FirebasePostRepository.CompletionCallback() {
+            FirebasePostRepository.cleanupSamplePostsIfNeeded(this, new FirebasePostRepository.CompletionCallback() {
                 @Override
                 public void onSuccess() {
-                    FirebasePostRepository.loadPosts(FeedActivity.this, selectedFilter, UserProfileStorage.getEmail(FeedActivity.this, userEmail), new FirebasePostRepository.PostsCallback() {
+                    FirebasePostRepository.bootstrapLocalPostsIfNeeded(FeedActivity.this, new FirebasePostRepository.CompletionCallback() {
                         @Override
-                        public void onSuccess(java.util.List<AnimalPost> posts) {
-                            animalPostAdapter.submitList(posts);
-                            textEmptyFeed.setVisibility(posts.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+                        public void onSuccess() {
+                            FirebasePostRepository.loadPosts(FeedActivity.this, selectedFilter, UserProfileStorage.getEmail(FeedActivity.this, userEmail), new FirebasePostRepository.PostsCallback() {
+                                @Override
+                                public void onSuccess(java.util.List<AnimalPost> posts) {
+                                    animalPostAdapter.submitList(posts);
+                                    textEmptyFeed.setVisibility(posts.isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    Toast.makeText(FeedActivity.this, message, Toast.LENGTH_LONG).show();
+                                }
+                            });
                         }
 
                         @Override

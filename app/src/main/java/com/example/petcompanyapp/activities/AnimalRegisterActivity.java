@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.petbook.app.R;
 import com.petbook.app.repositories.FirebaseAnimalRepository;
 import com.petbook.app.repositories.AnimalRepository;
+import com.petbook.app.utils.ActionStateHelper;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
 import com.petbook.app.utils.FirebaseChatConfig;
@@ -28,6 +29,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
     private EditText editWeight;
     private Long userId;
     private String userType;
+    private Button buttonRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +43,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         editWeight = findViewById(R.id.editAnimalWeight);
         TextView textBack = findViewById(R.id.textBackAnimalRegister);
         TextView textAnimalRegisterSubtitle = findViewById(R.id.textAnimalRegisterSubtitle);
-        Button buttonRegister = findViewById(R.id.buttonAnimalRegister);
+        buttonRegister = findViewById(R.id.buttonAnimalRegister);
 
         userType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (userType == null) {
@@ -95,6 +97,8 @@ public class AnimalRegisterActivity extends AppCompatActivity {
             return;
         }
 
+        setRegisterLoading(true);
+
         if (FirebaseChatConfig.isEnabled(this)) {
             FirebaseAnimalRepository.saveAnimal(
                     this,
@@ -109,6 +113,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(long animalId) {
                             runOnUiThread(() -> {
+                                setRegisterLoading(false);
                                 Toast.makeText(AnimalRegisterActivity.this, R.string.animal_register_success, Toast.LENGTH_LONG).show();
                                 finish();
                             });
@@ -116,11 +121,14 @@ public class AnimalRegisterActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String message) {
-                            runOnUiThread(() -> Toast.makeText(
-                                    AnimalRegisterActivity.this,
-                                    message == null ? getString(R.string.error_animal_save_failed) : message,
-                                    Toast.LENGTH_SHORT
-                            ).show());
+                            runOnUiThread(() -> {
+                                setRegisterLoading(false);
+                                Toast.makeText(
+                                        AnimalRegisterActivity.this,
+                                        message == null ? getString(R.string.error_animal_save_failed) : message,
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            });
                         }
                     }
             );
@@ -138,12 +146,25 @@ public class AnimalRegisterActivity extends AppCompatActivity {
                 Double.parseDouble(weight.replace(",", "."))
         );
         if (animalId < 0) {
+            setRegisterLoading(false);
             Toast.makeText(this, R.string.error_animal_save_failed, Toast.LENGTH_SHORT).show();
             return;
         }
 
+        setRegisterLoading(false);
         Toast.makeText(this, R.string.animal_register_success, Toast.LENGTH_LONG).show();
         finish();
+    }
+
+    private void setRegisterLoading(boolean isLoading) {
+        ActionStateHelper.setEnabled(!isLoading,
+                editAnimalName, spinnerSpecies, editBreed, editAge, editWeight);
+        ActionStateHelper.setLoading(
+                buttonRegister,
+                isLoading,
+                getString(R.string.button_register_animal),
+                getString(R.string.action_processing)
+        );
     }
 }
 

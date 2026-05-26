@@ -15,6 +15,7 @@ import com.petbook.app.repositories.ApiCompanyRepository;
 import com.petbook.app.repositories.CompanyRepository;
 import com.petbook.app.repositories.FirebaseCompanyRepository;
 import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.ActionStateHelper;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.IntentKeys;
@@ -147,7 +148,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
             return;
         }
 
-        buttonSave.setEnabled(false);
+        setSaveLoading(true);
 
         if (FirebaseChatConfig.isEnabled(this)) {
             FirebaseCompanyRepository.saveCompany(
@@ -166,7 +167,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
                         @Override
                         public void onError(String message) {
                             runOnUiThread(() -> {
-                                buttonSave.setEnabled(true);
+                                setSaveLoading(false);
                                 Toast.makeText(
                                         CompanyRegisterActivity.this,
                                         message == null ? getString(R.string.error_company_save_failed) : message,
@@ -189,7 +190,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
                     editPhone.getText().toString().trim()
             );
             if (companyId < 0) {
-                buttonSave.setEnabled(true);
+                setSaveLoading(false);
                 Toast.makeText(this, R.string.error_company_save_failed, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -208,7 +209,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
                 ),
                 ignored -> openFeed(companyName),
                 exception -> {
-                    buttonSave.setEnabled(true);
+                    setSaveLoading(false);
                     Toast.makeText(
                             this,
                             exception.getMessage() == null ? getString(R.string.error_company_save_failed) : exception.getMessage(),
@@ -219,7 +220,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
     }
 
     private void openFeed(String companyName) {
-        buttonSave.setEnabled(true);
+        setSaveLoading(false);
         Toast.makeText(this, editingExistingCompany ? R.string.company_update_success : R.string.company_register_success, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, FeedActivity.class);
         intent.putExtra(IntentKeys.EXTRA_USER_ID, userId.longValue());
@@ -230,6 +231,18 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         }
         startActivity(intent);
         finish();
+    }
+
+    private void setSaveLoading(boolean isLoading) {
+        ActionStateHelper.setEnabled(!isLoading, editCompanyName, editCnpj, editAddress, editPhone);
+        ActionStateHelper.setLoading(
+                buttonSave,
+                isLoading,
+                editingExistingCompany
+                        ? getString(R.string.button_save_post_changes)
+                        : getString(R.string.button_save),
+                getString(R.string.action_processing)
+        );
     }
 }
 

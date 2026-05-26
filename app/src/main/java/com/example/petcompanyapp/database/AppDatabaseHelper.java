@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "petcompany.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     public static final String TABLE_USERS = "users";
     public static final String TABLE_COMPANIES = "companies";
@@ -60,6 +60,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         }
         if (oldVersion < 6) {
             db.execSQL("ALTER TABLE " + TABLE_FAIR_POST_ANIMALS + " ADD COLUMN image_uri TEXT");
+        }
+        if (oldVersion < 7) {
+            removeSamplePosts(db);
         }
     }
 
@@ -249,63 +252,20 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         lunaAnimal.put("weight_kg", 4.3);
         db.insert(TABLE_ANIMALS, null, lunaAnimal);
 
-        ContentValues thorPost = new ContentValues();
-        thorPost.put("author_user_id", anaUserId);
-        thorPost.put("post_type", "LOST");
-        thorPost.put("animal_name", "Thor");
-        thorPost.put("species", "Cachorro");
-        thorPost.put("breed", "Labrador");
-        thorPost.put("age_description", "4 anos");
-        thorPost.put("description_text", "Animal perdido na regiao central, usa coleira azul e atende pelo nome Thor.");
-        thorPost.put("contact_phone", "(11) 98888-0001");
-        thorPost.put("latitude", -23.550520d);
-        thorPost.put("longitude", -46.633308d);
-        thorPost.put("location_reference", "Ultima vez visto proximo a praca central.");
-        thorPost.put("image_uri", "");
-        thorPost.put("created_at_millis", System.currentTimeMillis() - 1000L * 60L * 30L);
-        thorPost.put("liked", 0);
-        thorPost.put("like_count", 12);
-        db.insert(TABLE_POSTS, null, thorPost);
+        removeSamplePosts(db);
+    }
 
-        ContentValues lunaPost = new ContentValues();
-        lunaPost.put("author_user_id", clinicUserId);
-        lunaPost.put("post_type", "ADOPTION");
-        lunaPost.put("animal_name", "Luna");
-        lunaPost.put("species", "Gato");
-        lunaPost.put("breed", "Siames");
-        lunaPost.put("age_description", "2 anos");
-        lunaPost.put("description_text", "Gata docil, castrada e pronta para um novo lar responsavel.");
-        lunaPost.put("contact_phone", "(11) 99999-1234");
-        lunaPost.putNull("latitude");
-        lunaPost.putNull("longitude");
-        lunaPost.put("location_reference", "");
-        lunaPost.put("image_uri", "");
-        lunaPost.put("created_at_millis", System.currentTimeMillis() - 1000L * 60L * 90L);
-        lunaPost.put("liked", 1);
-        lunaPost.put("like_count", 27);
-        db.insert(TABLE_POSTS, null, lunaPost);
-
-        ContentValues fairPost = new ContentValues();
-        fairPost.put("author_user_id", clinicUserId);
-        fairPost.put("post_type", "FAIR");
-        fairPost.put("animal_name", "Feira de Adocao de Sabado");
-        fairPost.put("species", "Feira");
-        fairPost.put("breed", "Varios perfis");
-        fairPost.put("age_description", "3 animais");
-        fairPost.put("description_text", "Evento especial da Clinica Feliz com varios animais prontos para encontrar um novo lar.");
-        fairPost.put("contact_phone", "(11) 99999-1234");
-        fairPost.putNull("latitude");
-        fairPost.putNull("longitude");
-        fairPost.put("location_reference", "");
-        fairPost.put("image_uri", "");
-        fairPost.put("created_at_millis", System.currentTimeMillis() - 1000L * 60L * 10L);
-        fairPost.put("liked", 0);
-        fairPost.put("like_count", 8);
-        long fairPostId = db.insert(TABLE_POSTS, null, fairPost);
-
-        insertFairAnimal(db, fairPostId, "Milo", "Cachorro", "SRD", "1 ano", "");
-        insertFairAnimal(db, fairPostId, "Nina", "Gato", "Persa", "2 anos", "");
-        insertFairAnimal(db, fairPostId, "Tico", "Coelho", "Mini lop", "8 meses", "");
+    private void removeSamplePosts(SQLiteDatabase db) {
+        db.delete(
+                TABLE_FAIR_POST_ANIMALS,
+                "post_id IN (SELECT id FROM " + TABLE_POSTS + " WHERE animal_name IN (?, ?, ?))",
+                new String[]{"Thor", "Luna", "Feira de Adocao de Sabado"}
+        );
+        db.delete(
+                TABLE_POSTS,
+                "animal_name IN (?, ?, ?)",
+                new String[]{"Thor", "Luna", "Feira de Adocao de Sabado"}
+        );
     }
 
     private void insertFairAnimal(

@@ -10,12 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
 import com.petbook.app.repositories.FirebaseUserRepository;
+import com.petbook.app.utils.ActionStateHelper;
 import com.petbook.app.utils.ValidationUtils;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private EditText editEmail;
     private EditText editConfirmEmail;
+    private Button buttonResetPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +27,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editForgotPasswordEmail);
         editConfirmEmail = findViewById(R.id.editForgotPasswordConfirmEmail);
         TextView textBack = findViewById(R.id.textBackForgotPassword);
-        Button buttonResetPassword = findViewById(R.id.buttonResetPassword);
+        buttonResetPassword = findViewById(R.id.buttonResetPassword);
 
         textBack.setOnClickListener(v -> finish());
         buttonResetPassword.setOnClickListener(v -> resetPassword());
@@ -47,11 +49,14 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             return;
         }
 
+        setResetLoading(true);
+
         if (FirebaseUserRepository.isEnabled(this)) {
             FirebaseUserRepository.sendPasswordResetEmail(this, email, new FirebaseUserRepository.CompletionCallback() {
                 @Override
                 public void onSuccess() {
                     runOnUiThread(() -> {
+                        setResetLoading(false);
                         Toast.makeText(ForgotPasswordActivity.this, R.string.forgot_password_email_sent_success, Toast.LENGTH_LONG).show();
                         finish();
                     });
@@ -59,17 +64,31 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String message) {
-                    runOnUiThread(() -> Toast.makeText(
-                            ForgotPasswordActivity.this,
-                            message == null ? getString(R.string.error_forgot_password_user_not_found) : message,
-                            Toast.LENGTH_LONG
-                    ).show());
+                    runOnUiThread(() -> {
+                        setResetLoading(false);
+                        Toast.makeText(
+                                ForgotPasswordActivity.this,
+                                message == null ? getString(R.string.error_forgot_password_user_not_found) : message,
+                                Toast.LENGTH_LONG
+                        ).show();
+                    });
                 }
             });
             return;
         }
 
+        setResetLoading(false);
         Toast.makeText(this, R.string.error_password_reset_email_unavailable, Toast.LENGTH_LONG).show();
+    }
+
+    private void setResetLoading(boolean isLoading) {
+        ActionStateHelper.setEnabled(!isLoading, editEmail, editConfirmEmail);
+        ActionStateHelper.setLoading(
+                buttonResetPassword,
+                isLoading,
+                getString(R.string.forgot_password_send_button),
+                getString(R.string.action_processing)
+        );
     }
 }
 
