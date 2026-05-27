@@ -13,6 +13,7 @@ import com.petbook.app.R;
 import com.petbook.app.repositories.FirebaseAnimalRepository;
 import com.petbook.app.repositories.AnimalRepository;
 import com.petbook.app.utils.ActionStateHelper;
+import com.petbook.app.utils.AgeFormatUtils;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
 import com.petbook.app.utils.FirebaseChatConfig;
@@ -25,7 +26,8 @@ public class AnimalRegisterActivity extends AppCompatActivity {
     private EditText editAnimalName;
     private Spinner spinnerSpecies;
     private EditText editBreed;
-    private EditText editAge;
+    private EditText editAgeYears;
+    private EditText editAgeMonths;
     private EditText editWeight;
     private Long userId;
     private String userType;
@@ -39,7 +41,8 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         editAnimalName = findViewById(R.id.editAnimalName);
         spinnerSpecies = findViewById(R.id.spinnerSpecies);
         editBreed = findViewById(R.id.editAnimalBreed);
-        editAge = findViewById(R.id.editAnimalAge);
+        editAgeYears = findViewById(R.id.editAnimalAgeYears);
+        editAgeMonths = findViewById(R.id.editAnimalAgeMonths);
         editWeight = findViewById(R.id.editAnimalWeight);
         TextView textBack = findViewById(R.id.textBackAnimalRegister);
         TextView textAnimalRegisterSubtitle = findViewById(R.id.textAnimalRegisterSubtitle);
@@ -65,7 +68,8 @@ public class AnimalRegisterActivity extends AppCompatActivity {
         String animalName = editAnimalName.getText().toString().trim();
         String species = spinnerSpecies.getSelectedItem().toString();
         String breed = editBreed.getText().toString().trim();
-        String age = editAge.getText().toString().trim();
+        String ageYearsValue = editAgeYears.getText().toString().trim();
+        String ageMonthsValue = editAgeMonths.getText().toString().trim();
         String weight = editWeight.getText().toString().trim();
 
         if (ValidationUtils.isEmpty(animalName)) {
@@ -85,9 +89,17 @@ public class AnimalRegisterActivity extends AppCompatActivity {
             return;
         }
 
-        if (ValidationUtils.isEmpty(age)) {
-            editAge.setError(getString(R.string.error_required_field));
-            editAge.requestFocus();
+        if (!AgeFormatUtils.hasAnyValue(ageYearsValue, ageMonthsValue)) {
+            editAgeYears.setError(getString(R.string.error_age_required));
+            editAgeYears.requestFocus();
+            return;
+        }
+
+        int ageYears = AgeFormatUtils.parseYears(ageYearsValue);
+        int ageMonths = AgeFormatUtils.parseMonths(ageMonthsValue);
+        if (!AgeFormatUtils.isValidMonths(ageMonths)) {
+            editAgeMonths.setError(getString(R.string.error_age_months_invalid));
+            editAgeMonths.requestFocus();
             return;
         }
 
@@ -107,7 +119,8 @@ public class AnimalRegisterActivity extends AppCompatActivity {
                     animalName,
                     species,
                     breed,
-                    Integer.parseInt(age),
+                    ageYears,
+                    ageMonths,
                     Double.parseDouble(weight.replace(",", ".")),
                     new FirebaseAnimalRepository.AnimalIdCallback() {
                         @Override
@@ -142,7 +155,8 @@ public class AnimalRegisterActivity extends AppCompatActivity {
                 animalName,
                 species,
                 breed,
-                Integer.parseInt(age),
+                ageYears,
+                ageMonths,
                 Double.parseDouble(weight.replace(",", "."))
         );
         if (animalId < 0) {
@@ -158,7 +172,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
 
     private void setRegisterLoading(boolean isLoading) {
         ActionStateHelper.setEnabled(!isLoading,
-                editAnimalName, spinnerSpecies, editBreed, editAge, editWeight);
+                editAnimalName, spinnerSpecies, editBreed, editAgeYears, editAgeMonths, editWeight);
         ActionStateHelper.setLoading(
                 buttonRegister,
                 isLoading,

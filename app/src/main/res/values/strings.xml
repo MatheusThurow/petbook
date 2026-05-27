@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">PetCompanyApp</string>
-    <string name="api_base_url">http://192.168.15.3:8080</string>
+    <string name="app_name">PetBook</string>
+    <string name="app_name_pet">Pet</string>
+    <string name="app_name_book">Book</string>
+    <string name="api_base_url">http://127.0.0.1:8080</string>
     <string name="login_title">Bem-vindo de volta</string>
     <string name="login_subtitle">Entre para acompanhar animais perdidos, adoções e novidades da comunidade.</string>
     <string name="button_login">Entrar</string>
@@ -15,6 +17,10 @@
     <string name="user_register_subtitle">Crie seu perfil para publicar, acompanhar e interagir com a comunidade.</string>
     <string name="user_register_subtitle_person">Cadastre uma conta para pessoa fisica</string>
     <string name="user_register_subtitle_company">Cadastre o acesso principal para empresa</string>
+    <string name="user_register_google_title">Concluir cadastro</string>
+    <string name="user_register_google_subtitle">Complete seu cadastro para entrar com sua conta Google.</string>
+    <string name="user_register_google_subtitle_person">Escolha pessoa fisica e conclua os dados obrigatorios.</string>
+    <string name="user_register_google_subtitle_company">Escolha empresa para concluir o cadastro institucional.</string>
     <string name="company_register_title">Cadastro de Empresa</string>
     <string name="company_register_subtitle">Informe os dados da empresa</string>
     <string name="forgot_password_title">Redefinir senha</string>
@@ -97,6 +103,7 @@
     <string name="post_type_adoption">Animal para adocao</string>
     <string name="post_type_fair">Feira</string>
     <string name="button_register">Cadastrar</string>
+    <string name="button_complete_google_signup">Concluir cadastro</string>
     <string name="button_save">Salvar</string>
     <string name="button_create_post">Criar Post</string>
     <string name="button_register_animal">Cadastrar Animal</string>
@@ -109,7 +116,7 @@
     <string name="action_back">Voltar</string>
     <string name="action_logout">Sair</string>
     <string name="button_capture_location">Capturar localizacao atual</string>
-    <string name="button_select_location_map">Selecionar localizacao no Google Maps</string>
+    <string name="button_select_location_map">Selecionar localizacao (mapa)</string>
     <string name="button_publish_post">Publicar Post</string>
     <string name="button_save_post_changes">Salvar alteracoes</string>
     <string name="button_save_profile">Salvar alteracoes</string>
@@ -153,6 +160,9 @@
     <string name="action_remove_fair_animal">Remover</string>
     <string name="action_mark_as_read">Marcar como lida</string>
     <string name="action_mark_all_read">Marcar todas</string>
+    <string name="action_remove_notification">Remover notificacao</string>
+    <string name="action_clear_all_notifications">Limpar todas</string>
+    <string name="action_remove_all_notifications">Apagar todas</string>
     <string name="action_send_comment">Enviar</string>
     <string name="action_reply_comment">Responder</string>
     <string name="action_like_short">Curtir</string>
@@ -180,6 +190,8 @@
     <string name="error_password_match">As senhas precisam ser iguais</string>
     <string name="error_invalid_cnpj">Informe um CNPJ com 14 digitos</string>
     <string name="error_invalid_phone">Informe um telefone valido</string>
+    <string name="error_age_required">Informe ao menos anos ou meses para a idade.</string>
+    <string name="error_age_months_invalid">Os meses devem ficar entre 0 e 11.</string>
     <string name="error_location_permission">Permita o acesso a localizacao para capturar o ponto atual.</string>
     <string name="error_location_unavailable">Nao foi possivel obter a localizacao atual neste momento.</string>
     <string name="error_location_required">Posts de animal perdido exigem localizacao capturada.</string>
@@ -263,6 +275,8 @@
     <string name="dialog_interest_select_animal">Escolha o animal da feira</string>
     <string name="notifications_title">Notificacoes</string>
     <string name="notifications_empty_state">Nenhuma notificacao por enquanto.</string>
+    <string name="notifications_clear_all_title">Apagar notificacoes</string>
+    <string name="notifications_clear_all_message">Tem certeza que deseja apagar todas as notificacoes?</string>
     <string name="notification_type_like">Curtida</string>
     <string name="notification_type_comment">Comentario</string>
     <string name="notification_type_chat">Mensagem</string>
@@ -279,6 +293,8 @@
     <string name="notification_interest_fair_message">%1$s demonstrou interesse em %2$s da sua feira.</string>
     <string name="notification_post_updated_title">Seu post foi atualizado</string>
     <string name="notification_post_updated_message">As informacoes do post %1$s foram atualizadas.</string>
+    <string name="error_delete_notification_failed">Nao foi possivel remover a notificacao.</string>
+    <string name="error_clear_notifications_failed">Nao foi possivel apagar as notificacoes.</string>
     <string name="notification_channel_name">Avisos do PetBook</string>
     <string name="notification_channel_description">Mensagens, comentarios, curtidas e atualizacoes do aplicativo.</string>
     <string name="comments_empty_state">Ainda nao ha comentarios neste post.</string>

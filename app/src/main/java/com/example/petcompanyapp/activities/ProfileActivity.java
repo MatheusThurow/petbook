@@ -42,8 +42,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         editProfileName = findViewById(R.id.editProfileName);
         editProfileEmail = findViewById(R.id.editProfileEmail);
-        TextView textProfileType = findViewById(R.id.textProfileType);
-        TextView textBack = findViewById(R.id.textBackProfile);
         TextView textLogout = findViewById(R.id.textLogoutProfile);
         Button buttonOpenChangePassword = findViewById(R.id.buttonOpenChangePassword);
         Button buttonSaveProfile = findViewById(R.id.buttonSaveProfile);
@@ -67,9 +65,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         editProfileName.setText(UserProfileStorage.getName(this, fallbackName));
         editProfileEmail.setText(UserProfileStorage.getEmail(this, fallbackEmail));
-        textProfileType.setText(UserType.isCompany(userType)
-                ? R.string.profile_type_company
-                : R.string.profile_type_person);
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_PROFILE);
         swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_PROFILE);
         switchDarkMode.setChecked(ThemePreferenceManager.isDarkModeEnabled(this));
@@ -82,7 +77,6 @@ public class ProfileActivity extends AppCompatActivity {
         } else if (FeatureFlags.useRemoteApi(this)) {
             loadProfileFromApi();
         }
-        textBack.setOnClickListener(v -> finish());
         textLogout.setOnClickListener(v -> logout());
         buttonOpenChangePassword.setOnClickListener(v ->
                 startActivity(new Intent(this, ChangePasswordActivity.class))

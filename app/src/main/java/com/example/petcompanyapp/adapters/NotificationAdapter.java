@@ -23,6 +23,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public interface OnNotificationActionListener {
         void onNotificationClicked(AppNotification notification);
         void onMarkAsReadClicked(AppNotification notification);
+        void onDeleteClicked(AppNotification notification);
     }
 
     private static final int TYPE_HEADER = 0;
@@ -84,6 +85,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         viewHolder.textMarkRead.setVisibility(notification.isRead() ? View.GONE : View.VISIBLE);
         viewHolder.itemView.setOnClickListener(v -> listener.onNotificationClicked(notification));
         viewHolder.textMarkRead.setOnClickListener(v -> listener.onMarkAsReadClicked(notification));
+        viewHolder.buttonDelete.setOnClickListener(v -> listener.onDeleteClicked(notification));
     }
 
     @Override
@@ -107,6 +109,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private final TextView textMessage;
         private final TextView textTime;
         private final TextView textMarkRead;
+        private final View buttonDelete;
 
         NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,6 +119,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             textMessage = itemView.findViewById(R.id.textNotificationMessage);
             textTime = itemView.findViewById(R.id.textNotificationTime);
             textMarkRead = itemView.findViewById(R.id.textNotificationMarkRead);
+            buttonDelete = itemView.findViewById(R.id.buttonDeleteNotification);
         }
     }
 

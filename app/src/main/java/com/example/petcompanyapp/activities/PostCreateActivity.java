@@ -39,6 +39,7 @@ import com.petbook.app.repositories.FirebaseNotificationRepository;
 import com.petbook.app.repositories.FirebasePostRepository;
 import com.petbook.app.repositories.NotificationRepository;
 import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.AgeFormatUtils;
 import com.petbook.app.utils.AsyncRunner;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.ImageUtils;
@@ -63,10 +64,12 @@ public class PostCreateActivity extends AppCompatActivity {
     private EditText editAnimalName;
     private LinearLayout layoutSingleAnimalFields;
     private TextInputLayout inputBreed;
-    private TextInputLayout inputAge;
+    private TextInputLayout inputAgeYears;
+    private TextInputLayout inputAgeMonths;
     private Spinner spinnerSpecies;
     private EditText editBreed;
-    private EditText editAge;
+    private EditText editAgeYears;
+    private EditText editAgeMonths;
     private EditText editDescription;
     private EditText editContactPhone;
     private EditText editLocationReference;
@@ -159,10 +162,12 @@ public class PostCreateActivity extends AppCompatActivity {
         editAnimalName = findViewById(R.id.editPostAnimalName);
         layoutSingleAnimalFields = findViewById(R.id.layoutSingleAnimalFields);
         inputBreed = findViewById(R.id.inputPostBreed);
-        inputAge = findViewById(R.id.inputPostAge);
+        inputAgeYears = findViewById(R.id.inputPostAgeYears);
+        inputAgeMonths = findViewById(R.id.inputPostAgeMonths);
         spinnerSpecies = findViewById(R.id.spinnerPostSpecies);
         editBreed = findViewById(R.id.editPostBreed);
-        editAge = findViewById(R.id.editPostAge);
+        editAgeYears = findViewById(R.id.editPostAgeYears);
+        editAgeMonths = findViewById(R.id.editPostAgeMonths);
         editDescription = findViewById(R.id.editPostDescription);
         editContactPhone = findViewById(R.id.editPostContactPhone);
         editLocationReference = findViewById(R.id.editLostLocationReference);
@@ -248,7 +253,7 @@ public class PostCreateActivity extends AppCompatActivity {
         editAnimalName.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_ANIMAL_NAME));
         setSpinnerSelection(getIntent().getStringExtra(IntentKeys.EXTRA_POST_SPECIES));
         editBreed.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_BREED));
-        editAge.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_AGE));
+        populateAgeFields(getIntent().getStringExtra(IntentKeys.EXTRA_POST_AGE), editAgeYears, editAgeMonths);
         editDescription.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_DESCRIPTION));
         editContactPhone.setText(getIntent().getStringExtra(IntentKeys.EXTRA_POST_CONTACT_PHONE));
         editLocationReference.setText(getIntent().getStringExtra(IntentKeys.EXTRA_LOCATION_REFERENCE));
@@ -411,7 +416,7 @@ public class PostCreateActivity extends AppCompatActivity {
         if (existingAnimal != null) {
             editName.setText(existingAnimal.getName());
             editBreed.setText(existingAnimal.getBreed());
-            populateFairAnimalAgeFields(existingAnimal.getAgeDescription(), editAgeYears, editAgeMonths);
+            populateAgeFields(existingAnimal.getAgeDescription(), editAgeYears, editAgeMonths);
 
             for (int index = 0; index < spinnerDialogSpecies.getAdapter().getCount(); index++) {
                 Object item = spinnerDialogSpecies.getAdapter().getItem(index);
@@ -448,27 +453,21 @@ public class PostCreateActivity extends AppCompatActivity {
                 editBreed.setError(getString(R.string.error_required_field));
                 return;
             }
-            if (ValidationUtils.isEmpty(yearsValue) && ValidationUtils.isEmpty(monthsValue)) {
+            if (!AgeFormatUtils.hasAnyValue(yearsValue, monthsValue)) {
                 editAgeYears.setError(getString(R.string.error_fair_animal_age_required));
                 editAgeYears.requestFocus();
                 return;
             }
 
-            int years = 0;
-            int months = 0;
-            if (!ValidationUtils.isEmpty(yearsValue)) {
-                years = Integer.parseInt(yearsValue);
-            }
-            if (!ValidationUtils.isEmpty(monthsValue)) {
-                months = Integer.parseInt(monthsValue);
-                if (months < 0 || months > 11) {
-                    editAgeMonths.setError(getString(R.string.error_fair_animal_age_months_invalid));
-                    editAgeMonths.requestFocus();
-                    return;
-                }
+            int years = AgeFormatUtils.parseYears(yearsValue);
+            int months = AgeFormatUtils.parseMonths(monthsValue);
+            if (!AgeFormatUtils.isValidMonths(months)) {
+                editAgeMonths.setError(getString(R.string.error_fair_animal_age_months_invalid));
+                editAgeMonths.requestFocus();
+                return;
             }
 
-            String age = buildFairAnimalAgeDescription(years, months);
+            String age = AgeFormatUtils.formatAge(years, months);
             if ((selectedFairAnimalImageValue == null || selectedFairAnimalImageValue.trim().isEmpty()) && selectedFairAnimalImageUri == null) {
                 Toast.makeText(this, R.string.error_image_required, Toast.LENGTH_SHORT).show();
                 return;
@@ -511,45 +510,17 @@ public class PostCreateActivity extends AppCompatActivity {
         }
     }
 
-    private String buildFairAnimalAgeDescription(int years, int months) {
-        if (years > 0 && months > 0) {
-            return years + " ano" + (years > 1 ? "s" : "") + " e " + months + " mes" + (months > 1 ? "es" : "");
-        }
-        if (years > 0) {
-            return years + " ano" + (years > 1 ? "s" : "");
-        }
-        return months + " mes" + (months > 1 ? "es" : "");
-    }
-
-    private void populateFairAnimalAgeFields(
+    private void populateAgeFields(
             String ageDescription,
-            TextInputEditText editAgeYears,
-            TextInputEditText editAgeMonths
+            EditText editAgeYears,
+            EditText editAgeMonths
     ) {
-        if (ageDescription == null || ageDescription.trim().isEmpty()) {
-            return;
+        AgeFormatUtils.AgeValue ageValue = AgeFormatUtils.parseAgeDescription(ageDescription);
+        if (ageValue.getYears() > 0) {
+            editAgeYears.setText(String.valueOf(ageValue.getYears()));
         }
-
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("(\\d+)\\s*ano[s]?|(?:(?:e\\s*)?(\\d+)\\s*mes(?:es)?)", java.util.regex.Pattern.CASE_INSENSITIVE)
-                .matcher(ageDescription);
-
-        Integer years = null;
-        Integer months = null;
-        while (matcher.find()) {
-            if (matcher.group(1) != null) {
-                years = Integer.parseInt(matcher.group(1));
-            }
-            if (matcher.group(2) != null) {
-                months = Integer.parseInt(matcher.group(2));
-            }
-        }
-
-        if (years != null) {
-            editAgeYears.setText(String.valueOf(years));
-        }
-        if (months != null) {
-            editAgeMonths.setText(String.valueOf(months));
+        if (ageValue.getMonths() > 0) {
+            editAgeMonths.setText(String.valueOf(ageValue.getMonths()));
         }
     }
 
@@ -636,7 +607,8 @@ public class PostCreateActivity extends AppCompatActivity {
         String postTitle = editAnimalName.getText().toString().trim();
         String species = spinnerSpecies.getSelectedItem().toString();
         String breed = editBreed.getText().toString().trim();
-        String age = editAge.getText().toString().trim();
+        String ageYearsValue = editAgeYears.getText().toString().trim();
+        String ageMonthsValue = editAgeMonths.getText().toString().trim();
         String description = editDescription.getText().toString().trim();
         String contactPhone = editContactPhone.getText().toString().replaceAll("\\D", "");
         String locationReference = editLocationReference.getText().toString().trim();
@@ -680,11 +652,21 @@ public class PostCreateActivity extends AppCompatActivity {
             return;
         }
 
-        if (!isFair && ValidationUtils.isEmpty(age)) {
-            editAge.setError(getString(R.string.error_required_field));
-            editAge.requestFocus();
+        if (!isFair && !AgeFormatUtils.hasAnyValue(ageYearsValue, ageMonthsValue)) {
+            editAgeYears.setError(getString(R.string.error_age_required));
+            editAgeYears.requestFocus();
             return;
         }
+
+        int ageYears = AgeFormatUtils.parseYears(ageYearsValue);
+        int ageMonths = AgeFormatUtils.parseMonths(ageMonthsValue);
+        if (!isFair && !AgeFormatUtils.isValidMonths(ageMonths)) {
+            editAgeMonths.setError(getString(R.string.error_age_months_invalid));
+            editAgeMonths.requestFocus();
+            return;
+        }
+
+        String age = isFair ? "" : AgeFormatUtils.formatAge(ageYears, ageMonths);
 
         if (ValidationUtils.isEmpty(description)) {
             editDescription.setError(getString(R.string.error_required_field));

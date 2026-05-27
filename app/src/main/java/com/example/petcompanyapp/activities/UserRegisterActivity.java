@@ -37,6 +37,7 @@ public class UserRegisterActivity extends AppCompatActivity {
     private TextInputLayout inputLayoutUserName;
     private TextInputLayout inputLayoutUserDocument;
     private String selectedUserType;
+    private boolean isGoogleSignupFlow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +54,10 @@ public class UserRegisterActivity extends AppCompatActivity {
         inputLayoutUserName = findViewById(R.id.inputLayoutUserName);
         inputLayoutUserDocument = findViewById(R.id.inputLayoutUserDocument);
         TextView textBack = findViewById(R.id.textBackUserRegister);
+        TextView textTitle = findViewById(R.id.textUserRegisterTitle);
         Button buttonRegister = findViewById(R.id.buttonUserRegister);
+
+        isGoogleSignupFlow = getIntent().getBooleanExtra(IntentKeys.EXTRA_GOOGLE_SIGNUP_FLOW, false);
 
         selectedUserType = getIntent().getStringExtra(IntentKeys.EXTRA_USER_TYPE);
         if (selectedUserType == null) {
@@ -63,6 +67,17 @@ public class UserRegisterActivity extends AppCompatActivity {
         radioGroupUserType.check(UserType.isCompany(selectedUserType) ? R.id.radioUserTypeCompany : R.id.radioUserTypePerson);
         updateFormByUserType(selectedUserType);
         MaskUtils.applyCpfOrCnpjMask(editDocument, UserType.isCompany(selectedUserType));
+
+        if (isGoogleSignupFlow) {
+            textTitle.setText(R.string.user_register_google_title);
+            textUserRegisterSubtitle.setText(R.string.user_register_google_subtitle);
+            buttonRegister.setText(R.string.button_complete_google_signup);
+            editName.setText(getIntent().getStringExtra(IntentKeys.EXTRA_USER_NAME));
+            editEmail.setText(getIntent().getStringExtra(IntentKeys.EXTRA_USER_EMAIL));
+            editEmail.setEnabled(false);
+            editEmail.setFocusable(false);
+            editEmail.setClickable(false);
+        }
 
         radioGroupUserType.setOnCheckedChangeListener((group, checkedId) -> {
             selectedUserType = checkedId == R.id.radioUserTypeCompany ? UserType.COMPANY : UserType.PERSON;
@@ -115,6 +130,33 @@ public class UserRegisterActivity extends AppCompatActivity {
         String finalDocument = UserType.isCompany(selectedUserType) ? "" : document;
 
         if (FirebaseUserRepository.isEnabled(this)) {
+            if (isGoogleSignupFlow) {
+                FirebaseUserRepository.completeGoogleRegistration(
+                        this,
+                        selectedUserType,
+                        name,
+                        email,
+                        password,
+                        finalDocument,
+                        new FirebaseUserRepository.UserCallback() {
+                            @Override
+                            public void onSuccess(User user) {
+                                runOnUiThread(() -> completeRegistration(user));
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                runOnUiThread(() -> Toast.makeText(
+                                        UserRegisterActivity.this,
+                                        message == null ? getString(R.string.error_server_unavailable) : message,
+                                        Toast.LENGTH_LONG
+                                ).show());
+                            }
+                        }
+                );
+                return;
+            }
+
             FirebaseUserRepository.register(
                     this,
                     selectedUserType,
@@ -206,12 +248,16 @@ public class UserRegisterActivity extends AppCompatActivity {
     private void updateFormByUserType(String userType) {
         if (UserType.isCompany(userType)) {
             inputLayoutUserName.setHint(getString(R.string.hint_company_responsible_name));
-            textUserRegisterSubtitle.setText(R.string.user_register_subtitle_company);
+            textUserRegisterSubtitle.setText(isGoogleSignupFlow
+                    ? R.string.user_register_google_subtitle_company
+                    : R.string.user_register_subtitle_company);
             inputLayoutUserDocument.setVisibility(android.view.View.GONE);
         } else {
             inputLayoutUserName.setHint(getString(R.string.hint_name));
             inputLayoutUserDocument.setHint(getString(R.string.hint_cpf));
-            textUserRegisterSubtitle.setText(R.string.user_register_subtitle_person);
+            textUserRegisterSubtitle.setText(isGoogleSignupFlow
+                    ? R.string.user_register_google_subtitle_person
+                    : R.string.user_register_subtitle_person);
             inputLayoutUserDocument.setVisibility(android.view.View.VISIBLE);
         }
     }

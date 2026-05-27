@@ -224,26 +224,15 @@ public class LoginActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onError(String message) {
-                                    FirebaseUserRepository.registerGoogleUser(
+                                    if (message != null && message.toLowerCase().contains("nao encontrado")) {
+                                        runOnUiThread(() -> openGoogleRegistrationCompletion(displayName, email));
+                                        return;
+                                    }
+                                    runOnUiThread(() -> Toast.makeText(
                                             LoginActivity.this,
-                                            displayName,
-                                            email,
-                                            new FirebaseUserRepository.UserCallback() {
-                                                @Override
-                                                public void onSuccess(User user) {
-                                                    runOnUiThread(() -> openFeedWithGoogleSuccess(user));
-                                                }
-
-                                                @Override
-                                                public void onError(String registerMessage) {
-                                                    runOnUiThread(() -> Toast.makeText(
-                                                            LoginActivity.this,
-                                                            registerMessage == null ? getString(R.string.error_google_sign_in_failed) : registerMessage,
-                                                            Toast.LENGTH_LONG
-                                                    ).show());
-                                                }
-                                            }
-                                    );
+                                            message == null ? getString(R.string.error_google_sign_in_failed) : message,
+                                            Toast.LENGTH_LONG
+                                    ).show());
                                 }
                             })
                     )
@@ -289,6 +278,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void openUserRegister() {
         startActivity(new Intent(this, UserRegisterActivity.class));
+    }
+
+    private void openGoogleRegistrationCompletion(String displayName, String email) {
+        Intent intent = new Intent(this, UserRegisterActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_GOOGLE_SIGNUP_FLOW, true);
+        intent.putExtra(IntentKeys.EXTRA_USER_NAME, displayName);
+        intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, email);
+        startActivity(intent);
     }
 
     private void openFeedWithGoogleSuccess(User user) {

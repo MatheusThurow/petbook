@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "petcompany.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     public static final String TABLE_USERS = "users";
     public static final String TABLE_COMPANIES = "companies";
@@ -64,6 +64,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 7) {
             removeSamplePosts(db);
         }
+        if (oldVersion < 8) {
+            db.execSQL("ALTER TABLE " + TABLE_ANIMALS + " ADD COLUMN age_months INTEGER NOT NULL DEFAULT 0");
+        }
     }
 
     private void createUsersTable(SQLiteDatabase db) {
@@ -98,6 +101,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "species TEXT NOT NULL,"
                 + "breed TEXT NOT NULL,"
                 + "age_years INTEGER NOT NULL,"
+                + "age_months INTEGER NOT NULL DEFAULT 0,"
                 + "weight_kg REAL NOT NULL"
                 + ")");
     }
@@ -239,6 +243,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         thorAnimal.put("species", "Cachorro");
         thorAnimal.put("breed", "Labrador");
         thorAnimal.put("age_years", 4);
+        thorAnimal.put("age_months", 0);
         thorAnimal.put("weight_kg", 28.5);
         db.insert(TABLE_ANIMALS, null, thorAnimal);
 
@@ -249,6 +254,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         lunaAnimal.put("species", "Gato");
         lunaAnimal.put("breed", "Siames");
         lunaAnimal.put("age_years", 2);
+        lunaAnimal.put("age_months", 0);
         lunaAnimal.put("weight_kg", 4.3);
         db.insert(TABLE_ANIMALS, null, lunaAnimal);
 

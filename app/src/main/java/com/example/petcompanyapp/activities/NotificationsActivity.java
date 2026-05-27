@@ -1,11 +1,13 @@
 package com.petbook.app.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,6 +44,7 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
 
         ImageButton buttonBack = findViewById(R.id.buttonBackNotifications);
         TextView textMarkAllRead = findViewById(R.id.textMarkAllRead);
+        TextView textClearAllNotifications = findViewById(R.id.textClearAllNotifications);
         RecyclerView recyclerNotifications = findViewById(R.id.recyclerNotifications);
         textEmptyState = findViewById(R.id.textEmptyNotifications);
 
@@ -61,6 +64,7 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
                 BottomNavigationHelper.refreshNotificationBadge(this);
             }
         });
+        textClearAllNotifications.setOnClickListener(v -> confirmClearAllNotifications());
 
         adapter = new NotificationAdapter(this);
         recyclerNotifications.setLayoutManager(new LinearLayoutManager(this));
@@ -173,6 +177,84 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
         } else {
             NotificationRepository.markAsRead(this, notification.getId());
         }
+        loadNotifications();
+        BottomNavigationHelper.refreshNotificationBadge(this);
+    }
+
+    @Override
+    public void onDeleteClicked(AppNotification notification) {
+        if (FirebasePostRepository.isEnabled(this)) {
+            FirebaseNotificationRepository.deleteNotification(this, notification.getId(), new FirebaseNotificationRepository.OperationCallback() {
+                @Override
+                public void onSuccess() {
+                    runOnUiThread(() -> {
+                        loadNotifications();
+                        BottomNavigationHelper.refreshNotificationBadge(NotificationsActivity.this);
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                    runOnUiThread(() -> Toast.makeText(
+                            NotificationsActivity.this,
+                            message == null ? getString(R.string.error_delete_notification_failed) : message,
+                            Toast.LENGTH_LONG
+                    ).show());
+                }
+            });
+            return;
+        }
+
+        NotificationRepository.deleteNotification(this, notification.getId());
+        loadNotifications();
+        BottomNavigationHelper.refreshNotificationBadge(this);
+    }
+
+    private void confirmClearAllNotifications() {
+        if (currentUserId == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.notifications_clear_all_title)
+                .setMessage(R.string.notifications_clear_all_message)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_remove_all_notifications, (dialog, which) -> clearAllNotifications())
+                .show();
+    }
+
+    private void clearAllNotifications() {
+        if (currentUserId == null) {
+            return;
+        }
+
+        if (FirebasePostRepository.isEnabled(this)) {
+            FirebaseNotificationRepository.deleteAllNotifications(
+                    this,
+                    UserProfileStorage.getEmail(this, ""),
+                    new FirebaseNotificationRepository.OperationCallback() {
+                        @Override
+                        public void onSuccess() {
+                            runOnUiThread(() -> {
+                                loadNotifications();
+                                BottomNavigationHelper.refreshNotificationBadge(NotificationsActivity.this);
+                            });
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            runOnUiThread(() -> Toast.makeText(
+                                    NotificationsActivity.this,
+                                    message == null ? getString(R.string.error_clear_notifications_failed) : message,
+                                    Toast.LENGTH_LONG
+                            ).show());
+                        }
+                    }
+            );
+            return;
+        }
+
+        NotificationRepository.deleteAllForUser(this, currentUserId);
         loadNotifications();
         BottomNavigationHelper.refreshNotificationBadge(this);
     }

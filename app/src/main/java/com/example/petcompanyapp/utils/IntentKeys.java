@@ -6,6 +6,7 @@ public final class IntentKeys {
     public static final String EXTRA_USER_TYPE = "extra_user_type";
     public static final String EXTRA_USER_NAME = "extra_user_name";
     public static final String EXTRA_USER_EMAIL = "extra_user_email";
+    public static final String EXTRA_GOOGLE_SIGNUP_FLOW = "extra_google_signup_flow";
     public static final String EXTRA_LATITUDE = "extra_latitude";
     public static final String EXTRA_LONGITUDE = "extra_longitude";
     public static final String EXTRA_LOCATION_REFERENCE = "extra_location_reference";

@@ -121,6 +121,32 @@ public final class NotificationRepository {
         }
     }
 
+    public static void deleteNotification(Context context, long notificationId) {
+        SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
+        try {
+            db.delete(
+                    AppDatabaseHelper.TABLE_NOTIFICATIONS,
+                    "id = ?",
+                    new String[]{String.valueOf(notificationId)}
+            );
+        } finally {
+            db.close();
+        }
+    }
+
+    public static void deleteAllForUser(Context context, long userId) {
+        SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
+        try {
+            db.delete(
+                    AppDatabaseHelper.TABLE_NOTIFICATIONS,
+                    "recipient_user_id = ?",
+                    new String[]{String.valueOf(userId)}
+            );
+        } finally {
+            db.close();
+        }
+    }
+
     private static AppNotification mapNotification(Cursor cursor) {
         return new AppNotification(
                 cursor.getLong(cursor.getColumnIndexOrThrow("id")),

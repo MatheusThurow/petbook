@@ -95,7 +95,6 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         UserProfileStorage.saveProfile(this, userId, userName, userEmail, userType);
 
         textFeedTitle = findViewById(R.id.textFeedTitle);
-        TextView textLogout = findViewById(R.id.textLogout);
         MaterialButtonToggleGroup toggleGroupFeedFilter = findViewById(R.id.toggleGroupFeedFilter);
         RecyclerView recyclerFeedPosts = findViewById(R.id.recyclerFeedPosts);
         textEmptyFeed = findViewById(R.id.textEmptyFeed);
@@ -108,11 +107,6 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         animalPostAdapter = new AnimalPostAdapter(this, userId);
         recyclerFeedPosts.setLayoutManager(new LinearLayoutManager(this));
         recyclerFeedPosts.setAdapter(animalPostAdapter);
-
-        textLogout.setOnClickListener(v -> logout());
-
-       
-
         toggleGroupFeedFilter.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) {
                 return;
@@ -273,14 +267,6 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         }
 
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-    }
-
-    private void logout() {
-        UserProfileStorage.clearProfile(this);
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 
     @Override

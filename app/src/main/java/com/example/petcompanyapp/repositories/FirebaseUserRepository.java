@@ -190,6 +190,64 @@ public final class FirebaseUserRepository {
                 .addOnFailureListener(exception -> callback.onError(safeMessage(exception)));
     }
 
+    public static void completeGoogleRegistration(
+            Context context,
+            String userType,
+            String name,
+            String email,
+            String password,
+            String document,
+            @NonNull UserCallback callback
+    ) {
+        if (!isEnabled(context)) {
+            callback.onError("Firebase nao configurado.");
+            return;
+        }
+
+        String documentId = documentIdFromEmail(email);
+        usersCollection(context)
+                .document(documentId)
+                .get()
+                .addOnSuccessListener(existing -> {
+                    if (existing.exists()) {
+                        User user = mapUser(existing.getData());
+                        if (user == null) {
+                            callback.onError("Nao foi possivel concluir o cadastro.");
+                            return;
+                        }
+                        callback.onSuccess(user);
+                        return;
+                    }
+
+                    User user = new User(
+                            System.currentTimeMillis(),
+                            userType,
+                            name,
+                            normalizedEmail(email),
+                            password,
+                            document == null ? "" : document,
+                            true
+                    );
+
+                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (firebaseUser == null) {
+                        callback.onError("Nao foi possivel concluir o cadastro com Google.");
+                        return;
+                    }
+
+                    firebaseUser.updatePassword(password)
+                            .addOnSuccessListener(unused ->
+                                    usersCollection(context)
+                                            .document(documentId)
+                                            .set(buildUserMap(user), SetOptions.merge())
+                                            .addOnSuccessListener(saved -> callback.onSuccess(user))
+                                            .addOnFailureListener(exception -> callback.onError(safeMessage(exception)))
+                            )
+                            .addOnFailureListener(exception -> callback.onError(safeMessage(exception)));
+                })
+                .addOnFailureListener(exception -> callback.onError(safeMessage(exception)));
+    }
+
     public static void findByEmail(Context context, String email, @NonNull UserCallback callback) {
         if (!isEnabled(context)) {
             callback.onError("Firebase nao configurado.");

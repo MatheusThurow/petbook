@@ -45,6 +45,17 @@
                 android:gravity="end"
                 android:textColor="@color/secondary_text"
                 android:textSize="12sp" />
+
+            <ImageButton
+                android:id="@+id/buttonDeleteNotification"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/action_remove_notification"
+                android:padding="6dp"
+                android:src="@drawable/ic_delete_notification"
+                android:tint="@color/secondary_text" />
         </LinearLayout>
 
         <TextView

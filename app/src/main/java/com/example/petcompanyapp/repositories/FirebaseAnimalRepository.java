@@ -29,6 +29,7 @@ public final class FirebaseAnimalRepository {
             String species,
             String breed,
             int ageYears,
+            int ageMonths,
             double weightKg,
             @NonNull AnimalIdCallback callback
     ) {
@@ -41,6 +42,7 @@ public final class FirebaseAnimalRepository {
         values.put("species", species);
         values.put("breed", breed);
         values.put("ageYears", ageYears);
+        values.put("ageMonths", ageMonths);
         values.put("weightKg", weightKg);
         values.put("createdAtMillis", System.currentTimeMillis());
 

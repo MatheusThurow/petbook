@@ -15,6 +15,11 @@ import java.util.List;
 
 public final class FirebaseNotificationRepository {
 
+    public interface OperationCallback {
+        void onSuccess();
+        void onError(String message);
+    }
+
     public interface NotificationsCallback {
         void onSuccess(List<AppNotification> notifications);
         void onError(String message);
@@ -141,6 +146,86 @@ public final class FirebaseNotificationRepository {
                         }
                     }
                 });
+    }
+
+    public static void deleteNotification(
+            Context context,
+            long notificationId,
+            @NonNull OperationCallback callback
+    ) {
+        if (!FirebaseChatConfig.isEnabled(context)) {
+            callback.onSuccess();
+            return;
+        }
+
+        notificationsCollection(context)
+                .whereEqualTo("id", notificationId)
+                .get()
+                .addOnSuccessListener(result -> {
+                    if (result.isEmpty()) {
+                        callback.onSuccess();
+                        return;
+                    }
+
+                    final int[] pending = {result.size()};
+                    final boolean[] failed = {false};
+                    for (QueryDocumentSnapshot document : result) {
+                        document.getReference().delete()
+                                .addOnSuccessListener(unused -> {
+                                    pending[0]--;
+                                    if (pending[0] == 0 && !failed[0]) {
+                                        callback.onSuccess();
+                                    }
+                                })
+                                .addOnFailureListener(exception -> {
+                                    if (!failed[0]) {
+                                        failed[0] = true;
+                                        callback.onError(exception.getMessage());
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
+    }
+
+    public static void deleteAllNotifications(
+            Context context,
+            String currentUserEmail,
+            @NonNull OperationCallback callback
+    ) {
+        if (!FirebaseChatConfig.isEnabled(context)) {
+            callback.onSuccess();
+            return;
+        }
+
+        notificationsCollection(context)
+                .whereEqualTo("recipientKey", ChatIdentityUtils.userKeyFromEmail(currentUserEmail))
+                .get()
+                .addOnSuccessListener(result -> {
+                    if (result.isEmpty()) {
+                        callback.onSuccess();
+                        return;
+                    }
+
+                    final int[] pending = {result.size()};
+                    final boolean[] failed = {false};
+                    for (QueryDocumentSnapshot document : result) {
+                        document.getReference().delete()
+                                .addOnSuccessListener(unused -> {
+                                    pending[0]--;
+                                    if (pending[0] == 0 && !failed[0]) {
+                                        callback.onSuccess();
+                                    }
+                                })
+                                .addOnFailureListener(exception -> {
+                                    if (!failed[0]) {
+                                        failed[0] = true;
+                                        callback.onError(exception.getMessage());
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
     }
 
     private static AppNotification mapNotification(QueryDocumentSnapshot document) {

@@ -20,6 +20,7 @@ public final class AnimalRepository {
             String species,
             String breed,
             int ageYears,
+            int ageMonths,
             double weightKg
     ) {
         SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
@@ -38,6 +39,7 @@ public final class AnimalRepository {
         values.put("species", species);
         values.put("breed", breed);
         values.put("age_years", ageYears);
+        values.put("age_months", ageMonths);
         values.put("weight_kg", weightKg);
         long animalId = db.insert(AppDatabaseHelper.TABLE_ANIMALS, null, values);
         db.close();
