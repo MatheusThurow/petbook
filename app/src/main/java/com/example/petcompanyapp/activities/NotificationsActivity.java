@@ -19,10 +19,12 @@ import com.petbook.app.models.AppNotification;
 import com.petbook.app.repositories.FirebaseNotificationRepository;
 import com.petbook.app.repositories.FirebasePostRepository;
 import com.petbook.app.repositories.NotificationRepository;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.UserProfileStorage;
 
@@ -38,17 +40,20 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_notifications);
 
         currentUserId = UserProfileStorage.getUserId(this);
 
-        ImageButton buttonBack = findViewById(R.id.buttonBackNotifications);
+        View buttonBack = findViewById(R.id.buttonBackNotifications);
         TextView textMarkAllRead = findViewById(R.id.textMarkAllRead);
         TextView textClearAllNotifications = findViewById(R.id.textClearAllNotifications);
         RecyclerView recyclerNotifications = findViewById(R.id.recyclerNotifications);
         textEmptyState = findViewById(R.id.textEmptyNotifications);
 
-        buttonBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, buttonBack);
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_NOTIFICATIONS);
         swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_NOTIFICATIONS);
         textMarkAllRead.setOnClickListener(v -> {
@@ -82,6 +87,9 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
     @Override
     protected void onResume() {
         super.onResume();
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         BottomNavigationHelper.refreshNotificationBadge(this);
         loadNotifications();
     }

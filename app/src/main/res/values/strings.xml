@@ -114,6 +114,7 @@
     <string name="button_open_chat">Abrir conversas</string>
     <string name="button_open_notifications">Abrir notificacoes</string>
     <string name="action_back">Voltar</string>
+    <string name="action_back_chevron">&lt;</string>
     <string name="action_logout">Sair</string>
     <string name="button_capture_location">Capturar localizacao atual</string>
     <string name="button_select_location_map">Selecionar localizacao (mapa)</string>
@@ -147,8 +148,6 @@
     <string name="action_open_map">Ver no mapa</string>
     <string name="action_view_more_location">Ver mais</string>
     <string name="action_view_fair_animals">Ver animais</string>
-    <string name="action_like">Curtir (%1$d)</string>
-    <string name="action_liked">Curtido (%1$d)</string>
     <string name="action_share_post">Compartilhar</string>
     <string name="action_comment">Comentar</string>
     <string name="action_comments">Comentarios</string>
@@ -165,7 +164,6 @@
     <string name="action_remove_all_notifications">Apagar todas</string>
     <string name="action_send_comment">Enviar</string>
     <string name="action_reply_comment">Responder</string>
-    <string name="action_like_short">Curtir</string>
     <string name="action_share_short">Compartilhar</string>
     <string name="action_cancel">Cancelar</string>
     <string name="forgot_password_document_label">Documento</string>
@@ -257,7 +255,6 @@
     <string name="delete_post_message">Tem certeza que deseja apagar este post?</string>
     <string name="error_delete_post_failed">Nao foi possivel apagar o post.</string>
     <string name="error_save_post_failed">Nao foi possivel salvar as alteracoes do post.</string>
-    <string name="info_like_sync_pending">Curtidas compartilhadas ainda nao foram integradas ao servidor.</string>
     <string name="info_interest_already_registered">Seu interesse nesse animal ja foi registrado.</string>
     <string name="fair_animals_section_title">Animais da feira</string>
     <string name="fair_animals_hint">Monte a feira adicionando todos os animais disponiveis para adocao neste post.</string>
@@ -277,13 +274,10 @@
     <string name="notifications_empty_state">Nenhuma notificacao por enquanto.</string>
     <string name="notifications_clear_all_title">Apagar notificacoes</string>
     <string name="notifications_clear_all_message">Tem certeza que deseja apagar todas as notificacoes?</string>
-    <string name="notification_type_like">Curtida</string>
     <string name="notification_type_comment">Comentario</string>
     <string name="notification_type_chat">Mensagem</string>
     <string name="notification_type_interest">Interesse</string>
     <string name="notification_type_update">Atualizacao</string>
-    <string name="notification_like_title">Seu post recebeu uma curtida</string>
-    <string name="notification_like_message">%1$s curtiu o post %2$s.</string>
     <string name="notification_comment_title">Novo comentario no seu post</string>
     <string name="notification_comment_message">%1$s comentou em %2$s.</string>
     <string name="notification_chat_title">Nova mensagem no chat</string>
@@ -296,7 +290,7 @@
     <string name="error_delete_notification_failed">Nao foi possivel remover a notificacao.</string>
     <string name="error_clear_notifications_failed">Nao foi possivel apagar as notificacoes.</string>
     <string name="notification_channel_name">Avisos do PetBook</string>
-    <string name="notification_channel_description">Mensagens, comentarios, curtidas e atualizacoes do aplicativo.</string>
+    <string name="notification_channel_description">Mensagens, comentarios e atualizacoes do aplicativo.</string>
     <string name="comments_empty_state">Ainda nao ha comentarios neste post.</string>
     <string name="comments_reply_label">Resposta</string>
     <string name="comments_reply_to_label">Em resposta a %1$s</string>

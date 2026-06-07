@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.petbook.app.models.AppNotification;
 import com.petbook.app.utils.ChatIdentityUtils;
 import com.petbook.app.utils.FirebaseChatConfig;
+import com.petbook.app.utils.NotificationType;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -85,7 +86,11 @@ public final class FirebaseNotificationRepository {
                 .addOnSuccessListener(result -> {
                     List<AppNotification> notifications = new ArrayList<>();
                     for (QueryDocumentSnapshot document : result) {
-                        notifications.add(mapNotification(document));
+                        AppNotification notification = mapNotification(document);
+                        if (NotificationType.LIKE.equals(notification.getType())) {
+                            continue;
+                        }
+                        notifications.add(notification);
                     }
                     notifications.sort((first, second) -> Long.compare(second.getCreatedAtMillis(), first.getCreatedAtMillis()));
                     callback.onSuccess(notifications);
@@ -109,6 +114,9 @@ public final class FirebaseNotificationRepository {
                 .addOnSuccessListener(result -> {
                     int unreadCount = 0;
                     for (QueryDocumentSnapshot document : result) {
+                        if (NotificationType.LIKE.equals(safe(document.getString("notificationType")))) {
+                            continue;
+                        }
                         if (!Boolean.TRUE.equals(document.getBoolean("read"))) {
                             unreadCount++;
                         }

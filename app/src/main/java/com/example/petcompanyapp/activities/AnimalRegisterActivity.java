@@ -14,9 +14,11 @@ import com.petbook.app.repositories.FirebaseAnimalRepository;
 import com.petbook.app.repositories.AnimalRepository;
 import com.petbook.app.utils.ActionStateHelper;
 import com.petbook.app.utils.AgeFormatUtils;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
 import com.petbook.app.utils.FirebaseChatConfig;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
@@ -36,6 +38,9 @@ public class AnimalRegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_animal_register);
 
         editAnimalName = findViewById(R.id.editAnimalName);
@@ -60,7 +65,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
 
         MaskUtils.configureSpeciesSpinner(this, spinnerSpecies);
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
         buttonRegister.setOnClickListener(v -> registerAnimal());
     }
 
@@ -128,7 +133,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
                             runOnUiThread(() -> {
                                 setRegisterLoading(false);
                                 Toast.makeText(AnimalRegisterActivity.this, R.string.animal_register_success, Toast.LENGTH_LONG).show();
-                                finish();
+                                BackNavigationUtils.navigateBack(AnimalRegisterActivity.this);
                             });
                         }
 
@@ -167,7 +172,7 @@ public class AnimalRegisterActivity extends AppCompatActivity {
 
         setRegisterLoading(false);
         Toast.makeText(this, R.string.animal_register_success, Toast.LENGTH_LONG).show();
-        finish();
+        BackNavigationUtils.navigateBack(this);
     }
 
     private void setRegisterLoading(boolean isLoading) {

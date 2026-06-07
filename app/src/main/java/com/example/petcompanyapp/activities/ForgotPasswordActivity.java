@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.petbook.app.R;
 import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.utils.ActionStateHelper;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.ValidationUtils;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
@@ -29,7 +30,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         TextView textBack = findViewById(R.id.textBackForgotPassword);
         buttonResetPassword = findViewById(R.id.buttonResetPassword);
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
         buttonResetPassword.setOnClickListener(v -> resetPassword());
     }
 
@@ -58,7 +59,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         setResetLoading(false);
                         Toast.makeText(ForgotPasswordActivity.this, R.string.forgot_password_email_sent_success, Toast.LENGTH_LONG).show();
-                        finish();
+                        BackNavigationUtils.navigateBack(ForgotPasswordActivity.this);
                     });
                 }
 

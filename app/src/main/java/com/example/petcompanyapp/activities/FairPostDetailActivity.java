@@ -13,7 +13,9 @@ import com.petbook.app.models.AnimalPost;
 import com.petbook.app.models.FairAnimal;
 import com.petbook.app.repositories.AnimalPostRepository;
 import com.petbook.app.repositories.FirebasePostRepository;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SessionUtils;
 
 import java.util.List;
 
@@ -22,6 +24,9 @@ public class FairPostDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_fair_post_detail);
 
         TextView textBack = findViewById(R.id.textBackFairDetail);
@@ -32,11 +37,11 @@ public class FairPostDetailActivity extends AppCompatActivity {
         RecyclerView recyclerAnimals = findViewById(R.id.recyclerFairAnimals);
         TextView textEmpty = findViewById(R.id.textFairAnimalsEmpty);
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
 
         long postId = getIntent().getLongExtra(IntentKeys.EXTRA_POST_ID, -1L);
         if (postId < 0) {
-            finish();
+            BackNavigationUtils.navigateBack(this);
             return;
         }
 
@@ -65,14 +70,14 @@ public class FairPostDetailActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String message) {
-                            finish();
+                            BackNavigationUtils.navigateBack(FairPostDetailActivity.this);
                         }
                     });
                 }
 
                 @Override
                 public void onError(String message) {
-                    finish();
+                    BackNavigationUtils.navigateBack(FairPostDetailActivity.this);
                 }
             });
             return;
@@ -80,7 +85,7 @@ public class FairPostDetailActivity extends AppCompatActivity {
 
         AnimalPost post = AnimalPostRepository.findById(this, postId);
         if (post == null) {
-            finish();
+            BackNavigationUtils.navigateBack(this);
             return;
         }
 

@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.petbook.app.R;
@@ -50,9 +49,8 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         holder.textAuthor.setText(comment.getAuthorName());
         holder.textAvatar.setText(buildInitials(comment.getAuthorName()));
         holder.textMessage.setText(comment.getMessage());
-        holder.textLike.setText("♡ 0");
-        holder.textLike.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_text));
         holder.textReply.setOnClickListener(v -> listener.onReplyClicked(comment));
+
         if (comment.isReply()) {
             String parentAuthorName = comment.getParentAuthorName();
             if (parentAuthorName == null || parentAuthorName.trim().isEmpty()) {
@@ -66,6 +64,7 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         } else {
             holder.textReplyingLabel.setVisibility(View.GONE);
         }
+
         holder.itemView.setPadding(
                 dp(holder.itemView, 12 + (comment.getDepth() * 20)),
                 holder.itemView.getPaddingTop(),
@@ -103,7 +102,6 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         private final TextView textAuthor;
         private final TextView textMessage;
         private final TextView textDate;
-        private final TextView textLike;
         private final TextView textReply;
         private final TextView textReplyingLabel;
         private final TextView textRepliesCount;
@@ -114,7 +112,6 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
             textAuthor = itemView.findViewById(R.id.textCommentAuthor);
             textMessage = itemView.findViewById(R.id.textCommentMessage);
             textDate = itemView.findViewById(R.id.textCommentDate);
-            textLike = itemView.findViewById(R.id.textCommentLike);
             textReply = itemView.findViewById(R.id.textCommentReply);
             textReplyingLabel = itemView.findViewById(R.id.textCommentReplyingLabel);
             textRepliesCount = itemView.findViewById(R.id.textCommentRepliesCount);
@@ -148,5 +145,4 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         }
         return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase(Locale.ROOT);
     }
-
 }

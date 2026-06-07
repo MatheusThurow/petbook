@@ -5,9 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.core.content.ContextCompat;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.petbook.app.R;
@@ -24,7 +24,6 @@ import java.util.Locale;
 public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.PostViewHolder> {
 
     public interface OnPostActionListener {
-        void onLikeClicked(AnimalPost post);
         void onShareClicked(AnimalPost post);
         void onMapClicked(AnimalPost post);
         void onCommentClicked(AnimalPost post);
@@ -93,13 +92,6 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
                 R.string.feed_post_contact,
                 post.getContactPhone()
         ));
-        holder.textLike.setText(post.isLiked()
-                ? "♥ " + post.getLikeCount()
-                : "♡ " + post.getLikeCount());
-        holder.textLike.setTextColor(ContextCompat.getColor(
-                holder.itemView.getContext(),
-                post.isLiked() ? R.color.accent_color : R.color.primary_text
-        ));
         holder.textAuthor.setText(holder.itemView.getContext().getString(
                 R.string.feed_post_author,
                 post.getAuthorName()
@@ -149,7 +141,6 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
             holder.buttonMap.setVisibility(View.GONE);
         }
 
-        holder.textLike.setOnClickListener(v -> listener.onLikeClicked(post));
         holder.textShare.setOnClickListener(v -> listener.onShareClicked(post));
         holder.buttonMap.setOnClickListener(v -> listener.onMapClicked(post));
         holder.textComment.setOnClickListener(v -> listener.onCommentClicked(post));
@@ -171,7 +162,6 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         private final TextView textDescription;
         private final TextView textLocation;
         private final TextView textContact;
-        private final TextView textLike;
         private final TextView textShare;
         private final TextView textComment;
         private final TextView textInterest;
@@ -191,7 +181,6 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
             textDescription = itemView.findViewById(R.id.textPostDescription);
             textLocation = itemView.findViewById(R.id.textPostLocation);
             textContact = itemView.findViewById(R.id.textPostContact);
-            textLike = itemView.findViewById(R.id.textPostLike);
             textShare = itemView.findViewById(R.id.textPostShare);
             textComment = itemView.findViewById(R.id.textPostComment);
             textInterest = itemView.findViewById(R.id.textPostInterest);
@@ -204,4 +193,3 @@ public class AnimalPostAdapter extends RecyclerView.Adapter<AnimalPostAdapter.Po
         }
     }
 }
-

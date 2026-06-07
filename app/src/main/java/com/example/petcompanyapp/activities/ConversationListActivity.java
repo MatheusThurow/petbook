@@ -23,10 +23,12 @@ import com.petbook.app.repositories.ChatRepository;
 import com.petbook.app.repositories.FirebaseChatRepository;
 import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
 import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.UserProfileStorage;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -52,11 +54,14 @@ public class ConversationListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_conversation_list);
 
         currentUserId = UserProfileStorage.getUserId(this);
 
-        ImageButton buttonBack = findViewById(R.id.buttonBackConversations);
+        View buttonBack = findViewById(R.id.buttonBackConversations);
         editSearchUsers = findViewById(R.id.editSearchUsers);
         RecyclerView recyclerUsers = findViewById(R.id.recyclerUsers);
         recyclerConversations = findViewById(R.id.recyclerConversations);
@@ -65,7 +70,7 @@ public class ConversationListActivity extends AppCompatActivity implements
         textRecentConversationsToggle = findViewById(R.id.textRecentConversationsToggle);
         View layoutRecentConversationsHeader = findViewById(R.id.layoutRecentConversationsHeader);
 
-        buttonBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, buttonBack);
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_CONVERSATIONS);
         swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_CONVERSATIONS);
 
@@ -108,6 +113,9 @@ public class ConversationListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         BottomNavigationHelper.refreshNotificationBadge(this);
         if (FeatureFlags.useFirebaseChat(this) && FirebaseChatConfig.isConfigured(this)) {
             FirebaseUserDirectoryRepository.bootstrapLocalUsersIfNeeded(this, new FirebaseUserDirectoryRepository.CompletionCallback() {

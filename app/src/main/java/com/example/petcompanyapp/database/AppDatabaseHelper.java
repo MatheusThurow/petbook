@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "petcompany.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     public static final String TABLE_USERS = "users";
     public static final String TABLE_COMPANIES = "companies";
@@ -67,6 +67,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 8) {
             db.execSQL("ALTER TABLE " + TABLE_ANIMALS + " ADD COLUMN age_months INTEGER NOT NULL DEFAULT 0");
         }
+        if (oldVersion < 9) {
+            migratePostsTableWithoutLikes(db);
+        }
     }
 
     private void createUsersTable(SQLiteDatabase db) {
@@ -122,8 +125,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 + "location_reference TEXT,"
                 + "image_uri TEXT,"
                 + "created_at_millis INTEGER NOT NULL,"
-                + "liked INTEGER NOT NULL DEFAULT 0,"
-                + "like_count INTEGER NOT NULL DEFAULT 0,"
                 + "FOREIGN KEY(author_user_id) REFERENCES " + TABLE_USERS + "(id)"
                 + ")");
     }
@@ -272,6 +273,19 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 "animal_name IN (?, ?, ?)",
                 new String[]{"Thor", "Luna", "Feira de Adocao de Sabado"}
         );
+    }
+
+    private void migratePostsTableWithoutLikes(SQLiteDatabase db) {
+        db.execSQL("ALTER TABLE " + TABLE_POSTS + " RENAME TO " + TABLE_POSTS + "_old");
+        createPostsTable(db);
+        db.execSQL("INSERT INTO " + TABLE_POSTS + " ("
+                + "id, author_user_id, post_type, animal_name, species, breed, age_description, "
+                + "description_text, contact_phone, latitude, longitude, location_reference, image_uri, created_at_millis"
+                + ") SELECT "
+                + "id, author_user_id, post_type, animal_name, species, breed, age_description, "
+                + "description_text, contact_phone, latitude, longitude, location_reference, image_uri, created_at_millis "
+                + "FROM " + TABLE_POSTS + "_old");
+        db.execSQL("DROP TABLE " + TABLE_POSTS + "_old");
     }
 
     private void insertFairAnimal(

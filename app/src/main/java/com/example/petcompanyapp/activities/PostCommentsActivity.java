@@ -18,8 +18,10 @@ import com.petbook.app.repositories.AnimalPostRepository;
 import com.petbook.app.repositories.FirebasePostRepository;
 import com.petbook.app.repositories.NotificationRepository;
 import com.petbook.app.repositories.PostCommentRepository;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.NotificationType;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.ValidationUtils;
 
@@ -39,18 +41,21 @@ public class PostCommentsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_post_comments);
 
         currentUserId = UserProfileStorage.getUserId(this);
         currentUserName = UserProfileStorage.getName(this, "");
 
-        ImageButton buttonBack = findViewById(R.id.buttonBackComments);
+        android.view.View buttonBack = findViewById(R.id.buttonBackComments);
         RecyclerView recyclerComments = findViewById(R.id.recyclerComments);
         textEmptyComments = findViewById(R.id.textEmptyComments);
         editComment = findViewById(R.id.editCommentMessage);
         TextView textSend = findViewById(R.id.textSendComment);
 
-        buttonBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, buttonBack);
         adapter = new PostCommentAdapter(this::startReplyToComment);
         recyclerComments.setLayoutManager(new LinearLayoutManager(this));
         recyclerComments.setAdapter(adapter);
@@ -61,7 +66,7 @@ public class PostCommentsActivity extends AppCompatActivity {
 
         long postId = getIntent().getLongExtra(IntentKeys.EXTRA_POST_ID, -1L);
         if (postId < 0) {
-            finish();
+            BackNavigationUtils.navigateBack(this);
             return;
         }
 
@@ -76,13 +81,13 @@ public class PostCommentsActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String message) {
-                    finish();
+                    BackNavigationUtils.navigateBack(PostCommentsActivity.this);
                 }
             });
         } else {
             post = AnimalPostRepository.findById(this, postId);
             if (post == null) {
-                finish();
+                BackNavigationUtils.navigateBack(this);
                 return;
             }
             bindPostHeader();

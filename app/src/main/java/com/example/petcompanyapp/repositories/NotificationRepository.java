@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.petbook.app.database.AppDatabaseHelper;
 import com.petbook.app.models.AppNotification;
+import com.petbook.app.utils.NotificationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +56,8 @@ public final class NotificationRepository {
         Cursor cursor = db.query(
                 AppDatabaseHelper.TABLE_NOTIFICATIONS,
                 null,
-                "recipient_user_id = ?",
-                new String[]{String.valueOf(userId)},
+                "recipient_user_id = ? AND notification_type <> ?",
+                new String[]{String.valueOf(userId), NotificationType.LIKE},
                 null,
                 null,
                 "created_at_millis DESC, id DESC"
@@ -78,8 +79,8 @@ public final class NotificationRepository {
         SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
         Cursor cursor = db.rawQuery(
                 "SELECT COUNT(*) FROM " + AppDatabaseHelper.TABLE_NOTIFICATIONS
-                        + " WHERE recipient_user_id = ? AND is_read = 0",
-                new String[]{String.valueOf(userId)}
+                        + " WHERE recipient_user_id = ? AND is_read = 0 AND notification_type <> ?",
+                new String[]{String.valueOf(userId), NotificationType.LIKE}
         );
         try {
             return cursor.moveToFirst() ? cursor.getInt(0) : 0;

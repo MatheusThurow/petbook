@@ -125,8 +125,6 @@ public final class ApiPostRepository {
                 jsonObject.optString("authorName", "usuario"),
                 jsonObject.optString("authorEmail", ""),
                 jsonObject.optLong("createdAtMillis", System.currentTimeMillis()),
-                jsonObject.optBoolean("liked", false),
-                jsonObject.optInt("likeCount", 0),
                 jsonObject.optInt("fairAnimalCount", 0)
         );
     }

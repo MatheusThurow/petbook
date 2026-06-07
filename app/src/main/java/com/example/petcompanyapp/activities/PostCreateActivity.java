@@ -41,6 +41,7 @@ import com.petbook.app.repositories.NotificationRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.AgeFormatUtils;
 import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.ImageUtils;
 import com.petbook.app.utils.IntentKeys;
@@ -48,6 +49,7 @@ import com.petbook.app.utils.LocationUtils;
 import com.petbook.app.utils.MaskUtils;
 import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
@@ -154,6 +156,9 @@ public class PostCreateActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_post_create);
 
         radioGroupPostType = findViewById(R.id.radioGroupPostType);
@@ -224,7 +229,7 @@ public class PostCreateActivity extends AppCompatActivity {
             updatePostTypeUi(selectedPostType);
         });
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
         buttonCaptureLocation.setOnClickListener(v -> requestLocation());
         buttonSelectLocationOnMap.setOnClickListener(v -> openMapPicker());
         buttonSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
@@ -726,8 +731,6 @@ public class PostCreateActivity extends AppCompatActivity {
                     authorName,
                     UserProfileStorage.getEmail(this, ""),
                     System.currentTimeMillis(),
-                    false,
-                    0,
                     fairAnimals.size()
             );
 
@@ -760,7 +763,7 @@ public class PostCreateActivity extends AppCompatActivity {
                     ? resolveSuccessMessage(selectedPostType)
                     : R.string.post_edit_success;
             Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
-            finish();
+            BackNavigationUtils.navigateBack(this);
             return;
         }
 
@@ -802,7 +805,7 @@ public class PostCreateActivity extends AppCompatActivity {
                             ? resolveSuccessMessage(savedPost.getPostType())
                             : R.string.post_edit_success;
                     Toast.makeText(this, successMessage, Toast.LENGTH_LONG).show();
-                    finish();
+                    BackNavigationUtils.navigateBack(this);
                 },
                 exception -> Toast.makeText(
                         this,
@@ -872,8 +875,6 @@ public class PostCreateActivity extends AppCompatActivity {
                 authorName,
                 UserProfileStorage.getEmail(this, ""),
                 editingPostId == null ? System.currentTimeMillis() : System.currentTimeMillis(),
-                false,
-                0,
                 fairAnimals.size()
         );
 
@@ -904,7 +905,7 @@ public class PostCreateActivity extends AppCompatActivity {
                                 editingPostId == null ? resolveSuccessMessage(post.getPostType()) : R.string.post_edit_success,
                                 Toast.LENGTH_LONG
                         ).show();
-                        finish();
+                        BackNavigationUtils.navigateBack(PostCreateActivity.this);
                     }
 
                     @Override

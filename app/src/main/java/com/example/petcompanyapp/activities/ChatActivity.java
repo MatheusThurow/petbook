@@ -18,9 +18,11 @@ import com.petbook.app.repositories.ChatRepository;
 import com.petbook.app.repositories.FirebaseChatRepository;
 import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.repositories.UserRepository;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -46,6 +48,9 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_chat);
 
         currentUserId = UserProfileStorage.getUserId(this);
@@ -69,18 +74,18 @@ public class ChatActivity extends AppCompatActivity {
         targetUserType = getIntent().getStringExtra(IntentKeys.EXTRA_TARGET_USER_TYPE);
         targetUserEmail = getIntent().getStringExtra(IntentKeys.EXTRA_TARGET_USER_EMAIL);
 
-        ImageButton buttonBack = findViewById(R.id.buttonBackChat);
+        android.view.View buttonBack = findViewById(R.id.buttonBackChat);
         ImageButton buttonSend = findViewById(R.id.buttonSendMessage);
         recyclerChatMessages = findViewById(R.id.recyclerChatMessages);
         editChatMessage = findViewById(R.id.editChatMessage);
         textChatTitle = findViewById(R.id.textChatTitle);
         textChatSubtitle = findViewById(R.id.textChatSubtitle);
 
-        buttonBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, buttonBack);
 
         if (currentUserId == null) {
             Toast.makeText(this, R.string.error_chat_user_invalid, Toast.LENGTH_LONG).show();
-            finish();
+            BackNavigationUtils.navigateBack(this);
             return;
         }
 
@@ -95,6 +100,9 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         loadMessages();
     }
 
@@ -164,7 +172,7 @@ public class ChatActivity extends AppCompatActivity {
         if (FeatureFlags.useFirebaseChat(this) && FirebaseChatConfig.isConfigured(this)) {
             if (targetUserEmail == null || targetUserEmail.trim().isEmpty()) {
                 Toast.makeText(this, R.string.error_chat_user_invalid, Toast.LENGTH_LONG).show();
-                finish();
+                BackNavigationUtils.navigateBack(this);
                 return;
             }
             if (messagesRegistration != null) {

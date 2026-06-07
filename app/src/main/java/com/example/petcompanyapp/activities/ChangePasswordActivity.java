@@ -13,6 +13,8 @@ import com.petbook.app.models.User;
 import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.ActionStateHelper;
+import com.petbook.app.utils.BackNavigationUtils;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.ValidationUtils;
 
@@ -26,6 +28,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_change_password);
 
         editCurrentPassword = findViewById(R.id.editCurrentPassword);
@@ -34,7 +39,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         TextView textBack = findViewById(R.id.textBackChangePassword);
         buttonSavePassword = findViewById(R.id.buttonSavePassword);
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
         buttonSavePassword.setOnClickListener(v -> changePassword());
     }
 
@@ -71,7 +76,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         setPasswordLoading(false);
                         Toast.makeText(ChangePasswordActivity.this, R.string.change_password_success, Toast.LENGTH_LONG).show();
-                        finish();
+                        BackNavigationUtils.navigateBack(ChangePasswordActivity.this);
                     });
                 }
 
@@ -107,7 +112,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         setPasswordLoading(false);
         Toast.makeText(this, R.string.change_password_success, Toast.LENGTH_LONG).show();
-        finish();
+        BackNavigationUtils.navigateBack(this);
     }
 
     private void setPasswordLoading(boolean isLoading) {

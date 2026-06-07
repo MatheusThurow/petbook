@@ -30,6 +30,7 @@ import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.AsyncRunner;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.ValidationUtils;
 
@@ -46,6 +47,10 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (SessionUtils.isAuthenticated(this)) {
+            openExistingSession();
+            return;
+        }
         setContentView(R.layout.activity_login);
 
         credentialManager = CredentialManager.create(this);
@@ -146,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, authenticatedUser.getUserType());
         intent.putExtra(IntentKeys.EXTRA_USER_NAME, authenticatedUser.getName());
         intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, authenticatedUser.getEmail());
-        startActivity(intent);
+        SessionUtils.openMainFlow(this, intent);
     }
 
     private void signInWithGoogle() {
@@ -272,7 +277,7 @@ public class LoginActivity extends AppCompatActivity {
             intent.putExtra(IntentKeys.EXTRA_USER_TYPE, user.getUserType());
             intent.putExtra(IntentKeys.EXTRA_USER_NAME, user.getName());
             intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, user.getEmail());
-            startActivity(intent);
+            SessionUtils.openMainFlow(this, intent);
         });
     }
 
@@ -304,7 +309,19 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, user.getUserType());
         intent.putExtra(IntentKeys.EXTRA_USER_NAME, user.getName());
         intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, user.getEmail());
-        startActivity(intent);
+        SessionUtils.openMainFlow(this, intent);
+    }
+
+    private void openExistingSession() {
+        Intent intent = new Intent(this, FeedActivity.class);
+        Long userId = UserProfileStorage.getUserId(this);
+        if (userId != null) {
+            intent.putExtra(IntentKeys.EXTRA_USER_ID, userId);
+        }
+        intent.putExtra(IntentKeys.EXTRA_USER_TYPE, UserProfileStorage.getUserType(this, ""));
+        intent.putExtra(IntentKeys.EXTRA_USER_NAME, UserProfileStorage.getName(this, getString(R.string.default_user_name)));
+        intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, UserProfileStorage.getEmail(this, ""));
+        SessionUtils.openMainFlow(this, intent);
     }
 }
 

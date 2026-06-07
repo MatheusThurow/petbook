@@ -18,9 +18,11 @@ import com.petbook.app.repositories.FirebaseUserRepository;
 import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.ThemePreferenceManager;
 import com.petbook.app.utils.UserProfileStorage;
@@ -38,6 +40,9 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_profile);
 
         editProfileName = findViewById(R.id.editProfileName);
@@ -67,6 +72,7 @@ public class ProfileActivity extends AppCompatActivity {
         editProfileEmail.setText(UserProfileStorage.getEmail(this, fallbackEmail));
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_PROFILE);
         swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_PROFILE);
+        BackNavigationUtils.bind(this);
         switchDarkMode.setChecked(ThemePreferenceManager.isDarkModeEnabled(this));
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) ->
                 ThemePreferenceManager.setDarkModeEnabled(this, isChecked)
@@ -95,6 +101,9 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         BottomNavigationHelper.refreshNotificationBadge(this);
     }
 
@@ -168,7 +177,7 @@ public class ProfileActivity extends AppCompatActivity {
                         FirebaseUserDirectoryRepository.syncUser(ProfileActivity.this, user);
                         UserProfileStorage.saveProfile(ProfileActivity.this, userId, user.getName(), user.getEmail(), user.getUserType());
                         Toast.makeText(ProfileActivity.this, R.string.profile_save_success, Toast.LENGTH_SHORT).show();
-                        finish();
+                        BackNavigationUtils.navigateBack(ProfileActivity.this);
                     });
                 }
 
@@ -196,7 +205,7 @@ public class ProfileActivity extends AppCompatActivity {
             );
             UserProfileStorage.saveProfile(this, userId, name, email, userType);
             Toast.makeText(this, R.string.profile_save_success, Toast.LENGTH_SHORT).show();
-            finish();
+            BackNavigationUtils.navigateBack(this);
             return;
         }
 
@@ -206,7 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
                     FirebaseUserDirectoryRepository.syncUser(this, user);
                     UserProfileStorage.saveProfile(this, userId, user.getName(), user.getEmail(), user.getUserType());
                     Toast.makeText(this, R.string.profile_save_success, Toast.LENGTH_SHORT).show();
-                    finish();
+                    BackNavigationUtils.navigateBack(ProfileActivity.this);
                 },
                 exception -> Toast.makeText(
                         this,
@@ -217,11 +226,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        UserProfileStorage.clearProfile(this);
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        SessionUtils.logout(this);
     }
 }
 

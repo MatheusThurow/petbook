@@ -124,9 +124,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private String resolveTypeLabel(String type, View itemView) {
-        if (NotificationType.LIKE.equals(type)) {
-            return itemView.getContext().getString(R.string.notification_type_like);
-        }
         if (NotificationType.COMMENT.equals(type)) {
             return itemView.getContext().getString(R.string.notification_type_comment);
         }

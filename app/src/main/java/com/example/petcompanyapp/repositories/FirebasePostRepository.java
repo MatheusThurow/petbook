@@ -15,7 +15,6 @@ import com.petbook.app.utils.ImageUtils;
 import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -215,60 +214,6 @@ public final class FirebasePostRepository {
                 callback.onError(message);
             }
         });
-    }
-
-    public static void toggleLike(
-            Context context,
-            AnimalPost post,
-            String currentUserEmail,
-            String currentUserName,
-            Long currentUserId,
-            @NonNull CompletionCallback callback
-    ) {
-        String currentUserKey = ChatIdentityUtils.userKeyFromEmail(currentUserEmail);
-        postsCollection(context)
-                .document(String.valueOf(post.getId()))
-                .get()
-                .addOnSuccessListener(document -> {
-                    List<String> likedByKeys = (List<String>) document.get("likedByKeys");
-                    if (likedByKeys == null) {
-                        likedByKeys = new ArrayList<>();
-                    }
-                    boolean alreadyLiked = likedByKeys.contains(currentUserKey);
-
-                    Map<String, Object> update = new HashMap<>();
-                    update.put("likedByKeys", alreadyLiked
-                            ? FieldValue.arrayRemove(currentUserKey)
-                            : FieldValue.arrayUnion(currentUserKey));
-                    update.put("likeCount", FieldValue.increment(alreadyLiked ? -1 : 1));
-
-                    postsCollection(context)
-                            .document(String.valueOf(post.getId()))
-                            .update(update)
-                            .addOnSuccessListener(unused -> {
-                                if (!alreadyLiked
-                                        && post.getAuthorEmail() != null
-                                        && !post.getAuthorEmail().trim().isEmpty()
-                                        && !post.getAuthorEmail().equalsIgnoreCase(currentUserEmail)) {
-                                    FirebaseNotificationRepository.addNotification(
-                                            context,
-                                            post.getAuthorEmail(),
-                                            NotificationType.LIKE,
-                                            context.getString(com.petbook.app.R.string.notification_like_title),
-                                            context.getString(com.petbook.app.R.string.notification_like_message, currentUserName, post.getAnimalName()),
-                                            post.getId(),
-                                            post.getPostType(),
-                                            currentUserId,
-                                            currentUserName,
-                                            currentUserEmail,
-                                            null
-                                    );
-                                }
-                                callback.onSuccess();
-                            })
-                            .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
-                })
-                .addOnFailureListener(exception -> callback.onError(exception.getMessage()));
     }
 
     public static void getComments(Context context, long postId, @NonNull CommentsCallback callback) {
@@ -508,10 +453,7 @@ public final class FirebasePostRepository {
 
     private static AnimalPost mapPost(com.google.firebase.firestore.DocumentSnapshot document, String currentUserKey) {
         List<FairAnimal> fairAnimals = extractFairAnimals(document.get("fairAnimals"));
-        List<String> likedByKeys = (List<String>) document.get("likedByKeys");
-        int likeCount = document.getLong("likeCount") == null ? (likedByKeys == null ? 0 : likedByKeys.size()) : document.getLong("likeCount").intValue();
         int fairAnimalCount = document.getLong("fairAnimalCount") == null ? fairAnimals.size() : document.getLong("fairAnimalCount").intValue();
-        boolean liked = likedByKeys != null && likedByKeys.contains(currentUserKey);
         return new AnimalPost(
                 safeLong(document.getLong("id")),
                 document.getLong("authorUserId"),
@@ -529,8 +471,6 @@ public final class FirebasePostRepository {
                 safe(document.getString("authorName")),
                 safe(document.getString("authorEmail")),
                 safeLong(document.getLong("createdAtMillis")),
-                liked,
-                likeCount,
                 fairAnimalCount
         );
     }

@@ -15,9 +15,21 @@
         android:paddingBottom="10dp">
 
         <TextView
+            android:id="@+id/textBackPostLocationMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/action_back"
+            android:padding="6dp"
+            android:text="@string/action_back_chevron"
+            android:textColor="@color/accent_color"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
             style="@style/AppScreenTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="@string/post_location_map_title"
             android:textAlignment="center"
             android:textSize="30sp" />

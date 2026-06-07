@@ -8,8 +8,10 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.LocationUtils;
+import com.petbook.app.utils.SessionUtils;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.Marker;
 import org.maplibre.android.annotations.MarkerOptions;
@@ -35,12 +37,17 @@ public class MapPickerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         MapLibre.getInstance(this);
         setContentView(R.layout.activity_map_picker);
 
+        TextView textBack = findViewById(R.id.textBackMapPicker);
         textSelectedLocation = findViewById(R.id.textSelectedLocation);
         mapView = findViewById(R.id.mapPickerView);
         Button buttonConfirmLocation = findViewById(R.id.buttonConfirmLocation);
+        BackNavigationUtils.bind(this, textBack);
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(map -> {
@@ -110,7 +117,7 @@ public class MapPickerActivity extends AppCompatActivity {
         resultIntent.putExtra(IntentKeys.EXTRA_LONGITUDE, selectedLatLng.getLongitude());
         resultIntent.putExtra(IntentKeys.EXTRA_LOCATION_REFERENCE, reference);
         setResult(RESULT_OK, resultIntent);
-        finish();
+        BackNavigationUtils.navigateBack(this);
     }
 
     @Override

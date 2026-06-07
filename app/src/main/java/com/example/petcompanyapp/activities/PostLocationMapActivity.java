@@ -9,8 +9,10 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.petbook.app.R;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.LocationUtils;
+import com.petbook.app.utils.SessionUtils;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.camera.CameraPosition;
@@ -36,12 +38,17 @@ public class PostLocationMapActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         MapLibre.getInstance(this);
         setContentView(R.layout.activity_post_location_map);
 
+        TextView textBack = findViewById(R.id.textBackPostLocationMap);
         textLocationSummary = findViewById(R.id.textLocationSummary);
         mapView = findViewById(R.id.mapPostLocation);
         Button buttonOpenExternalMap = findViewById(R.id.buttonOpenExternalMap);
+        BackNavigationUtils.bind(this, textBack);
         latitude = getIntent().getDoubleExtra(IntentKeys.EXTRA_LATITUDE, -23.550520d);
         longitude = getIntent().getDoubleExtra(IntentKeys.EXTRA_LONGITUDE, -46.633308d);
         locationReference = getIntent().getStringExtra(IntentKeys.EXTRA_LOCATION_REFERENCE);

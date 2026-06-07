@@ -16,10 +16,12 @@ import com.petbook.app.repositories.CompanyRepository;
 import com.petbook.app.repositories.FirebaseCompanyRepository;
 import com.petbook.app.utils.AsyncRunner;
 import com.petbook.app.utils.ActionStateHelper;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.FirebaseChatConfig;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
 
@@ -41,6 +43,9 @@ public class CompanyRegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_company_register);
 
         editCompanyName = findViewById(R.id.editCompanyName);
@@ -65,7 +70,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         MaskUtils.applyPhoneMask(editPhone);
         loadExistingCompany();
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
         buttonSave.setOnClickListener(v -> saveCompany());
     }
 
@@ -229,8 +234,7 @@ public class CompanyRegisterActivity extends AppCompatActivity {
         if (userEmail != null) {
             intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, userEmail);
         }
-        startActivity(intent);
-        finish();
+        SessionUtils.openMainFlow(this, intent);
     }
 
     private void setSaveLoading(boolean isLoading) {

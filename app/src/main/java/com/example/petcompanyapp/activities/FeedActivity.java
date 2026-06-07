@@ -33,11 +33,13 @@ import com.petbook.app.repositories.NotificationRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.petbook.app.utils.FeedFilter;
 import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.BottomNavigationHelper;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.NotificationType;
 import com.petbook.app.utils.PostType;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.SwipeNavigationHelper;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
@@ -64,6 +66,9 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         setContentView(R.layout.activity_feed);
         PushNotificationHelper.ensureNotificationChannel(this);
 
@@ -102,6 +107,7 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         bindProfileHeader();
         BottomNavigationHelper.bind(this, BottomNavigationHelper.DESTINATION_FEED);
         swipeNavigationHelper = new SwipeNavigationHelper(this, BottomNavigationHelper.DESTINATION_FEED);
+        BackNavigationUtils.bind(this);
 
 
         animalPostAdapter = new AnimalPostAdapter(this, userId);
@@ -126,6 +132,9 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
     @Override
     protected void onResume() {
         super.onResume();
+        if (!SessionUtils.requireAuthenticated(this)) {
+            return;
+        }
         userName = UserProfileStorage.getName(this, userName);
         userEmail = UserProfileStorage.getEmail(this, userEmail);
         userId = UserProfileStorage.getUserId(this);
@@ -267,62 +276,6 @@ public class FeedActivity extends AppCompatActivity implements AnimalPostAdapter
         }
 
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-    }
-
-    @Override
-    public void onLikeClicked(AnimalPost post) {
-        if (FirebasePostRepository.isEnabled(this)) {
-            FirebasePostRepository.toggleLike(
-                    this,
-                    post,
-                    UserProfileStorage.getEmail(this, userEmail),
-                    userName,
-                    userId,
-                    new FirebasePostRepository.CompletionCallback() {
-                        @Override
-                        public void onSuccess() {
-                            loadFeedPosts();
-                            BottomNavigationHelper.refreshNotificationBadge(FeedActivity.this);
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            Toast.makeText(FeedActivity.this, message, Toast.LENGTH_LONG).show();
-                        }
-                    }
-            );
-            return;
-        }
-
-        if (!FeatureFlags.useRemoteApi(this)) {
-            if (post.getId() == null) {
-                return;
-            }
-            boolean wasLiked = post.isLiked();
-            AnimalPostRepository.toggleLike(this, post.getId());
-            if (!wasLiked
-                    && userId != null
-                    && post.getAuthorUserId() != null
-                    && userId.longValue() != post.getAuthorUserId().longValue()) {
-                NotificationRepository.addNotification(
-                        this,
-                        post.getAuthorUserId(),
-                        NotificationType.LIKE,
-                        getString(R.string.notification_like_title),
-                        getString(R.string.notification_like_message, userName, post.getAnimalName()),
-                        post.getId(),
-                        post.getPostType(),
-                        userId,
-                        userName,
-                        userEmail,
-                        null
-                );
-            }
-            loadFeedPosts();
-            BottomNavigationHelper.refreshNotificationBadge(this);
-            return;
-        }
-        Toast.makeText(this, R.string.info_like_sync_pending, Toast.LENGTH_SHORT).show();
     }
 
     @Override

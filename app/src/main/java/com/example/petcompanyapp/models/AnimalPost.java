@@ -17,8 +17,6 @@ public class AnimalPost {
     private final String authorName;
     private final String authorEmail;
     private final long createdAtMillis;
-    private final boolean liked;
-    private final int likeCount;
     private final int fairAnimalCount;
 
     public AnimalPost(
@@ -51,8 +49,6 @@ public class AnimalPost {
                 "usuario",
                 "",
                 System.currentTimeMillis(),
-                false,
-                0,
                 0
         );
     }
@@ -74,8 +70,6 @@ public class AnimalPost {
             String authorName,
             String authorEmail,
             long createdAtMillis,
-            boolean liked,
-            int likeCount,
             int fairAnimalCount
     ) {
         this.id = id;
@@ -94,8 +88,6 @@ public class AnimalPost {
         this.authorName = authorName;
         this.authorEmail = authorEmail;
         this.createdAtMillis = createdAtMillis;
-        this.liked = liked;
-        this.likeCount = likeCount;
         this.fairAnimalCount = fairAnimalCount;
     }
 
@@ -161,14 +153,6 @@ public class AnimalPost {
 
     public long getCreatedAtMillis() {
         return createdAtMillis;
-    }
-
-    public boolean isLiked() {
-        return liked;
-    }
-
-    public int getLikeCount() {
-        return likeCount;
     }
 
     public int getFairAnimalCount() {

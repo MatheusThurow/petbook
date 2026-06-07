@@ -26,7 +26,7 @@ public final class AnimalPostRepository {
         SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
         String sql = "SELECT p.id, p.author_user_id, p.post_type, p.animal_name, p.species, p.breed, "
                 + "p.age_description, p.description_text, p.contact_phone, p.latitude, p.longitude, "
-                + "p.location_reference, p.image_uri, p.created_at_millis, p.liked, p.like_count, "
+                + "p.location_reference, p.image_uri, p.created_at_millis, "
                 + "(SELECT COUNT(*) FROM " + AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS + " fair WHERE fair.post_id = p.id) AS fair_animal_count, "
                 + "u.name AS author_name, u.email AS author_email "
                 + "FROM " + AppDatabaseHelper.TABLE_POSTS + " p "
@@ -53,8 +53,6 @@ public final class AnimalPostRepository {
         SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
         ContentValues values = toContentValues(post);
         values.put("created_at_millis", System.currentTimeMillis());
-        values.put("liked", post.isLiked() ? 1 : 0);
-        values.put("like_count", post.getLikeCount());
         long postId = db.insert(AppDatabaseHelper.TABLE_POSTS, null, values);
         if (postId > 0) {
             replaceFairAnimals(db, postId, fairAnimals);
@@ -63,51 +61,12 @@ public final class AnimalPostRepository {
         return postId > 0;
     }
 
-    public static void toggleLike(Context context, long postId) {
-        SQLiteDatabase db = new AppDatabaseHelper(context).getWritableDatabase();
-        Cursor cursor = db.query(
-                AppDatabaseHelper.TABLE_POSTS,
-                new String[]{"liked", "like_count"},
-                "id = ?",
-                new String[]{String.valueOf(postId)},
-                null,
-                null,
-                null
-        );
-
-        try {
-            if (!cursor.moveToFirst()) {
-                return;
-            }
-
-            boolean currentLiked = cursor.getInt(cursor.getColumnIndexOrThrow("liked")) == 1;
-            int currentLikeCount = cursor.getInt(cursor.getColumnIndexOrThrow("like_count"));
-            boolean newLiked = !currentLiked;
-            int newLikeCount = newLiked
-                    ? currentLikeCount + 1
-                    : Math.max(0, currentLikeCount - 1);
-
-            ContentValues values = new ContentValues();
-            values.put("liked", newLiked ? 1 : 0);
-            values.put("like_count", newLikeCount);
-            db.update(
-                    AppDatabaseHelper.TABLE_POSTS,
-                    values,
-                    "id = ?",
-                    new String[]{String.valueOf(postId)}
-            );
-        } finally {
-            cursor.close();
-            db.close();
-        }
-    }
-
     public static AnimalPost findById(Context context, long postId) {
         SQLiteDatabase db = new AppDatabaseHelper(context).getReadableDatabase();
         Cursor cursor = db.rawQuery(
                 "SELECT p.id, p.author_user_id, p.post_type, p.animal_name, p.species, p.breed, "
                         + "p.age_description, p.description_text, p.contact_phone, p.latitude, p.longitude, "
-                        + "p.location_reference, p.image_uri, p.created_at_millis, p.liked, p.like_count, "
+                        + "p.location_reference, p.image_uri, p.created_at_millis, "
                         + "(SELECT COUNT(*) FROM " + AppDatabaseHelper.TABLE_FAIR_POST_ANIMALS + " fair WHERE fair.post_id = p.id) AS fair_animal_count, "
                         + "u.name AS author_name, u.email AS author_email "
                         + "FROM " + AppDatabaseHelper.TABLE_POSTS + " p "
@@ -279,8 +238,6 @@ public final class AnimalPostRepository {
                 cursor.getString(cursor.getColumnIndexOrThrow("author_name")),
                 cursor.getString(cursor.getColumnIndexOrThrow("author_email")),
                 cursor.getLong(cursor.getColumnIndexOrThrow("created_at_millis")),
-                cursor.getInt(cursor.getColumnIndexOrThrow("liked")) == 1,
-                cursor.getInt(cursor.getColumnIndexOrThrow("like_count")),
                 cursor.getInt(cursor.getColumnIndexOrThrow("fair_animal_count"))
         );
     }

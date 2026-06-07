@@ -78,20 +78,10 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textCommentLike"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:text="♡ 0"
-                android:textColor="@color/primary_text"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:id="@+id/textCommentReply"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="12dp"
                 android:text="@string/action_reply_comment"
                 android:textColor="@color/secondary_text"
                 android:textSize="12sp"

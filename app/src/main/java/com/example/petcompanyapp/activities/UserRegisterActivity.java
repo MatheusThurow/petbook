@@ -18,9 +18,11 @@ import com.petbook.app.repositories.FirebaseUserDirectoryRepository;
 import com.petbook.app.repositories.UserRepository;
 import com.google.android.material.textfield.TextInputLayout;
 import com.petbook.app.utils.AsyncRunner;
+import com.petbook.app.utils.BackNavigationUtils;
 import com.petbook.app.utils.FeatureFlags;
 import com.petbook.app.utils.IntentKeys;
 import com.petbook.app.utils.MaskUtils;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 import com.petbook.app.utils.UserType;
 import com.petbook.app.utils.ValidationUtils;
@@ -86,7 +88,7 @@ public class UserRegisterActivity extends AppCompatActivity {
             updateFormByUserType(selectedUserType);
         });
 
-        textBack.setOnClickListener(v -> finish());
+        BackNavigationUtils.bind(this, textBack);
         buttonRegister.setOnClickListener(v -> registerUser());
     }
 
@@ -241,8 +243,7 @@ public class UserRegisterActivity extends AppCompatActivity {
         intent.putExtra(IntentKeys.EXTRA_USER_TYPE, registeredUser.getUserType());
         intent.putExtra(IntentKeys.EXTRA_USER_NAME, registeredUser.getName());
         intent.putExtra(IntentKeys.EXTRA_USER_EMAIL, registeredUser.getEmail());
-        startActivity(intent);
-        finish();
+        SessionUtils.openMainFlow(this, intent);
     }
 
     private void updateFormByUserType(String userType) {
