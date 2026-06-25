@@ -10,13 +10,27 @@ import com.petbook.app.activities.LoginActivity;
 
 public final class SessionUtils {
 
+    private static Boolean testAuthenticatedOverride;
+
     private SessionUtils() {
+    }
+
+    public static void setTestAuthenticatedOverride(Boolean authenticated) {
+        testAuthenticatedOverride = authenticated;
+    }
+
+    public static void clearTestAuthenticatedOverride() {
+        testAuthenticatedOverride = null;
     }
 
     public static boolean isAuthenticated(Context context) {
         Long userId = UserProfileStorage.getUserId(context);
         if (userId == null) {
             return false;
+        }
+
+        if (testAuthenticatedOverride != null) {
+            return testAuthenticatedOverride;
         }
 
         if (FirebaseChatConfig.isEnabled(context)) {

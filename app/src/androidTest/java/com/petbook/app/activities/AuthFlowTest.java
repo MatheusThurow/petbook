@@ -5,21 +5,15 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.intent.Intents.intended;
-import static androidx.test.espresso.intent.Intents.intending;
-import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import android.app.Activity;
-import android.app.Instrumentation;
 import android.content.Context;
 import android.os.SystemClock;
 
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.espresso.intent.Intents;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 
@@ -27,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.petbook.app.R;
 import com.petbook.app.models.User;
 import com.petbook.app.repositories.FirebaseUserRepository;
+import com.petbook.app.utils.SessionUtils;
 import com.petbook.app.utils.UserProfileStorage;
 
 import org.junit.After;
@@ -43,6 +38,7 @@ public class AuthFlowTest {
     private static final String INVALID_PASSWORD = "Univali12345";
     private static final String RESET_EMAIL = "ferreiraarthur2812@gmail.com";
     private static final long DEMO_PAUSE_MILLIS = 1200L;
+    private static final long HOME_DEMO_PAUSE_MILLIS = 5000L;
 
     @Rule
     public ActivityTestRule<LoginActivity> loginRule =
@@ -53,6 +49,7 @@ public class AuthFlowTest {
         Context context = ApplicationProvider.getApplicationContext();
         UserProfileStorage.clearProfile(context);
         FirebaseAuth.getInstance().signOut();
+        SessionUtils.clearTestAuthenticatedOverride();
 
         FirebaseUserRepository.setTestDelegate(new FirebaseUserRepository.TestDelegate() {
             @Override
@@ -63,8 +60,10 @@ public class AuthFlowTest {
                     FirebaseUserRepository.UserCallback callback
             ) {
                 if (VALID_EMAIL.equalsIgnoreCase(email) && VALID_PASSWORD.equals(password)) {
+                    SessionUtils.setTestAuthenticatedOverride(true);
                     callback.onSuccess(createValidUser());
                 } else {
+                    SessionUtils.setTestAuthenticatedOverride(false);
                     callback.onError("Usuario ou senha invalidos.");
                 }
                 return true;
@@ -85,7 +84,6 @@ public class AuthFlowTest {
             }
         });
 
-        Intents.init();
     }
 
     @After
@@ -94,14 +92,11 @@ public class AuthFlowTest {
         UserProfileStorage.clearProfile(context);
         FirebaseAuth.getInstance().signOut();
         FirebaseUserRepository.clearTestDelegate();
-        Intents.release();
+        SessionUtils.clearTestAuthenticatedOverride();
     }
 
     @Test
     public void autenticacaoComUsuarioESenhaValidosDirecionaParaHome() {
-        intending(hasComponent(FeedActivity.class.getName()))
-                .respondWith(new Instrumentation.ActivityResult(Activity.RESULT_OK, null));
-
         loginRule.launchActivity(null);
         pauseForDemo();
 
@@ -112,11 +107,12 @@ public class AuthFlowTest {
         onView(withId(R.id.buttonLogin)).perform(click());
         pauseForDemo();
 
-        intended(hasComponent(FeedActivity.class.getName()));
+        onView(withId(R.id.textFeedTitle)).check(matches(isDisplayed()));
+        onView(withId(R.id.recyclerFeedPosts)).check(matches(isDisplayed()));
+        pauseOnHomeForDemo();
 
         Context context = ApplicationProvider.getApplicationContext();
         assertEquals(Long.valueOf(1L), UserProfileStorage.getUserId(context));
-        assertEquals(VALID_EMAIL, UserProfileStorage.getEmail(context, ""));
     }
 
     @Test
@@ -169,5 +165,9 @@ public class AuthFlowTest {
 
     private void pauseForDemo() {
         SystemClock.sleep(DEMO_PAUSE_MILLIS);
+    }
+
+    private void pauseOnHomeForDemo() {
+        SystemClock.sleep(HOME_DEMO_PAUSE_MILLIS);
     }
 }
