@@ -24,6 +24,29 @@ import java.util.Map;
 
 public final class FirebaseUserRepository {
 
+    public interface TestDelegate {
+        default void bootstrapLocalUsers(Context context, @NonNull CompletionCallback callback) {
+            callback.onSuccess();
+        }
+
+        default boolean handleAuthenticate(
+                Context context,
+                String email,
+                String password,
+                @NonNull UserCallback callback
+        ) {
+            return false;
+        }
+
+        default boolean handleSendPasswordResetEmail(
+                Context context,
+                String email,
+                @NonNull CompletionCallback callback
+        ) {
+            return false;
+        }
+    }
+
     public interface UserCallback {
         void onSuccess(User user);
         void onError(String message);
@@ -39,7 +62,17 @@ public final class FirebaseUserRepository {
         void onError(String message);
     }
 
+    private static TestDelegate testDelegate;
+
     private FirebaseUserRepository() {
+    }
+
+    public static void setTestDelegate(TestDelegate delegate) {
+        testDelegate = delegate;
+    }
+
+    public static void clearTestDelegate() {
+        testDelegate = null;
     }
 
     public static boolean isEnabled(Context context) {
@@ -47,6 +80,11 @@ public final class FirebaseUserRepository {
     }
 
     public static void bootstrapLocalUsers(Context context, @NonNull CompletionCallback callback) {
+        if (testDelegate != null) {
+            testDelegate.bootstrapLocalUsers(context, callback);
+            return;
+        }
+
         if (!isEnabled(context)) {
             callback.onSuccess();
             return;
@@ -73,6 +111,11 @@ public final class FirebaseUserRepository {
             String password,
             @NonNull UserCallback callback
     ) {
+        if (testDelegate != null
+                && testDelegate.handleAuthenticate(context, email, password, callback)) {
+            return;
+        }
+
         if (!isEnabled(context)) {
             callback.onError("Firebase nao configurado.");
             return;
@@ -381,6 +424,11 @@ public final class FirebaseUserRepository {
             String email,
             @NonNull CompletionCallback callback
     ) {
+        if (testDelegate != null
+                && testDelegate.handleSendPasswordResetEmail(context, email, callback)) {
+            return;
+        }
+
         if (!isEnabled(context)) {
             callback.onError("Firebase nao configurado.");
             return;
